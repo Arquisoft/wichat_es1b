@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1><span class="image"><img src="./images/logo.png" alt="logo"></span> <span class="image"><img src="./images/arc42-logo.png" alt="arc42"></span> Wichat en español - Equipo 1-B</h1>
 <div class="details">
 <span id="revnumber">version 8.2 EN,</span>
-<span id="revdate">January 2023</span>
+<span id="revdate">February 2025</span>
 <br><span id="revremark">(based upon AsciiDoc version)</span>
 </div>
 <div id="toc" class="toc">
@@ -458,10 +458,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_restricciones_organizativas_y_de_proceso">2.2. Restricciones organizativas y de proceso</a></li>
 </ul>
 </li>
-<li><a href="#section-context-and-scope">3. Context and Scope</a>
+<li><a href="#section-context-and-scope">3. Contexto y Alcance</a>
 <ul class="sectlevel2">
-<li><a href="#_business_context">3.1. Business Context</a></li>
-<li><a href="#_technical_context">3.2. Technical Context</a></li>
+<li><a href="#_contexto_empresarial">3.1. Contexto Empresarial</a></li>
+<li><a href="#_contexto_tecnico">3.2. Contexto tecnico</a></li>
 </ul>
 </li>
 <li><a href="#section-solution-strategy">4. Estrategia de solución</a>
@@ -480,11 +480,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#section-runtime-view">6. Vista de ejecución</a></li>
 <li><a href="#section-deployment-view">7. Vista de despliegue</a></li>
-<li><a href="#section-concepts">8. Cross-cutting Concepts</a>
+<li><a href="#section-concepts">8. Conceptos transversales</a>
 <ul class="sectlevel2">
 <li><a href="#_gestión_de_proyecto">8.1. <em>Gestión de Proyecto</em></a></li>
 <li><a href="#_arquitectura_y_patrones_de_diseño">8.2. <em>Arquitectura y patrones de diseño</em></a></li>
-<li><a href="#_modelo_de_dominio">8.3. <em>Modelo de dominio</em></a></li>
+<li><a href="#_libreria_chatbotify">8.3. <em>Libreria ChatBotify</em></a></li>
+<li><a href="#_modelo_de_dominio">8.4. <em>Modelo de dominio</em></a></li>
 </ul>
 </li>
 <li><a href="#section-design-decisions">9. Decisiones arquitectónicas</a></li>
@@ -523,7 +524,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>arc42, the template for documentation of software and system architecture.</p>
 </div>
 <div class="paragraph">
-<p>Template Version 8.2 EN. (based upon AsciiDoc version), January 2023</p>
+<p>Template Version 8.2 EN. (based upon AsciiDoc version), February 2025</p>
 </div>
 <div class="paragraph">
 <p>Created, maintained and &#169; by Dr. Peter Hruschka, Dr. Gernot Starke and contributors.
@@ -752,65 +753,10 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="section-context-and-scope">3. Context and Scope</h2>
+<h2 id="section-context-and-scope">3. Contexto y Alcance</h2>
 <div class="sectionbody">
-<div class="sidebarblock arc42help">
-<div class="content">
-<div class="paragraph">
-<div class="title">Contents</div>
-<p>Context and scope - as the name suggests - delimits your system (i.e. your scope) from all its communication partners
-(neighboring systems and users, i.e. the context of your system). It thereby specifies the external interfaces.</p>
-</div>
-<div class="paragraph">
-<p>If necessary, differentiate the business context (domain specific inputs and outputs) from the technical context (channels, protocols, hardware).</p>
-</div>
-<div class="paragraph">
-<div class="title">Motivation</div>
-<p>The domain interfaces and technical interfaces to communication partners are among your system&#8217;s most critical aspects. Make sure that you completely understand them.</p>
-</div>
-<div class="paragraph">
-<div class="title">Form</div>
-<p>Various options:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Context diagrams</p>
-</li>
-<li>
-<p>Lists of communication partners and their interfaces.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<div class="title">Further Information</div>
-<p>See <a href="https://docs.arc42.org/section-3/">Context and Scope</a> in the arc42 documentation.</p>
-</div>
-</div>
-</div>
 <div class="sect2">
-<h3 id="_business_context">3.1. Business Context</h3>
-<div class="sidebarblock arc42help">
-<div class="content">
-<div class="paragraph">
-<div class="title">Contents</div>
-<p>Specification of <strong>all</strong> communication partners (users, IT-systems, &#8230;&#8203;) with explanations of domain specific inputs and outputs or interfaces.
-Optionally you can add domain specific formats or communication protocols.</p>
-</div>
-<div class="paragraph">
-<div class="title">Motivation</div>
-<p>All stakeholders should understand which data are exchanged with the environment of the system.</p>
-</div>
-<div class="paragraph">
-<div class="title">Form</div>
-<p>All kinds of diagrams that show the system as a black box and specify the domain interfaces to communication partners.</p>
-</div>
-<div class="paragraph">
-<p>Alternatively (or additionally) you can use a table.
-The title of the table is the name of your system, the three columns contain the name of the communication partner, the inputs, and the outputs.</p>
-</div>
-</div>
-</div>
+<h3 id="_contexto_empresarial">3.1. Contexto Empresarial</h3>
 <div class="paragraph">
 <p>WIChat es una aplicación web desarrollada por la empresa ChattySw para RTVE con el propósito de modernizar y ampliar la experiencia de juego en línea basada en concursos de preguntas y respuestas. La aplicación se inspira en el formato televisivo de "Saber y Ganar", proporcionando una plataforma interactiva donde los usuarios deben identificar lugares a partir de imágenes generadas automáticamente desde Wikidata.</p>
 </div>
@@ -843,24 +789,7 @@ The title of the table is the name of your system, the three columns contain the
 </div>
 </div>
 <div class="sect2">
-<h3 id="_technical_context">3.2. Technical Context</h3>
-<div class="sidebarblock arc42help">
-<div class="content">
-<div class="paragraph">
-<div class="title">Contents</div>
-<p>Technical interfaces (channels and transmission media) linking your system to its environment. In addition a mapping of domain specific input/output to the channels, i.e. an explanation which I/O uses which channel.</p>
-</div>
-<div class="paragraph">
-<div class="title">Motivation</div>
-<p>Many stakeholders make architectural decision based on the technical interfaces between the system and its context. Especially infrastructure or hardware designers decide these technical interfaces.</p>
-</div>
-<div class="paragraph">
-<div class="title">Form</div>
-<p>E.g. UML deployment diagram describing channels to neighboring systems,
-together with a mapping table showing the relationships between channels and input/output.</p>
-</div>
-</div>
-</div>
+<h3 id="_contexto_tecnico">3.2. Contexto tecnico</h3>
 <div class="paragraph">
 <p>WIChat es una aplicación web compuesta por diversos módulos y tecnologías que permiten su funcionamiento fluido y escalable. La arquitectura se basa en un enfoque de microservicios, con integración de APIs para la generación de preguntas y el procesamiento de lenguaje natural.</p>
 </div>
@@ -936,26 +865,6 @@ together with a mapping table showing the relationships between channels and inp
 <div class="content">
 <img src="./images/32_tecnicalContext.png" alt="32 tecnicalContext">
 </div>
-</div>
-<div class="paragraph">
-<p><strong>&lt;Mapping Input/Output to Channels&gt;</strong>
-En este flujo:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>El usuario interactúa con la interfaz de usuario (front-end) a través de clics y respuestas.</p>
-</li>
-<li>
-<p>El Backend procesa las solicitudes, consulta la API de Wikidata o al LLM en cuyo caso se solicite una pista y por ultimo actualiza la pantalla.</p>
-</li>
-<li>
-<p>Los canales son las conexiones HTTP entre los componentes de nuestra aplicación.</p>
-</li>
-<li>
-<p>El mapeo evalúa las respuestas del usuario en tiempo real para proporcionar una respuesta adecuada.</p>
-</li>
-</ul>
 </div>
 <div style="page-break-after: always;"></div>
 </div>
@@ -1322,107 +1231,8 @@ En este flujo:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="section-concepts">8. Cross-cutting Concepts</h2>
+<h2 id="section-concepts">8. Conceptos transversales</h2>
 <div class="sectionbody">
-<div class="sidebarblock arc42help">
-<div class="content">
-<div class="paragraph">
-<div class="title">Content</div>
-<p>This section describes overall, principal regulations and solution ideas that are relevant in multiple parts (= cross-cutting) of your system.
-Such concepts are often related to multiple building blocks.
-They can include many different topics, such as</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>models, especially domain models</p>
-</li>
-<li>
-<p>architecture or design patterns</p>
-</li>
-<li>
-<p>rules for using specific technology</p>
-</li>
-<li>
-<p>principal, often technical decisions of an overarching (= cross-cutting) nature</p>
-</li>
-<li>
-<p>implementation rules</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<div class="title">Motivation</div>
-<p>Concepts form the basis for <em>conceptual integrity</em> (consistency, homogeneity) of the architecture.
-Thus, they are an important contribution to achieve inner qualities of your system.</p>
-</div>
-<div class="paragraph">
-<p>Some of these concepts cannot be assigned to individual building blocks, e.g. security or safety.</p>
-</div>
-<div class="paragraph">
-<div class="title">Form</div>
-<p>The form can be varied:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>concept papers with any kind of structure</p>
-</li>
-<li>
-<p>cross-cutting model excerpts or scenarios using notations of the architecture views</p>
-</li>
-<li>
-<p>sample implementations, especially for technical concepts</p>
-</li>
-<li>
-<p>reference to typical usage of standard frameworks (e.g. using Hibernate for object/relational mapping)</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<div class="title">Structure</div>
-<p>A potential (but not mandatory) structure for this section could be:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Domain concepts</p>
-</li>
-<li>
-<p>User Experience concepts (UX)</p>
-</li>
-<li>
-<p>Safety and security concepts</p>
-</li>
-<li>
-<p>Architecture and design patterns</p>
-</li>
-<li>
-<p>"Under-the-hood"</p>
-</li>
-<li>
-<p>development concepts</p>
-</li>
-<li>
-<p>operational concepts</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Note: it might be difficult to assign individual concepts to one specific topic
-on this list.</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="./images/08-concepts-EN.drawio.png" alt="Possible topics for crosscutting concepts">
-</div>
-</div>
-<div class="paragraph">
-<div class="title">Further Information</div>
-<p>See <a href="https://docs.arc42.org/section-8/">Concepts</a> in the arc42 documentation.</p>
-</div>
-</div>
-</div>
 <div class="sect2">
 <h3 id="_gestión_de_proyecto">8.1. <em>Gestión de Proyecto</em></h3>
 <div class="ulist">
@@ -1456,7 +1266,13 @@ on this list.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_modelo_de_dominio">8.3. <em>Modelo de dominio</em></h3>
+<h3 id="_libreria_chatbotify">8.3. <em>Libreria ChatBotify</em></h3>
+<div class="paragraph">
+<p>Libreria encargada de la gestion del chatbot, se encargara de la gestion de las peticiones del usuario y respuestas del chatbot.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_modelo_de_dominio">8.4. <em>Modelo de dominio</em></h3>
 <div class="paragraph">
 <p><em>Se desarrollara segun la aplicación avance</em></p>
 </div>
@@ -1732,7 +1548,7 @@ There you will find links and examples about ADR.</p>
 <div id="footer">
 <div id="footer-text">
 Version 8.2 EN<br>
-Last updated 2025-02-26 01:02:52 +0100
+Last updated 2025-03-07 15:47:35 +0100
 </div>
 </div>
 </body>
