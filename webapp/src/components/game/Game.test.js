@@ -1,10 +1,9 @@
 import React from 'react';
-import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { BrowserRouter as Router } from "react-router-dom";
 import Game from './Game';
-
 
 // Configurar un mock de Axios
 const mockAxios = new MockAdapter(axios);
@@ -51,7 +50,7 @@ describe('Game Component', () => {
     fireEvent.click(correctButton);
 
     await waitFor(() => {
-      expect(correctButton).toHaveStyle('background-color: green'); // Respuesta correcta en verde
+      expect(correctButton).toHaveStyle('background-color: green !important'); // Respuesta correcta en verde
     });
   });
 
@@ -67,7 +66,7 @@ describe('Game Component', () => {
     fireEvent.click(incorrectButton);
 
     await waitFor(() => {
-      expect(incorrectButton).toHaveStyle('background-color: red'); // Respuesta incorrecta en rojo
+      expect(incorrectButton).toHaveStyle('background-color: red !important'); // Respuesta incorrecta en rojo
     });
   });
 
