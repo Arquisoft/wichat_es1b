@@ -80,7 +80,7 @@ export default function AnimatedCharacter() {
     const eyeCenterY = eyeRect.top + eyeRect.height / 2
 
     // Limitar el movimiento del ojo
-    const maxMovement = 2
+    const maxMovement = 3
     const deltaX = (mousePosition.x - eyeCenterX) / 25
     const deltaY = (mousePosition.y - eyeCenterY) / 25
 
@@ -98,111 +98,111 @@ export default function AnimatedCharacter() {
         transition={{ duration: 0.5, delay: 0.2 }}
         style={{ position: "relative", height: "100%", width: "100%" }}
       >
-        {/* SVG para un personaje más humano */}
-        <svg viewBox="0 0 100 120" style={{ height: "100%", width: "100%" }}>
-          {/* Sombra suave debajo del personaje */}
-          <ellipse cx="50" cy="115" rx="25" ry="5" fill="rgba(0,0,0,0.1)" />
+        {/* SVG para Doraemon */}
+        <svg viewBox="0 0 200 200" style={{ height: "100%", width: "100%" }}>
+          {/* Sombra */}
+          <ellipse cx="100" cy="190" rx="40" ry="8" fill="rgba(0,0,0,0.2)" />
 
-          {/* Cuello */}
-          <path d="M 40 95 C 40 110 60 110 60 95" fill="#f0d0b0" />
+          {/* Cuerpo */}
+          <ellipse cx="100" cy="140" rx="35" ry="30" fill="#1a75ff" />
 
-          {/* Hombros */}
-          <path d="M 25 100 C 25 110 40 105 40 95" fill="#3f51b5" />
-          <path d="M 75 100 C 75 110 60 105 60 95" fill="#3f51b5" />
+          {/* Barriga */}
+          <ellipse cx="100" cy="145" rx="25" ry="20" fill="white" />
 
-          {/* Cabeza - forma más humana */}
-          <ellipse cx="50" cy="60" rx="30" ry="35" fill="#f0d0b0" />
+          {/* Bolsillo */}
+          <path d="M 90 145 C 90 155 110 155 110 145 L 110 160 C 110 170 90 170 90 160 Z" fill="white" />
 
-          {/* Pelo */}
-          <path d="M 20 60 C 20 40 30 25 50 25 C 70 25 80 40 80 60" fill="#5b3c11" />
-          <path d="M 20 60 C 25 55 30 50 50 50 C 70 50 75 55 80 60" fill="#5b3c11" />
+          {/* Cabeza */}
+          <circle cx="100" cy="90" r="50" fill="#1a75ff" />
 
-          {/* Detalles del pelo */}
-          <path d="M 30 35 C 35 30 45 28 50 30" stroke="#4a3009" strokeWidth="0.5" fill="none" />
-          <path d="M 70 35 C 65 30 55 28 50 30" stroke="#4a3009" strokeWidth="0.5" fill="none" />
+          {/* Cara */}
+          <circle cx="100" cy="100" r="40" fill="white" />
 
-          {/* Orejas */}
-          <ellipse cx="20" cy="60" rx="5" ry="10" fill="#f0d0b0" />
-          <ellipse cx="80" cy="60" rx="5" ry="10" fill="#f0d0b0" />
-
-          {/* Cejas */}
-          <path d="M 35 50 C 38 48 42 48 45 50" stroke="#5b3c11" strokeWidth="1.5" fill="none" />
-          <path d="M 55 50 C 58 48 62 48 65 50" stroke="#5b3c11" strokeWidth="1.5" fill="none" />
-
-          {/* Ojos - área blanca */}
+          {/* Ojos */}
           <g id="leftEye">
-            <ellipse cx="40" cy="60" rx="5" ry="6" fill="white" stroke="#000" strokeWidth="0.5" />
+            <ellipse cx="85" cy="85" rx="10" ry="12" fill="white" stroke="#000" strokeWidth="1" />
             {!eyesClosed ? (
               <>
-                <motion.ellipse
-                  cx="40"
-                  cy="60"
-                  rx="2.5"
-                  ry="3"
-                  fill="#4b5563"
+                <motion.circle
+                  cx="85"
+                  cy="85"
+                  r="4"
+                  fill="black"
                   animate={{
-                    cx: 40 + calculateEyePosition(document.getElementById("leftEye")).x,
-                    cy: 60 + calculateEyePosition(document.getElementById("leftEye")).y,
+                    cx: 85 + calculateEyePosition(document.getElementById("leftEye")).x,
+                    cy: 85 + calculateEyePosition(document.getElementById("leftEye")).y,
                   }}
                 />
-                <motion.ellipse
-                  cx="40"
-                  cy="60"
-                  rx="1"
-                  ry="1"
+                <motion.circle
+                  cx="85"
+                  cy="83"
+                  r="1.5"
                   fill="white"
                   animate={{
-                    cx: 40 + calculateEyePosition(document.getElementById("leftEye")).x + 0.5,
-                    cy: 60 + calculateEyePosition(document.getElementById("leftEye")).y - 0.5,
+                    cx: 85 + calculateEyePosition(document.getElementById("leftEye")).x + 1,
+                    cy: 83 + calculateEyePosition(document.getElementById("leftEye")).y,
                   }}
                 />
               </>
             ) : (
-              <path d="M 35 60 C 38 58 42 58 45 60" stroke="#000" strokeWidth="1" fill="none" />
+              <path d="M 75 85 C 80 80 90 80 95 85" stroke="#000" strokeWidth="1.5" fill="none" />
             )}
           </g>
 
           <g id="rightEye">
-            <ellipse cx="60" cy="60" rx="5" ry="6" fill="white" stroke="#000" strokeWidth="0.5" />
+            <ellipse cx="115" cy="85" rx="10" ry="12" fill="white" stroke="#000" strokeWidth="1" />
             {!eyesClosed ? (
               <>
-                <motion.ellipse
-                  cx="60"
-                  cy="60"
-                  rx="2.5"
-                  ry="3"
-                  fill="#4b5563"
+                <motion.circle
+                  cx="115"
+                  cy="85"
+                  r="4"
+                  fill="black"
                   animate={{
-                    cx: 60 + calculateEyePosition(document.getElementById("rightEye")).x,
-                    cy: 60 + calculateEyePosition(document.getElementById("rightEye")).y,
+                    cx: 115 + calculateEyePosition(document.getElementById("rightEye")).x,
+                    cy: 85 + calculateEyePosition(document.getElementById("rightEye")).y,
                   }}
                 />
-                <motion.ellipse
-                  cx="60"
-                  cy="60"
-                  rx="1"
-                  ry="1"
+                <motion.circle
+                  cx="115"
+                  cy="83"
+                  r="1.5"
                   fill="white"
                   animate={{
-                    cx: 60 + calculateEyePosition(document.getElementById("rightEye")).x + 0.5,
-                    cy: 60 + calculateEyePosition(document.getElementById("rightEye")).y - 0.5,
+                    cx: 115 + calculateEyePosition(document.getElementById("rightEye")).x + 1,
+                    cy: 83 + calculateEyePosition(document.getElementById("rightEye")).y,
                   }}
                 />
               </>
             ) : (
-              <path d="M 55 60 C 58 58 62 58 65 60" stroke="#000" strokeWidth="1" fill="none" />
+              <path d="M 105 85 C 110 80 120 80 125 85" stroke="#000" strokeWidth="1.5" fill="none" />
             )}
           </g>
 
           {/* Nariz */}
-          <path d="M 50 65 C 52 70 48 70 50 70" stroke="#c0a080" strokeWidth="1" fill="none" />
+          <circle cx="100" cy="100" r="7" fill="#ff3333" />
+          <ellipse cx="100" cy="102" rx="3" ry="1" fill="#ff6666" />
+
+          {/* Bigotes */}
+          <line x1="70" y1="95" x2="90" y2="100" stroke="#000" strokeWidth="1" />
+          <line x1="70" y1="105" x2="90" y2="105" stroke="#000" strokeWidth="1" />
+          <line x1="70" y1="115" x2="90" y2="110" stroke="#000" strokeWidth="1" />
+
+          <line x1="130" y1="95" x2="110" y2="100" stroke="#000" strokeWidth="1" />
+          <line x1="130" y1="105" x2="110" y2="105" stroke="#000" strokeWidth="1" />
+          <line x1="130" y1="115" x2="110" y2="110" stroke="#000" strokeWidth="1" />
 
           {/* Boca */}
-          <path d="M 40 80 C 45 85 55 85 60 80" stroke="#c05050" strokeWidth="1.5" fill="none" />
+          <path d="M 75 115 C 90 130 110 130 125 115" stroke="#000" strokeWidth="1.5" fill="none" />
 
-          {/* Mejillas */}
-          <circle cx="30" cy="70" r="5" fill="#f8c0c0" opacity="0.3" />
-          <circle cx="70" cy="70" r="5" fill="#f8c0c0" opacity="0.3" />
+          {/* Collar */}
+          <path d="M 70 135 C 70 145 130 145 130 135" fill="#ff3333" />
+          
+          {/* Cascabel */}
+          <circle cx="100" cy="140" r="7" fill="#ffcc00" />
+          <ellipse cx="100" cy="140" rx="5" ry="1" fill="#ffdb4d" />
+          <line x1="100" y1="133" x2="100" y2="147" stroke="#000" strokeWidth="0.5" />
+
         </svg>
       </motion.div>
     </div>

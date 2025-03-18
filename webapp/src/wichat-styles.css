@@ -45,8 +45,8 @@
   /* Contenedor del personaje animado */
   .wichat-character-container {
     position: relative;
-    height: 140px;
-    width: 140px;
+    height: 160px;
+    width: 160px;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
     margin: 0 auto;
     margin-bottom: -70px;
@@ -66,21 +66,7 @@
   
   .MuiInputBase-root.Mui-focused {
     background-color: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2) !important;
-  }
-  
-  /* Estilos para los botones */
-  .MuiButton-containedPrimary {
-    background: linear-gradient(to right, #3f51b5, #5c6bc0) !important;
-    box-shadow: 0 4px 10px rgba(63, 81, 181, 0.3) !important;
-    border-radius: 8px !important;
-    padding: 10px 22px !important;
-    transition: all 0.3s ease !important;
-  }
-  
-  .MuiButton-containedPrimary:hover {
-    box-shadow: 0 6px 15px rgba(63, 81, 181, 0.4) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 0 0 2px rgba(26, 117, 255, 0.2) !important;
   }
   
   /* Estilos para el enlace de cambio entre login y registro */

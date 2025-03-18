@@ -17,72 +17,108 @@ export default function AnimatedWelcome() {
       transition={{ duration: 0.5 }}
     >
       <motion.div
-        style={{ marginBottom: "32px", height: "180px", width: "180px" }}
+        style={{ marginBottom: "32px", height: "200px", width: "200px" }}
         animate={{ y: [0, -10, 0] }}
         transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
       >
+        {/* SVG para Doraemon */}
         <svg
-          viewBox="0 0 100 120"
+          viewBox="0 0 200 200"
           style={{ height: "100%", width: "100%", filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" }}
         >
-          {/* Sombra suave debajo del personaje */}
-          <ellipse cx="50" cy="115" rx="25" ry="5" fill="rgba(0,0,0,0.1)" />
+          {/* Sombra */}
+          <ellipse cx="100" cy="190" rx="40" ry="8" fill="rgba(0,0,0,0.2)" />
 
-          {/* Cuello */}
-          <path d="M 40 95 C 40 110 60 110 60 95" fill="#f0d0b0" />
+          {/* Cuerpo */}
+          <ellipse cx="100" cy="140" rx="35" ry="30" fill="#1a75ff" />
 
-          {/* Hombros */}
-          <path d="M 25 100 C 25 110 40 105 40 95" fill="#3f51b5" />
-          <path d="M 75 100 C 75 110 60 105 60 95" fill="#3f51b5" />
+          {/* Barriga */}
+          <ellipse cx="100" cy="145" rx="25" ry="20" fill="white" />
 
-          {/* Cabeza - forma más humana */}
-          <ellipse cx="50" cy="60" rx="30" ry="35" fill="#f0d0b0" />
+          {/* Bolsillo */}
+          <path d="M 90 145 C 90 155 110 155 110 145 L 110 160 C 110 170 90 170 90 160 Z" fill="white" />
 
-          {/* Pelo */}
-          <path d="M 20 60 C 20 40 30 25 50 25 C 70 25 80 40 80 60" fill="#5b3c11" />
-          <path d="M 20 60 C 25 55 30 50 50 50 C 70 50 75 55 80 60" fill="#5b3c11" />
+          {/* Cabeza */}
+          <circle cx="100" cy="90" r="50" fill="#1a75ff" />
 
-          {/* Detalles del pelo */}
-          <path d="M 30 35 C 35 30 45 28 50 30" stroke="#4a3009" strokeWidth="0.5" fill="none" />
-          <path d="M 70 35 C 65 30 55 28 50 30" stroke="#4a3009" strokeWidth="0.5" fill="none" />
+          {/* Cara */}
+          <circle cx="100" cy="100" r="40" fill="white" />
 
-          {/* Orejas */}
-          <ellipse cx="20" cy="60" rx="5" ry="10" fill="#f0d0b0" />
-          <ellipse cx="80" cy="60" rx="5" ry="10" fill="#f0d0b0" />
-
-          {/* Cejas - levantadas para expresión feliz */}
-          <path d="M 35 48 C 38 45 42 45 45 48" stroke="#5b3c11" strokeWidth="1.5" fill="none" />
-          <path d="M 55 48 C 58 45 62 45 65 48" stroke="#5b3c11" strokeWidth="1.5" fill="none" />
-
-          {/* Ojos - brillantes y expresivos */}
+          {/* Ojos */}
           <g>
-            <ellipse cx="40" cy="60" rx="5" ry="6" fill="white" stroke="#000" strokeWidth="0.5" />
-            <ellipse cx="40" cy="60" rx="2.5" ry="3" fill="#4b5563" />
-            <ellipse cx="41" cy="59" rx="1" ry="1" fill="white" />
+            <ellipse cx="85" cy="85" rx="10" ry="12" fill="white" stroke="#000" strokeWidth="1" />
+            <circle cx="85" cy="85" r="4" fill="black" />
+            <circle cx="86" cy="83" r="1.5" fill="white" />
           </g>
 
           <g>
-            <ellipse cx="60" cy="60" rx="5" ry="6" fill="white" stroke="#000" strokeWidth="0.5" />
-            <ellipse cx="60" cy="60" rx="2.5" ry="3" fill="#4b5563" />
-            <ellipse cx="61" cy="59" rx="1" ry="1" fill="white" />
+            <ellipse cx="115" cy="85" rx="10" ry="12" fill="white" stroke="#000" strokeWidth="1" />
+            <circle cx="115" cy="85" r="4" fill="black" />
+            <circle cx="116" cy="83" r="1.5" fill="white" />
           </g>
 
           {/* Nariz */}
-          <path d="M 50 65 C 52 70 48 70 50 70" stroke="#c0a080" strokeWidth="1" fill="none" />
+          <circle cx="100" cy="100" r="7" fill="#ff3333" />
+          <ellipse cx="100" cy="102" rx="3" ry="1" fill="#ff6666" />
+
+          {/* Bigotes */}
+          <line x1="70" y1="95" x2="90" y2="100" stroke="#000" strokeWidth="1" />
+          <line x1="70" y1="105" x2="90" y2="105" stroke="#000" strokeWidth="1" />
+          <line x1="70" y1="115" x2="90" y2="110" stroke="#000" strokeWidth="1" />
+
+          <line x1="130" y1="95" x2="110" y2="100" stroke="#000" strokeWidth="1" />
+          <line x1="130" y1="105" x2="110" y2="105" stroke="#000" strokeWidth="1" />
+          <line x1="130" y1="115" x2="110" y2="110" stroke="#000" strokeWidth="1" />
 
           {/* Boca - sonriendo ampliamente */}
-          <path d="M 35 75 C 45 90 55 90 65 75" stroke="#c05050" strokeWidth="1.5" fill="none" />
-          <path d="M 40 82 C 45 85 55 85 60 82" fill="#a04040" opacity="0.2" />
+          <path d="M 75 115 C 90 135 110 135 125 115" stroke="#000" strokeWidth="1.5" fill="none" />
 
-          {/* Mejillas */}
-          <circle cx="30" cy="70" r="5" fill="#f8c0c0" opacity="0.5" />
-          <circle cx="70" cy="70" r="5" fill="#f8c0c0" opacity="0.5" />
+          {/* Collar */}
+          <path d="M 70 135 C 70 145 130 145 130 135" fill="#ff3333" />
+          
+          {/* Cascabel */}
+          <circle cx="100" cy="140" r="7" fill="#ffcc00" />
+          <ellipse cx="100" cy="140" rx="5" ry="1" fill="#ffdb4d" />
+          <line x1="100" y1="133" x2="100" y2="147" stroke="#000" strokeWidth="0.5" />
+
+          {/* Manos saludando */}
+          <motion.path
+            d="M 60 140 C 50 130 45 120 50 110"
+            fill="none"
+            stroke="#1a75ff"
+            strokeWidth="8"
+            strokeLinecap="round"
+            animate={{
+              d: [
+                "M 60 140 C 50 130 45 120 50 110",
+                "M 60 140 C 50 120 45 100 50 90",
+                "M 60 140 C 50 130 45 120 50 110",
+              ],
+            }}
+            transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1, repeatType: "reverse" }}
+          />
+
+          <motion.path
+            d="M 140 140 C 150 130 155 120 150 110"
+            fill="none"
+            stroke="#1a75ff"
+            strokeWidth="8"
+            strokeLinecap="round"
+            animate={{
+              d: [
+                "M 140 140 C 150 130 155 120 150 110",
+                "M 140 140 C 150 120 155 100 150 90",
+                "M 140 140 C 150 130 155 120 150 110",
+              ],
+            }}
+            transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1, repeatType: "reverse", delay: 0.5 }}
+          />
         </svg>
       </motion.div>
 
       <motion.div
         style={{
-          background: "linear-gradient(to right, #3f51b5, #7e57c2)",
+          background: "linear-gradient(to right, #1a75ff, #0052cc)",
           borderRadius: "12px",
           padding: "16px 32px",
           textAlign: "center",

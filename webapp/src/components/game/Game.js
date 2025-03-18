@@ -241,19 +241,26 @@ const Game = () => {
               }}>
                 {options.map((option, index) => (
                     <Button
-                        key={index}
-                        variant="contained"
-                        onClick={() => handleOptionClick(option)}
-                        style={{
-                          backgroundColor: selectedAnswer === option
-                              ? (isCorrect ? 'green' : 'red')
-                              : (selectedAnswer !== null && option === correctAnswer ? 'green' : ''), // Si se falla, también se muestra cual era la correcta
-                          color: selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer) ? 'white' : 'black'
-                        }}
-                        disabled={selectedAnswer !== null} // Deshabilita los botones tras hacer clic
+                      key={index}
+                      variant="contained"
+                      onClick={() => handleOptionClick(option)}
+                      style={{
+                        
+                        // Añadir !important para asegurar la prioridad
+                        backgroundColor: selectedAnswer === option
+                          ? (isCorrect ? 'green !important' : 'red !important')
+                          : (selectedAnswer !== null && option === correctAnswer ? 'green !important' : ''),
+                        color: selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer) ? 'white !important' : 'black !important',
+                        // Sin prioridad
+                        backgroundColor: selectedAnswer === option
+                          ? (isCorrect ? 'green' : 'red')
+                          : (selectedAnswer !== null && option === correctAnswer ? 'green' : ''), // Si se falla, también se muestra cual era la correcta
+                        color: selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer) ? 'white' : 'black'
+                      }}
+                      disabled={selectedAnswer !== null} // Deshabilita los botones tras hacer clic
                     >
                       {option}
-                    </Button>
+                  </Button>
                 ))}
               </div>
               <Chat>{correctAnswer}</Chat>
