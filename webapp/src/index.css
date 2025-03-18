@@ -8,16 +8,46 @@ html, body, main, #root {
   background-color: #cce9ff;
 }
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Estilos para mejorar los inputs de Material UI */
+.MuiInputBase-root {
+  background-color: #f5f7fa !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiInputBase-root:hover {
+  background-color: #edf0f7 !important;
+}
+
+.MuiInputBase-root.Mui-focused {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2) !important;
+}
+
+/* Estilos para los botones */
+.MuiButton-containedPrimary {
+  background: linear-gradient(to right, #3f51b5, #5c6bc0) !important;
+  box-shadow: 0 4px 10px rgba(63, 81, 181, 0.3) !important;
+  border-radius: 8px !important;
+  padding: 10px 22px !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiButton-containedPrimary:hover {
+  box-shadow: 0 6px 15px rgba(63, 81, 181, 0.4) !important;
+  transform: translateY(-1px) !important;
 }
