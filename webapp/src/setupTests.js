@@ -59,7 +59,7 @@ const mockAxios = new MockAdapter(axios);
 // Mockear la API de configuración del asistente para evitar errores 404
 mockAxios.onPost('http://localhost:8003/configureAssistant').reply(200, { message: "Mocked response" });
 
-// Mock de chat.png?react para evitar errores en Jest
+// Mock de chat_old.png?react para evitar errores en Jest
 jest.mock('./chat.png?react', () => 'chat.png', { virtual: true });
 
 console.log("setupTests.js cargado correctamente");

@@ -20,7 +20,7 @@ export default function Chat(props) {
         {id: "robotic", version: "0.1.0"}
     ]
 
-    const [message, setMessage] = useState("Bienvenido soy Aether te ofreceré pistas para llegar a descubrir que es la imagen 🥳!");
+    const [message, setMessage] = useState("Bienvenido, soy Doraemon, el gato robot, y estoy aquí para ayudarte a descubrir qué representa la imagen que ves 🥳");
 
     const flow = {
         start: {
