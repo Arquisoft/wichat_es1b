@@ -41,7 +41,7 @@ global.AudioContext = class MockAudioContext {
 
 global.webkitAudioContext = global.AudioContext;
 global.BaseAudioContext = global.AudioContext;
-jest.mock('./chat.png?react', () => 'chat.png', { virtual: true });
+jest.mock('./chat.png?react', () => 'chat_old.png', { virtual: true });
 
 import React from 'react';
 import {render, screen, fireEvent, act} from '@testing-library/react';
