@@ -14,23 +14,58 @@ export default function AnimatedCharacter() {
 
     window.addEventListener("mousemove", handleMouseMove)
 
-    // Escuchar cuando el campo de contraseña está activo
-    const passwordFields = document.querySelectorAll('input[type="password"]')
+    // Función para actualizar los event listeners en los campos de contraseña
+    const setupPasswordListeners = () => {
+      // Eliminar listeners anteriores para evitar duplicados
+      const allInputs = document.querySelectorAll("input")
+      allInputs.forEach((input) => {
+        input.removeEventListener("focus", handleFocus)
+        input.removeEventListener("blur", handleBlur)
+      })
+
+      // Buscar todos los campos de contraseña por tipo y por atributo name que contenga "password"
+      const passwordFields = [
+        ...document.querySelectorAll('input[type="password"]'),
+        ...document.querySelectorAll('input[name*="password" i]'), // 'i' hace que sea case-insensitive
+        ...document.querySelectorAll('input[placeholder*="contraseña" i]'),
+      ]
+
+      // Eliminar duplicados
+      const uniquePasswordFields = [...new Set(passwordFields)]
+
+      uniquePasswordFields.forEach((field) => {
+        field.addEventListener("focus", handleFocus)
+        field.addEventListener("blur", handleBlur)
+      })
+
+      console.log("Campos de contraseña detectados:", uniquePasswordFields.length)
+    }
 
     const handleFocus = () => setEyesClosed(true)
     const handleBlur = () => setEyesClosed(false)
 
-    passwordFields.forEach((field) => {
-      field.addEventListener("focus", handleFocus)
-      field.addEventListener("blur", handleBlur)
+    // Configurar los listeners inicialmente
+    setupPasswordListeners()
+
+    // Configurar un MutationObserver para detectar cambios en el DOM
+    // Esto ayudará a detectar cuando se cambia entre Login y AddUser
+    const observer = new MutationObserver(() => {
+      setTimeout(setupPasswordListeners, 100) // Pequeño retraso para asegurar que el DOM se ha actualizado
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
     })
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove)
-      passwordFields.forEach((field) => {
-        field.removeEventListener("focus", handleFocus)
-        field.removeEventListener("blur", handleBlur)
+      const allInputs = document.querySelectorAll("input")
+      allInputs.forEach((input) => {
+        input.removeEventListener("focus", handleFocus)
+        input.removeEventListener("blur", handleBlur)
       })
+      observer.disconnect()
     }
   }, [])
 
@@ -56,17 +91,7 @@ export default function AnimatedCharacter() {
   }
 
   return (
-    <div
-      style={{
-        position: "relative",
-        height: "140px",
-        width: "140px",
-        filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.1))",
-        margin: "0 auto",
-        marginBottom: "-70px",
-        zIndex: 10,
-      }}
-    >
+    <div className="wichat-character-container">
       <motion.div
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -183,3 +208,4 @@ export default function AnimatedCharacter() {
     </div>
   )
 }
+
