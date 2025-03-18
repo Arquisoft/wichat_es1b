@@ -8,7 +8,7 @@ test('renders welcome message', () => {
       <App />
     </Router>
   );
-  const welcomeMessage = screen.getByText(/¡Te damos la bienvenida a Wichat! ¡Esperamos que disfrutes!/i);
+  const welcomeMessage = screen.getByText(/¡BIENVENIDOS A WICHAT!/i);
   expect(welcomeMessage).toBeInTheDocument();
 });
 

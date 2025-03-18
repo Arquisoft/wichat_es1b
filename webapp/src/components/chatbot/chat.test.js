@@ -3,6 +3,7 @@ global.crypto = {
         return require('crypto').randomFillSync(buffer);
     }
 };
+
 // Add AudioContext mock
 global.AudioContext = class MockAudioContext {
     constructor() {
@@ -18,7 +19,8 @@ global.AudioContext = class MockAudioContext {
             stop: () => {},
             frequency: { value: 0 },
             type: 'sine'
-        });// Add the decodeAudioData method
+        });
+        // Add the decodeAudioData method
         this.decodeAudioData = (arrayBuffer, successCallback, errorCallback) => {
             const audioBuffer = {
                 length: 100,
@@ -38,13 +40,12 @@ global.AudioContext = class MockAudioContext {
     close() {}
 };
 
-
 global.webkitAudioContext = global.AudioContext;
 global.BaseAudioContext = global.AudioContext;
 jest.mock('./chat.png?react', () => 'chat_old.png', { virtual: true });
 
 import React from 'react';
-import {render, screen, fireEvent, act} from '@testing-library/react';
+import {render, screen, fireEvent} from '@testing-library/react';
 import axios from 'axios';
 import Chat from './chat';
 
@@ -99,7 +100,6 @@ describe('Chat Component', () => {
         fireEvent(inputField, enterEvent);
 
         // Wait for response
-        // Wait for error response
         const response = await screen.findByText(/llmanswer/i, {}, { timeout: 5000 });
         expect(response).toBeInTheDocument();
     });

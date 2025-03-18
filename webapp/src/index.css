@@ -4,20 +4,99 @@
   font-weight: 400;
 }
 
-html, body, main, #root {
+html,
+body,
+#root {
   background-color: #cce9ff;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+/* Nuevos estilos con mayor especificidad para evitar conflictos con app.css */
+
+/* Contenedor principal con gradiente */
+#root .wichat-animated-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(to bottom, #cce9ff, #a8d5ff);
+}
+
+/* Contenedor del formulario */
+#root .wichat-form-container {
+  position: relative;
+  margin-top: 40px;
+  border-radius: 16px;
+  overflow: visible;
+}
+
+/* Papel del formulario */
+#root .wichat-form-paper {
+  padding: 24px;
+  padding-top: 32px;
+  margin-top: 40px;
+  position: relative;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  background-color: white;
+}
+
+/* Curva superior del formulario */
+#root .wichat-form-top-curve {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-color: white;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  z-index: 1;
+}
+
+/* Contenedor del personaje animado */
+#root .wichat-character-container {
+  position: relative;
+  height: 140px;
+  width: 140px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  margin: 0 auto;
+  margin-bottom: -70px;
+  z-index: 10;
+}
+
+/* Estilos para mejorar los inputs de Material UI */
+#root .MuiInputBase-root {
+  background-color: #f5f7fa !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+#root .MuiInputBase-root:hover {
+  background-color: #edf0f7 !important;
+}
+
+#root .MuiInputBase-root.Mui-focused {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2) !important;
+}
+
+/* Estilos para el enlace de cambio entre login y registro */
+#root .wichat-toggle-link {
+  margin-top: 16px;
+  text-align: center;
+}
+
