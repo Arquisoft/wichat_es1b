@@ -87,4 +87,47 @@ describe('Game Component', () => {
     });
   });
 
+  it('debe mostrar y actualizar el temporizador correctamente', async() => {
+    jest.useFakeTimers();
+
+    render(
+      <Router>
+        <Game />
+      </Router>
+    );
+
+    // Esperar a que la pregunta se cargue antes de verificar el temporizador
+    await waitFor(() => {
+      expect(screen.getByText("¿Cuál es la capital de Francia?")).toBeInTheDocument();
+    });
+
+    // Verificar que el tiempo inicial es 30s
+    await waitFor(() => {
+      expect(screen.getByText(/Tiempo restante: 30s/i)).toBeInTheDocument();
+    })
+    
+    // Simular el paso de 10 segundos
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    })
+
+    // Esperar a que el temporizador refleje el cambio (debe estar entre 20 y 29 segundos)
+    await waitFor(() => {
+      const tiempoRestante = screen.getByText(/Tiempo restante: \d+s/i).textContent;
+      const tiempoNumerico = parseInt(tiempoRestante.match(/\d+/)[0], 10);
+      expect(tiempoNumerico).toBeLessThanOrEqual(29);
+      expect(tiempoNumerico).toBeGreaterThanOrEqual(20);
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(20000);
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Tiempo restante: 0s/i)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  })
+
 });
