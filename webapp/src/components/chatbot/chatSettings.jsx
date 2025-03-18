@@ -15,7 +15,7 @@ const settings = {
         icon: Icon,
     },
     header: {
-        title: (<div style={{ cursor: "pointer", margin: 0, fontSize: 20, fontWeight: "bold" }}>Aether</div>),
+        title: (<div style={{ cursor: "pointer", margin: 0, fontSize: 20, fontWeight: "bold" }}>Doraemon</div>),
         showAvatar: true,
         avatar: Icon,
     },
