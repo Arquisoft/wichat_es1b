@@ -140,7 +140,19 @@ const Game = () => {
     // Resetear las respuestas seleccionadas
     setSelectedAnswer(null);
     setIsCorrect(null);
-  };
+    
+    let acertadas = score;
+    let falladas = numberOfQuestions - score;
+
+    //Hacer una petición para guardar la sesión
+    axios.post('http://localhost:8005/api/save-session', {
+    
+      userId: "67db18a0984b55cb62e5a1b4",
+      score: acertadas,
+      wrongAnswers: falladas,
+    
+    });
+  }
 
   const isGameFinished = () => {
     return questionCounter >= numberOfQuestions;
@@ -150,7 +162,7 @@ const Game = () => {
   useEffect(() => {
     if (isGameFinished() && !isFinished) {
       setTimeout(() => {
-        setFinished(true);
+        handleEndGame();
       }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

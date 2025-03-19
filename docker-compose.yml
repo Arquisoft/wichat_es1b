@@ -24,6 +24,20 @@ services:
     environment:
       MONGODB_URI: mongodb://mongodb:27017/userdb
 
+  sessionservice:
+    container_name: sessionservice-wichat_es1b
+    image: ghcr.io/arquisoft/wichat_es1b/sessionservice:latest
+    profiles: ["dev", "prod"]
+    build: ./users/sesionservice
+    depends_on:
+      - mongodb
+    ports:
+      - "8005:8005"
+    networks:
+      - mynetwork
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/userdb
+
   userservice:
     container_name: userservice-wichat_es1b
     image: ghcr.io/arquisoft/wichat_es1b/userservice:latest

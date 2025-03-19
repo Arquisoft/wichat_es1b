@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const port = 8005;
@@ -22,10 +21,13 @@ const userSchema = new mongoose.Schema({
   password: String,
   createdAt: Date,
   sessions: [
-    {
-      id: String,
+    {      
       score: Number,
       wrongAnswers: Number,
+      createdAt: {
+        type: Date,
+        default: Date.now, 
+      }, 
     },
   ],
 });
@@ -37,7 +39,7 @@ app.post('/api/save-session', async (req, res) => {
   try {
     const user = await User.findById(userId);
     if (user) {
-      user.sessions.push({ id: uuidv4(), score, wrongAnswers });
+      user.sessions.push({score, wrongAnswers });
       await user.save();
       res.status(200).json({ message: 'Session saved successfully' });
     } else {
