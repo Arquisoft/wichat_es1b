@@ -9,3 +9,4 @@ llmservice/.env
 
 /.idea
 .idea
+.env

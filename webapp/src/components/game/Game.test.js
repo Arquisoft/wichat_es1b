@@ -5,7 +5,6 @@ import MockAdapter from 'axios-mock-adapter';
 import { BrowserRouter as Router } from "react-router-dom";
 import Game from './Game';
 
-
 // Configurar un mock de Axios
 const mockAxios = new MockAdapter(axios);
 
