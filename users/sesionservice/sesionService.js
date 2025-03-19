@@ -1,9 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = 8005;
+
+app.use(cookieParser());
 
 app.use(cors({
   origin: 'http://localhost:3000', // Permite solo este frontend
@@ -35,9 +39,12 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 app.post('/api/save-session', async (req, res) => {
-  const { userId, score, wrongAnswers } = req.body;
+  const {userid, score, wrongAnswers } = req.body;
+
+  console.log(userid);
+  
   try {
-    const user = await User.findById(userId);
+    const user = await User.findOne({username: userid});
     if (user) {
       user.sessions.push({score, wrongAnswers });
       await user.save();
@@ -49,6 +56,10 @@ app.post('/api/save-session', async (req, res) => {
     res.status(500).json({ error: 'Error saving session' });
   }
 });
+
+
+
+
 
 // Start the server
 const server = app.listen(port, () => {
