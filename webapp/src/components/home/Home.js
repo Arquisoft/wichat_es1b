@@ -2,12 +2,13 @@ import React, { createContext, useContext, useState } from 'react';
 import { Container, Typography, Button, Grid, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Snackbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
-
-
-
-
+import axios from 'axios';
 
 const ConfigContext = createContext();
+
+const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8000';
+
+
 
 export const useConfig = () => useContext(ConfigContext);
 
@@ -18,7 +19,19 @@ const HomePage = () => {
     const [numQuestions, setNumQuestions] = useState(5);
     const [timePerQuestion, setTimePerQuestion] = useState(10);
 
-    
+
+    // Recuperacion de las sesiones del usuario
+    let sesionData; // Variable global para almacenar la data
+
+    axios.get(`${apiEndpoint}/get-sessions/${localStorage.getItem('username')}`)
+        .then(response => {
+            sesionData = response.data; // Guardamos la respuesta
+            console.log(sesionData); // Ahora podemos usarla dentro de este bloque
+        })
+        .catch(error => {
+            console.error("Error al obtener sesiones:", error);
+    });
+
 
     const handleShowGame = () => {
         let path = '/Game';

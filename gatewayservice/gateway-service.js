@@ -71,14 +71,20 @@ app.get('/generateQuestion', async (req, res) => {
     //Mandar al endpoint del servicio de preguntas para que gestione la petición, con los parámetros añadidos
     //const URL = questionsServiceUrl + 'generateQuestion?user=' + req.query.user + '&category=' + req.query.category;   //codigo completo
     const URL = questionsServiceUrl + '/generateQuestion'; // + '?category=' + req.query.category;     //codigo de prueba
-    //console.log("Category" + req.query.category);
     const response = await axios.get(URL);
-    //console.log("URL: "+ URL);
     res.json(response.data);
-    //console.log("Pregunta generada: "+ response.data.responseQuestion);
   }
   catch(error) {
     res.status(error.response.status).json({error: error.response.data.error});
+  }
+});
+
+app.get('/get-sessions/:username', async (req, res) => {
+  try {
+    const response = await axios.get(sessionServiceUrl + '/get-sessions/' + req.params.username);
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
   }
 });
 
@@ -94,7 +100,6 @@ app.post('/configureGame', async (req, res) => {
 
 app.post('/save-session', async (req, res) => {
   try {
-    console.log("Guardando sesión");
     const response = await axios.post(sessionServiceUrl + '/save-session', req.body);   
     res.json(response.data);
   } catch (error) {
