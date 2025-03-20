@@ -36,7 +36,7 @@ const HomePage = () => {
 
   // Configuración de la partida
   const [numQuestions, setNumQuestions] = useState(5)
-  const [timePerQuestion, setTimePerQuestion] = useState(10)
+  const [timePerQuestion, setTimePerQuestion] = useState(30)
   const [sessionData, setSessionData] = useState([])
   const [loading, setLoading] = useState(true)
 
