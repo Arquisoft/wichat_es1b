@@ -50,7 +50,6 @@ async function getMessage(message) {
         });
         return response.data.answer;
     } catch (error) {
-        console.error("Error fetching message:", error);
         return "Error fetching message";
     }
 }
@@ -61,7 +60,6 @@ async function configure(message) {
             moderation: message,
         });
     } catch (error) {
-        console.error("Error fetching message:", error);
         return "Error fetching message";
     }
 }
