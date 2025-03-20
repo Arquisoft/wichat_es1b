@@ -9,7 +9,7 @@ const settings = {
     botBubble: { simStream: true },
     tooltip: {
         mode: "CLOSE",
-        text: "Estoy aquí para ayudarte! 😊",
+        text: "¡Estoy aquí para ayudarte! 😊",
     },
     chatButton: {
         icon: Icon,

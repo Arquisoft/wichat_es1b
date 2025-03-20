@@ -18,12 +18,15 @@ const wikiURL = "https://query.wikidata.org/sparql";
 const nOptions = 4;
 
 // Variables
+let questions = [];
+let currentQuestionIndex = 0;
+var maxQuestions = 5;
+
 var correct = "";
 var question = "";
 var image = "";
 var gameId = null;
 var options = [];
-var maxQuestions = 5;
 var questionToSave = null;
 var gameQuestions = [];
 var randomQuery;
@@ -70,28 +73,71 @@ var answerOptions = [];
 var questionImage = "";
 var numberOfOptions = 4;
 
+
+/**
+ * Loads the specified number of questions at the beginning of the game.
+ * @returns {Promise<void>}
+ */
+async function loadQuestions() {
+    questions = [];
+    for (let i = 0; i < maxQuestions; i++) {
+        const question = await generateQuestion();
+        questions.push(question);
+    }
+}
+
+
+/**
+ * Generates a single question
+ * @returns {Promise<Object>}
+ */
+async function generateQuestion() {
+    const randomQuery = crypto.randomInt(0, queries.length);
+    const url = wikiURL + "?query=" + encodeURIComponent(queries[randomQuery]) + "&format=json";
+
+    try {
+        const response = await axios(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if(!response.data || !response.data.results || response.data.results.bindings.length === 0) {
+            console.error("WikiData query did not return any result.");
+        }
+
+        return getQuestionData(response.data.results.bindings);
+    }
+    catch(error) {
+        console.error("Error while generating a question: " + error);
+        throw error;
+    }
+}
+
+
+
 function getQuestionData(data) {
-    answerOptions = [];
-    var fourRows = [];
+    const answerOptions = [];
+    const fourRows = [];
     const nElems = data.length;
 
-    // Select 4 random rows of the data
-    for (let i = 0; i<numberOfOptions; i++){
+    for (let i = 0; i < nOptions; i++) {
         let indexRow = crypto.randomInt(0, nElems);
-        if(data[indexRow].optionLabel.value.startsWith('Q')){    // añadir mas comprobaciones
-            i = i - 1;
-        }else{
+        if (!data[indexRow].optionLabel || data[indexRow].optionLabel.value.startsWith('Q')) {
+            i--;
+        } else {
             fourRows.push(data[indexRow]);
-            // Store the 4 posible answers
             answerOptions.push(data[indexRow].optionLabel.value);
         }
     }
 
-    var indexQuestion = crypto.randomInt(0,numberOfOptions);
-    // Store the country chosen and its capital
-    questionObject= possiblesQuestions[randomQuery];
-    questionImage = fourRows[indexQuestion].imageLabel.value;
-    correctAnswer = fourRows[indexQuestion].optionLabel.value;
+    const indexQuestion = crypto.randomInt(0, nOptions);
+    return {
+        questionObject: possiblesQuestions[randomQuery],
+        questionImage: fourRows[indexQuestion].imageLabel.value,
+        correctAnswer: fourRows[indexQuestion].optionLabel.value,
+        answerOptions: answerOptions
+    };
 
 }
 
@@ -177,6 +223,25 @@ app.post('/configureGame', async (req, res) => {
 })
 
 
+app.post('/startGame', async (req, res) => {
+    try {
+        await loadQuestions();
+        currentQuestionIndex = 0;
+        res.status(200).json({ message: 'Game started', firstQuestion: questions[currentQuestionIndex] });
+    } catch (error) {
+        res.status(500).json({ error: 'Error starting game' });
+    }
+});
+
+
+app.get('/nextQuestion', (req, res) => {
+    if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        res.status(200).json(questions[currentQuestionIndex]);
+    } else {
+        res.status(400).json({ error: 'No more questions' });
+    }
+});
 
 
 // Carga de las queries según la categoría

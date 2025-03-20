@@ -39,20 +39,23 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 app.post('/api/save-session', async (req, res) => {
-  const {userid, score, wrongAnswers } = req.body;
+  const { userid, score, wrongAnswers } = req.body;
 
-  console.log(userid);
-  
+  console.log(`Received request to save session for userid: ${userid}`);
+
   try {
-    const user = await User.findOne({username: userid});
+    const user = await User.findOne({ username: userid });
     if (user) {
-      user.sessions.push({score, wrongAnswers });
+      console.log(`User found: ${user.username}`);
+      user.sessions.push({ score, wrongAnswers });
       await user.save();
       res.status(200).json({ message: 'Session saved successfully' });
     } else {
+      console.log(`User not found: ${userid}`);
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
+    console.error(`Error saving session for userid: ${userid}`, error);
     res.status(500).json({ error: 'Error saving session' });
   }
 });
