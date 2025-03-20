@@ -20,11 +20,12 @@
     "dependencies": {
         "bcrypt": "^5.1.1",
         "body-parser": "^1.20.3",
+        "cookie-parser": "^1.4.5",
         "express": "^4.21.2",
         "express-validator": "^7.2.1",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.9.3",
-        "cookie-parser": "^1.4.5"
+        "wichat_es1b": "file:../.."
     },
     "devDependencies": {
         "jest": "^29.7.0",
