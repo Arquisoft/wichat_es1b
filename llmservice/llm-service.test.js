@@ -28,7 +28,7 @@ describe('LLM Service', () => {
   // Test /ask endpoint
   it('the llm should reply', async () => {
     const response = await request(app)
-        .post('/ask')
+        .post('/askllm')
         .send({ question: 'a question', apiKey: 'apiKey' });
 
     expect(response.statusCode).toBe(200);

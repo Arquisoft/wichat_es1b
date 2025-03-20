@@ -4,7 +4,8 @@ import ChatBot from "react-chatbotify";
 import settings from "./chatSettings"
 import axios from 'axios';
 
-const apiEndpoint = process.env.REACT_APP_LLM_ENDPOINT || 'http://localhost:8003';
+
+const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8000';
 
 
 export default function Chat(props) {
@@ -43,13 +44,12 @@ export default function Chat(props) {
 
 async function getMessage(message) {
     try {
-        const response = await axios.post(apiEndpoint+'/ask', {
+        const response = await axios.post(apiEndpoint+'/askllm', {
             question: message,
             apiKey: process.env.REACT_APP_LLM_API_KEY
         });
         return response.data.answer;
     } catch (error) {
-        console.error("Error fetching message:", error);
         return "Error fetching message";
     }
 }
@@ -60,7 +60,6 @@ async function configure(message) {
             moderation: message,
         });
     } catch (error) {
-        console.error("Error fetching message:", error);
         return "Error fetching message";
     }
 }

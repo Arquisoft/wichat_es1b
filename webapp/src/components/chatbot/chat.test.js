@@ -65,9 +65,9 @@ describe('Chat Component', () => {
 
     it('sends a message and receives a response', async () => {
         axios.post.mockImplementation((url) => {
-            if (url === 'http://localhost:8003/ask') {
+            if (url === 'http://localhost:8000/askllm') {
                 return Promise.resolve({ data: { answer: 'llmanswer' } });
-            } else if (url === 'http://localhost:8003/configureAssistant') {
+            } else if (url === 'http://localhost:8000/configureAssistant') {
                 return Promise.resolve({ data: {} });
             }
         });
@@ -106,9 +106,9 @@ describe('Chat Component', () => {
 
     it('handles error when fetching message', async () => {
         axios.post.mockImplementation((url) => {
-            if (url === 'http://localhost:8003/ask') {
+            if (url === 'http://localhost:8000/askllm') {
                 return Promise.reject(new Error('Error fetching message'));
-            } else if (url === 'http://localhost:8003/configureAssistant') {
+            } else if (url === 'http://localhost:8000/configureAssistant') {
                 return Promise.resolve({ data: {} });
             }
         });
