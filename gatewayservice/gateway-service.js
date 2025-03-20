@@ -57,12 +57,21 @@ app.post('/adduser', async (req, res) => {
 app.post('/askllm', async (req, res) => {
   try {
     // Forward the add user request to the user service
-    const llmResponse = await axios.post(llmServiceUrl+'/ask', req.body);
+    const llmResponse = await axios.post(llmServiceUrl+'/askllm', req.body);
     res.json(llmResponse.data);
   } catch (error) {
     res.status(error.response.status).json({ error: error.response.data.error });
   }
 });
+
+app.post('/configureAssistant', async (req, res) => {
+    try {
+        const response = await axios.post(llmServiceUrl+'/configureAssistant', req.body);
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response.status).json({ error: error.response.data.error });
+    }
+})
 
 
 app.get('/generateQuestion', async (req, res) => {
