@@ -34,8 +34,6 @@ app.get('/health', (req, res) => {
 
 app.post('/save-session', async (req, res) => {
   const {userid, score, wrongAnswers } = req.body;
-
-  console.log(userid);
   
   try {
     const user = await User.findOne({username: userid});

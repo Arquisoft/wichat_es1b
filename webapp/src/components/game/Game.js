@@ -58,6 +58,7 @@ const Game = () => {
       // Restablecer la respuesta seleccionada y los colores de los botones
       setSelectedAnswer(null);
       setIsCorrect(null);
+
       setQuestionCounter(qc => qc + 1);
     } catch (error) {
       console.error('Error fetching the next question:', error);
@@ -98,14 +99,15 @@ const Game = () => {
     stopTimer();
 
     setSelectedAnswer(option); // Guarda la opción seleccionada
+
+    let updatedScore = score;
     if (option === correctAnswer) {
       setIsCorrect(true);
-      setScore(score + 1);
+      updatedScore = score + 1;
+      setScore(updatedScore);
     } else {
       setIsCorrect(false);
     }
-
-    setQuestionsToAnswer(q => q - 1); // Disminuye el número de preguntas restantes
 
     // Espera 2 segundos antes de mostrar una nueva pregunta y comprueba si acabo la partida
     setTimeout(async () => {
@@ -118,7 +120,7 @@ const Game = () => {
   };
 
   // Finalizar partida
-  const handleEndGame = () => {
+  const handleEndGame = (finalScore = score) => {
     console.log("Partida finalizada");
 
     // Detener el temporizador y marcar la partida como finalizada
@@ -129,8 +131,8 @@ const Game = () => {
     setSelectedAnswer(null);
     setIsCorrect(null);
 
-    let acertadas = score;
-    let falladas = numberOfQuestions - score;
+    let acertadas = finalScore;
+    let falladas = numberOfQuestions - finalScore;
 
     //Hacer una petición para guardar la sesión
     axios.post(`${apiEndpoint}/save-session`, {
@@ -208,6 +210,7 @@ const Game = () => {
     }
   }, [timeLeft, isTimeUp]);
 
+
   return (
       <Container maxWidth="md" style={{ marginTop: '2rem' }}>
         {!isFinished && (
@@ -225,7 +228,7 @@ const Game = () => {
               <Grid container spacing={2} style={{ marginTop: '10px', marginBottom: '10px' }}>
                 <Grid item xs={6}>
                   <Typography variant="h6" sx={{ color: 'blue' }}>
-                    Preguntas restantes: {questionsToAnswer}
+                    Preguntas restantes: {questionCounter}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
