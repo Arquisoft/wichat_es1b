@@ -87,6 +87,7 @@ services:
       - authservice
       - llmservice
       - questionservice
+      - sessionservice
     ports:
       - "8000:8000"
     networks:
@@ -96,6 +97,7 @@ services:
       USER_SERVICE_URL: http://userservice:8001
       LLM_SERVICE_URL: http://llmservice:8003
       QUESTION_SERVICE_URL: http://questionservice:8004
+      SESSION_SERVICE_URL: http://sessionservice:8005
 
   webapp:
     container_name: webapp-wichat_es1b

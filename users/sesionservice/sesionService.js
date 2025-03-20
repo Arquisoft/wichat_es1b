@@ -1,19 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = 8005;
-
-app.use(cookieParser());
-
-app.use(cors({
-  origin: 'http://localhost:3000', // Permite solo este frontend
-  methods: ['GET', 'POST'], // Métodos permitidos
-  allowedHeaders: ['Content-Type'], // Cabeceras permitidas
-}));
 
 app.use(express.json());
 
@@ -38,29 +27,43 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-app.post('/api/save-session', async (req, res) => {
-  const { userid, score, wrongAnswers } = req.body;
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK' });
+});
 
-  console.log(`Received request to save session for userid: ${userid}`);
+app.post('/save-session', async (req, res) => {
+  const {userid, score, wrongAnswers } = req.body;
 
+  console.log(userid);
+  
   try {
-    const user = await User.findOne({ username: userid });
+    const user = await User.findOne({username: userid});
     if (user) {
-      console.log(`User found: ${user.username}`);
-      user.sessions.push({ score, wrongAnswers });
+      user.sessions.push({score, wrongAnswers });
       await user.save();
       res.status(200).json({ message: 'Session saved successfully' });
     } else {
-      console.log(`User not found: ${userid}`);
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
-    console.error(`Error saving session for userid: ${userid}`, error);
     res.status(500).json({ error: 'Error saving session' });
   }
 });
 
-
+app.get('/get-sessions/:username', async (req, res) => {
+    const { username } = req.params;
+    try {
+      const user = await User.findOne({username:username});
+      if (user) {
+        res.json(user.sessions);
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Error getting sessions' });
+    }
+});
 
 
 
