@@ -2,13 +2,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('./auth-model')
+const User = require('./auth-model');
+const cookieParser = require('cookie-parser');
 const { check, matchedData, validationResult } = require('express-validator');
 const app = express();
 const port = 8002; 
 
 // Middleware to parse JSON in request body
 app.use(express.json());
+app.use(cookieParser());
 
 // Connect to MongoDB
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/userdb';
@@ -48,7 +50,7 @@ app.post('/login',  [
       // Generate a JWT token
       const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' });
       // Respond with the token and user information
-      res.json({ token: token, username: username, createdAt: user.createdAt });
+      res.json({ token: token, username: username, createdAt: user.createdAt,id:user._id });
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
     }

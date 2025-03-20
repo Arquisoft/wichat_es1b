@@ -23,6 +23,8 @@ const Login = () => {
     try {
       const response = await axios.post(`${apiEndpoint}/login`, { username, password });
 
+      localStorage.setItem('username', username);
+
       const question = "Please, generate a greeting message for a student called " + username + " that is a student of the Software Architecture course in the University of Oviedo. Be nice and polite. Two to three sentences max.";
       const model = "empathy"
 
@@ -38,7 +40,7 @@ const Login = () => {
 
       setCreatedAt(userCreatedAt);
       setLoginSuccess(true);
-
+      
       setOpenSnackbar(true);
       navigate("/Home");
     } catch (error) {

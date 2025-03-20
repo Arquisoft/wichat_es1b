@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Typography, Button, AppBar, Toolbar, Paper, LinearProgress, Grid} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Container, Typography, Button, AppBar, Toolbar, Paper, LinearProgress, Grid } from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 
 import './Game.css';
-
-import './../chatbot/chat.jsx';
 import Chat from "../chatbot/chat";
 
 const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8000';
 const timeLimit = 30;
 
-
 const Game = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { gameConfig } = location.state || { gameConfig: { numQuestions: 5, timePerQuestion: 10 } };
 
   const [question, setQuestion] = useState('');
   const [image, setImage] = useState('');
@@ -31,11 +30,11 @@ const Game = () => {
   const [score, setScore] = useState(0);
 
   // Configuración de las partidas
-  const [numberOfQuestions, setNumberOfQuestions] = useState(5);
-  const [questionsToAnswer, setQuestionsToAnswer] = useState(5);
+  const [numberOfQuestions, setNumberOfQuestions] = useState(gameConfig.numQuestions);
+  const [questionsToAnswer, setQuestionsToAnswer] = useState(gameConfig.numQuestions);
 
   // Estados para el temporizador
-  const [timeLeft, setTimeLeft] = useState(timeLimit);
+  const [timeLeft, setTimeLeft] = useState(gameConfig.timePerQuestion);
   const [isTimeUp, setIsTimeUp] = useState(false);
 
   const stopTimer = () => {
@@ -43,20 +42,13 @@ const Game = () => {
   };
 
   const resetTimer = () => {
-    setTimeLeft(timeLimit);
+    setTimeLeft(gameConfig.timePerQuestion);
     setIsTimeUp(false);
   };
 
-
-
   const getQuestion = async () => {
     try {
-      const response = await axios.get(`${apiEndpoint}/generateQuestion`, { // una vez funcione
-        // params: {
-        //   category: "Geografia",
-        // }
-      });
-
+      const response = await axios.get(`${apiEndpoint}/generateQuestion`);
       setQuestion(response.data.responseQuestion);
       setOptions(response.data.responseAnswerOptions);
       setCorrectAnswer(response.data.responseCorrectAnswer);
@@ -68,7 +60,7 @@ const Game = () => {
       console.log(response.data.responseQuestionImage);
 
       // Reiniciar temporizador y estado de tiempo agotado
-      setTimeLeft(timeLimit);
+      setTimeLeft(gameConfig.timePerQuestion);
       setIsTimeUp(false);
 
       // Restablecer la respuesta seleccionada y los colores de los botones
@@ -79,7 +71,7 @@ const Game = () => {
     } catch (error) {
       console.log("Error en la generación de la pregunta");
     }
-  }
+  };
 
   useEffect(() => {
     getQuestion();
@@ -140,17 +132,27 @@ const Game = () => {
     // Resetear las respuestas seleccionadas
     setSelectedAnswer(null);
     setIsCorrect(null);
+    
+    let acertadas = score;
+    let falladas = numberOfQuestions - score;
+
+    //Hacer una petición para guardar la sesión
+    axios.post(`${apiEndpoint}/save-session`, {
+      userid: localStorage.getItem('username'),
+      score: acertadas,
+      wrongAnswers: falladas,
+    });
   };
 
   const isGameFinished = () => {
     return questionCounter >= numberOfQuestions;
-  }
+  };
 
   // Comprueba cada pregunta si acabo la partida o no
   useEffect(() => {
     if (isGameFinished() && !isFinished) {
       setTimeout(() => {
-        setFinished(true);
+        handleEndGame();
       }, 1000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,154 +183,128 @@ const Game = () => {
   ];
 
   return (
-      <Container maxWidth="md" style={{ marginTop: '2rem' }}>
-        {!isFinished && (
-            <Paper elevation={3} style={{ padding: '2rem', textAlign: 'center' }}>
+    <Container maxWidth="md" style={{ marginTop: '2rem' }}>
+      {!isFinished && (
+        <Paper elevation={3} style={{ padding: '2rem', textAlign: 'center' }}>
 
-              {/* Barra de menú */}
-              <AppBar position="static" color="primary">
-                <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Button color="inherit" onClick={handleEndGame}>Finalizar partida</Button>
-                  <Button color="inherit" onClick={handleNewGame}>Empezar nueva partida</Button>
-                  <Button color="inherit" onClick={handleGoToProfile}>Ir al perfil</Button>
-                </Toolbar>
-              </AppBar>
+          {/* Barra de menú */}
+          <AppBar position="static" color="primary">
+            <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button color="inherit" onClick={handleEndGame}>Finalizar partida</Button>
+              <Button color="inherit" onClick={handleNewGame}>Empezar nueva partida</Button>
+              <Button color="inherit" onClick={handleGoToProfile}>Ir al perfil</Button>
+            </Toolbar>
+          </AppBar>
 
-              {/* Grid Preguntas Restantes y Puntuación*/}
-              <Grid container spacing={2} style={{ marginTop: '10px', margingBottom: '10px' }}>
-                <Grid item xs={6}>
-                  <Typography variant="h6" sx={{ color: 'blue' }}>
-                    Preguntas restantes: {questionsToAnswer}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="h6" sx={{ color: 'blue' }}>
-                    Puntuación: {score}
-                  </Typography>
-                </Grid>
-              </Grid>
-
-              {/* Linea Regresiva Temporizador */}
-              <LinearProgress
-                  variant="determinate"
-                  value={(timeLeft / timeLimit) * 100}
-                  sx ={{
-                    height: 10,
-                    backgroundColor: 'primary',
-                    '& .MuiLinearProgress-bar': { backgroundColor: timeLeft <= 5 ? 'red' : 'blue' },
-                    marginTop: '10px' }}
-              />
-              <Typography variant="caption" sx={{ display: 'block', marginBottom: '10px' }}>
-                Tiempo restante: {timeLeft}s
+          {/* Grid Preguntas Restantes y Puntuación*/}
+          <Grid container spacing={2} style={{ marginTop: '10px', margingBottom: '10px' }}>
+            <Grid item xs={6}>
+              <Typography variant="h6" sx={{ color: 'blue' }}>
+                Preguntas restantes: {questionsToAnswer}
               </Typography>
-
-              {/* Pregunta */}
-              <Typography variant="h6" sx={{ marginBottom: '10px' }}>
-                {question}
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="h6" sx={{ color: 'blue' }}>
+                Puntuación: {score}
               </Typography>
+            </Grid>
+          </Grid>
 
-              {/* Imagen */}
-              {image && <img src={image} alt="Imagen de la pregunta" width="40%" height="auto" style={{ marginBottom: '20px'}} />}
+          {/* Linea Regresiva Temporizador */}
+          <LinearProgress
+            variant="determinate"
+            value={(timeLeft / timeLimit) * 100}
+            sx ={{
+              height: 10,
+              backgroundColor: 'primary',
+              '& .MuiLinearProgress-bar': { backgroundColor: timeLeft <= 5 ? 'red' : 'blue' },
+              marginTop: '10px' }}
+          />
+          <Typography variant="caption" sx={{ display: 'block', marginBottom: '10px' }}>
+            Tiempo restante: {timeLeft}s
+          </Typography>
 
-              {/* Opciones de respuesta */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '10px',
-                alignItems: 'center',
-                marginTop: '20px',
-                marginBottom: '20px'
-              }}>
-                {options.map((option, index) => (
-                    <Button
-                      key={index}
-                      variant="contained"
-                      onClick={() => handleOptionClick(option)}
-                      style={{
-                        
-                        // Añadir !important para asegurar la prioridad
-                        backgroundColor: selectedAnswer === option
-                          ? (isCorrect ? 'green !important' : 'red !important')
-                          : (selectedAnswer !== null && option === correctAnswer ? 'green !important' : ''),
-                        color: selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer) ? 'white !important' : 'black !important',
-                        // Sin prioridad
-                        backgroundColor: selectedAnswer === option
-                          ? (isCorrect ? 'green' : 'red')
-                          : (selectedAnswer !== null && option === correctAnswer ? 'green' : ''), // Si se falla, también se muestra cual era la correcta
-                        color: selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer) ? 'white' : 'black'
-                      }}
-                      disabled={selectedAnswer !== null} // Deshabilita los botones tras hacer clic
-                    >
-                      {option}
-                  </Button>
-                ))}
-              </div>
-              <Chat>{correctAnswer}</Chat>
-            </Paper>
-        )}
+          {/* Pregunta */}
+          <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+            {question}
+          </Typography>
 
-        {isFinished && (
-            <Paper elevation={3} style={{ padding: '2rem', textAlign: 'center' }}>
+          {/* Imagen */}
+          {image && <img src={image} alt="Imagen de la pregunta" width="40%" height="auto" style={{ marginBottom: '20px'}} />}
 
-              {/* Mensaje Partida Finalizada */}
-              <Typography variant="h4" gutterBottom>
-                Partida finalizada. ¡Gracias por jugar!
-              </Typography>
-
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                {/* Gráfico de respuestas */}
-                <PieChart width={300} height={300}>
-                  <Pie data={data} cx="50%" cy="50%" innerRadius={40} outerRadius={80} dataKey="value">
-                    {data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-
-                {/* Leyenda respuestas */}
-                <div style={{ marginLeft: '20px', textAlign: 'left' }}>
-                  <Typography variant="h6" sx={{ color: '#green' }}>
-                    Acertadas: {score}
-                  </Typography>
-                  <Typography variant="h6" sx={{ color: '#red' }}>
-                    Falladas: {numberOfQuestions - score}
-                  </Typography>
-                </div>
-              </div>
-
-              {/* Botón Menú principal */}
-              <Button onClick={handleHome} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
-                Volver al menú principal
+          {/* Opciones de respuesta */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '10px',
+            alignItems: 'center',
+            marginTop: '20px',
+            marginBottom: '20px'
+          }}>
+            {options.map((option, index) => (
+              <Button
+                key={index}
+                variant="contained"
+                onClick={() => handleOptionClick(option)}
+                style={{
+                  // Añadir !important para asegurar la prioridad
+                  backgroundColor: selectedAnswer === option
+                    ? (isCorrect ? 'green !important' : 'red !important')
+                    : (selectedAnswer !== null && option === correctAnswer ? 'green !important' : ''),
+                  color: selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer) ? 'white !important' : 'black !important',
+                  // Sin prioridad
+                  backgroundColor: selectedAnswer === option
+                    ? (isCorrect ? 'green' : 'red')
+                    : (selectedAnswer !== null && option === correctAnswer ? 'green' : ''), // Si se falla, también se muestra cual era la correcta
+                  color: selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer) ? 'white' : 'black'
+                }}
+                disabled={selectedAnswer !== null} // Deshabilita los botones tras hacer clic
+              >
+                {option}
               </Button>
-            </Paper>
-        )}
-      </Container>
+            ))}
+          </div>
+          <Chat>{correctAnswer}</Chat>
+        </Paper>
+      )}
+
+      {isFinished && (
+        <Paper elevation={3} style={{ padding: '2rem', textAlign: 'center' }}>
+
+          {/* Mensaje Partida Finalizada */}
+          <Typography variant="h4" gutterBottom>
+            Partida finalizada. ¡Gracias por jugar!
+          </Typography>
+
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            {/* Gráfico de respuestas */}
+            <PieChart width={300} height={300}>
+              <Pie data={data} cx="50%" cy="50%" innerRadius={40} outerRadius={80} dataKey="value">
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+            </PieChart>
+
+            {/* Leyenda respuestas */}
+            <div style={{ marginLeft: '20px', textAlign: 'left' }}>
+              <Typography variant="h6" sx={{ color: '#green' }}>
+                Acertadas: {score}
+              </Typography>
+              <Typography variant="h6" sx={{ color: '#red' }}>
+                Falladas: {numberOfQuestions - score}
+              </Typography>
+            </div>
+          </div>
+
+          {/* Botón Menú principal */}
+          <Button onClick={handleHome} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
+            Volver al menú principal
+          </Button>
+        </Paper>
+      )}
+    </Container>
   );
 };
 
 export default Game;
-
-
-/**
- * Cada segundo (1000 ms) se disminuye en una unidad el tiempo restante. Al llegar a 0, se deshabilitan los botones y se
- * reinicia el tiempo.
- */
-//useEffect(() => {
-//    const id = setInterval(() => {
-//        setTime(prev => {
-//            if (prev > 0) {
-//                return prev - 1;
-//            } else {
-//                setTimedOut(true);
-//                const buttons = document.querySelectorAll('button[title="btnsPreg"]');
-//                buttons.forEach(button => {
-//                    button.disabled = true;
-//                    button.onmouse = null;
-//                });
-//                clearInterval(id); // Clear the interval when the time runs out
-//            }
-//        });
-//    }, 1000);
-//
-//    return () => clearInterval(id); // Clear the interval on component unmount
-//}, [isTimerActive, isTimedOut]);
