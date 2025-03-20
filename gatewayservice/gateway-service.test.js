@@ -15,8 +15,10 @@ describe('Gateway Service', () => {
       return Promise.resolve({ data: { token: 'mockedToken' } });
     } else if (url.endsWith('/adduser')) {
       return Promise.resolve({ data: { userId: 'mockedUserId' } });
-    } else if (url.endsWith('/ask')) {
+    } else if (url.endsWith('/askllm')) {
       return Promise.resolve({ data: { answer: 'llmanswer' } });
+    }else if (url.endsWith('/configureAssistant')) {
+           return Promise.resolve({ data: { answer: 'llmanswer' } });
     }
   });
 
@@ -49,4 +51,13 @@ describe('Gateway Service', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.answer).toBe('llmanswer');
   });
+
+  it('should configure the assistant with the question', async () => {
+      const response = await request(app)
+        .post('/askllm')
+        .send({ moderation: 'question' });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.answer).toBe('llmanswer');
+    });
 });
