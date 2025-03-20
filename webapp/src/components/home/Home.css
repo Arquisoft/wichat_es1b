@@ -1,42 +1,118 @@
-div[title="main"] {
+/* Animaciones y efectos visuales */
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  /* Estilos globales para mejorar la apariencia */
+  body {
+    background-color: #f5f7fa;
+    color: #333;
+    font-family: "Roboto", "Segoe UI", sans-serif;
+  }
+  
+  /* Mejoras para los contenedores */
+  .MuiPaper-root {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  /* Estilos originales preservados e integrados */
+  div[title="main"] {
     display: grid;
     grid-template-columns: 1fr;
     justify-items: center;
     align-items: center;
-
-}
-
-div[title="main-title"]>h1 {
+  }
+  
+  div[title="main-title"] > h1 {
     margin-top: 1.5rem;
     margin-bottom: -1rem;
     color: #0f2080;
     font-size: 3rem;
     font-weight: 400;
-}
-
-div[title="main-title"]>h2 {
+  }
+  
+  div[title="main-title"] > h2 {
     color: #0f2080;
     font-size: 4rem;
     font-weight: bold;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-}
-
-
-div[title="main"]>button:hover {
-    background-color: white;
-    color: #0f2080;
-}
-
-div[title="main"]>button {
-    background-color: #0f2080;
-    color: white;
-    font-weight: 600;
+  }
+  
+  div[title="main"] > button:hover {
+    background-color: white !important;
+    color: #0f2080 !important;
+    animation: pulse 1s infinite;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(15, 32, 128, 0.2) !important;
+  }
+  
+  div[title="main"] > button {
+    background-color: #0f2080 !important;
+    color: white !important;
+    font-weight: 600 !important;
     width: 90%;
     height: auto;
-    font-size: 1em;
+    font-size: 1em !important;
     margin: 1rem;
     padding: 1.25em 0.5em;
-}
-
-
-
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  /* Mejoras para tipografía */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    letter-spacing: -0.5px;
+  }
+  
+  /* Mejoras para las tarjetas de sesión */
+  .session-card {
+    transition: all 0.3s ease;
+  }
+  
+  .session-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Clases personalizadas para usar el color corporativo */
+  .color-primary {
+    color: #0f2080 !important;
+  }
+  
+  .bg-primary {
+    background-color: #0f2080 !important;
+  }
+  
+  .border-primary {
+    border-color: #0f2080 !important;
+  }
+  
+  .primary-gradient {
+    background: linear-gradient(135deg, #0f2080 0%, #1a38b0 100%) !important;
+  }
+  
+  

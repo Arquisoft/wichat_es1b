@@ -1,20 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect } from "react"
-import {
-  Container,
-  Typography,
-  Button,
-  Grid,
-  Paper,
-  Box,
-  Divider,
-  Card,
-  CardContent,
-  Avatar,
-  useTheme,
-  alpha,
-} from "@mui/material"
+import { Container, Typography, Button, Grid, Paper, Box, CardContent, useTheme, alpha } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts"
@@ -22,6 +9,8 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline"
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined"
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"
+import QuizIcon from "@mui/icons-material/Quiz"
 
 const ConfigContext = createContext()
 
@@ -40,8 +29,12 @@ const HomePage = () => {
   const [sessionData, setSessionData] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Colors for the pie chart
-  const COLORS = ["#4caf50", "#f44336"]
+  // Colors for the pie chart - más vibrantes y con mejor contraste
+  const COLORS = ["#4CAF50", "#FF5252"]
+
+  // Gradientes para fondos
+  const primaryGradient = "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)"
+  const secondaryGradient = "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)"
 
   // Fetch session data on component mount
   useEffect(() => {
@@ -105,12 +98,14 @@ const HomePage = () => {
           sx={{
             bgcolor: "background.paper",
             p: 2,
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 1,
-            boxShadow: theme.shadows[2],
+            border: "none",
+            borderRadius: 2,
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+            backdropFilter: "blur(10px)",
+            animation: "fadeIn 0.3s ease-in-out",
           }}
         >
-          <Typography variant="body2" color="textPrimary">
+          <Typography variant="body2" fontWeight="medium">
             {`${payload[0].name}: ${payload[0].value}`}
           </Typography>
         </Box>
@@ -132,271 +127,585 @@ const HomePage = () => {
 
   return (
     <ConfigContext.Provider value={configValue}>
-      <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 10 }}>
-        {/* Welcome Message */}
-        <Box
-          sx={{
-            mb: 4,
-            textAlign: "center",
-            p: 3,
-            borderRadius: 2,
-            bgcolor: alpha(theme.palette.primary.main, 0.05),
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-          }}
-        >
-          <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
-            ¡Bienvenido a WiChat, {username}!
-          </Typography>
-          <Typography variant="subtitle1">Revisa tus estadísticas y comienza una nueva partida</Typography>
-        </Box>
-
-        {/* Statistics and New Game Button in the same container */}
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            mb: 4,
-            borderRadius: 2,
-            overflow: "hidden",
-          }}
-        >
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <Typography variant="h5" gutterBottom fontWeight="bold" color="primary">
-                Estadísticas Totales
-              </Typography>
-              <Divider sx={{ mb: 3 }} />
-            </Grid>
-
-            {/* Chart */}
-            <Grid item xs={12} md={8}>
-              {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
-                  <Typography>Cargando estadísticas...</Typography>
-                </Box>
-              ) : sessionData.length > 0 ? (
-                <Box>
-                  <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.success.main, 0.1),
-                        mr: 2,
-                      }}
-                    >
-                      <Typography variant="h6" color="success.main">
-                        {getTotalStats()[0]?.value || 0}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Correctas
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.error.main, 0.1),
-                      }}
-                    >
-                      <Typography variant="h6" color="error.main">
-                        {getTotalStats()[1]?.value || 0}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Incorrectas
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={getTotalStats()}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {getTotalStats().map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
-                    Total de preguntas respondidas: {totalQuestions}
-                  </Typography>
-                </Box>
-              ) : (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
-                  <Typography>No hay datos de sesiones disponibles</Typography>
-                </Box>
-              )}
-            </Grid>
-
-            {/* New Game Button */}
-            <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center" }}>
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 3,
-                  borderRadius: 2,
-                  bgcolor: alpha(theme.palette.primary.main, 0.05),
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                }}
-              >
-                <Typography variant="h6" gutterBottom align="center" fontWeight="medium">
-                  ¿Listo para poner a prueba tus conocimientos?
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  onClick={handleShowGame}
-                  startIcon={<PlayArrowIcon />}
-                  sx={{
-                    py: 1.5,
-                    px: 4,
-                    mt: 2,
-                    borderRadius: 8,
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    fontSize: "1.1rem",
-                    boxShadow: theme.shadows[4],
-                    "&:hover": {
-                      boxShadow: theme.shadows[8],
-                      transform: "translateY(-2px)",
-                      transition: "all 0.3s",
-                    },
-                  }}
-                >
-                  Nueva partida
-                </Button>
-                <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <AccessTimeIcon fontSize="small" color="action" sx={{ mr: 1 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {timePerQuestion} segundos por pregunta
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Typography variant="body2" color="text.secondary">
-                      {numQuestions} preguntas por partida
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
-
-        {/* Last 5 Sessions with improved aesthetics */}
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h5" gutterBottom fontWeight="bold" color="primary">
-            Últimas 5 sesiones de juego
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
-
-          {loading ? (
-            <Typography>Cargando sesiones...</Typography>
-          ) : sessionData.length > 0 ? (
-            <Grid container spacing={2}>
-              {getLastFiveSessions().map((session, index) => (
-                <Grid item xs={12} key={session._id}>
-                  <Card
-                    variant="outlined"
-                    sx={{
-                      mb: 1,
-                      transition: "all 0.3s",
-                      "&:hover": {
-                        boxShadow: theme.shadows[3],
-                        bgcolor: alpha(theme.palette.background.paper, 0.9),
-                      },
-                    }}
-                  >
-                    <CardContent>
-                      <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} sm={4}>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Avatar
-                              sx={{
-                                bgcolor: theme.palette.primary.main,
-                                width: 40,
-                                height: 40,
-                                mr: 2,
-                              }}
-                            >
-                              {index + 1}
-                            </Avatar>
-                            <Box>
-                              <Typography variant="subtitle2" color="text.primary">
-                                Sesión {index + 1}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {formatDate(session.createdAt)}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <CheckCircleOutlineIcon color="success" sx={{ mr: 1 }} />
-                            <Typography variant="body2">
-                              <strong>{session.score}</strong> correctas
-                            </Typography>
-                          </Box>
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <CancelOutlinedIcon color="error" sx={{ mr: 1 }} />
-                            <Typography variant="body2">
-                              <strong>{session.wrongAnswers}</strong> incorrectas
-                            </Typography>
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          ) : (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
+          pt: 4,
+          pb: 10,
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Welcome Message - con diseño mejorado */}
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 4,
+              textAlign: "center",
+              p: 4,
+              borderRadius: 4,
+              background: primaryGradient,
+              color: "white",
+              boxShadow: "0 10px 30px rgba(25, 118, 210, 0.3)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Elementos decorativos de fondo */}
             <Box
               sx={{
-                p: 4,
-                textAlign: "center",
-                bgcolor: alpha(theme.palette.info.main, 0.05),
-                borderRadius: 2,
+                position: "absolute",
+                top: -20,
+                left: -20,
+                width: 120,
+                height: 120,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.1)",
+              }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: -30,
+                right: -30,
+                width: 150,
+                height: 150,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.1)",
+              }}
+            />
+
+            <Typography
+              variant="h3"
+              component="h1"
+              gutterBottom
+              fontWeight="bold"
+              sx={{
+                textShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                position: "relative",
+                zIndex: 1,
               }}
             >
-              <Typography>No hay sesiones de juego registradas</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                ¡Comienza una nueva partida para ver tus estadísticas aquí!
+              ¡Bienvenido a WiChat, {username}!
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                opacity: 0.9,
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              Revisa tus estadísticas y comienza una nueva partida
+            </Typography>
+          </Paper>
+
+          {/* Statistics and New Game Button in the same container - con diseño mejorado */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 0,
+              mb: 4,
+              borderRadius: 4,
+              overflow: "hidden",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
+              border: "1px solid rgba(0, 0, 0, 0.05)",
+            }}
+          >
+            <Box
+              sx={{
+                p: 3,
+                background: "linear-gradient(90deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%)",
+                borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                color="primary"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <EmojiEventsIcon /> Estadísticas Totales
               </Typography>
             </Box>
-          )}
-        </Paper>
-      </Container>
+
+            <Box sx={{ p: 4 }}>
+              <Grid container spacing={4}>
+                {/* Chart - con diseño mejorado */}
+                <Grid item xs={12} md={8}>
+                  {loading ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: 300,
+                        background: "rgba(0, 0, 0, 0.02)",
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography>Cargando estadísticas...</Typography>
+                    </Box>
+                  ) : sessionData.length > 0 ? (
+                    <Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          mb: 3,
+                          gap: 3,
+                        }}
+                      >
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            p: 2,
+                            borderRadius: 3,
+                            bgcolor: alpha("#4CAF50", 0.1),
+                            border: `1px solid ${alpha("#4CAF50", 0.2)}`,
+                            minWidth: 120,
+                            boxShadow: "0 4px 12px rgba(76, 175, 80, 0.1)",
+                          }}
+                        >
+                          <Typography variant="h4" color="success.main" fontWeight="bold">
+                            {getTotalStats()[0]?.value || 0}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                              mt: 1,
+                            }}
+                          >
+                            <CheckCircleOutlineIcon fontSize="small" color="success" />
+                            Correctas
+                          </Typography>
+                        </Paper>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            p: 2,
+                            borderRadius: 3,
+                            bgcolor: alpha("#FF5252", 0.1),
+                            border: `1px solid ${alpha("#FF5252", 0.2)}`,
+                            minWidth: 120,
+                            boxShadow: "0 4px 12px rgba(255, 82, 82, 0.1)",
+                          }}
+                        >
+                          <Typography variant="h4" color="error.main" fontWeight="bold">
+                            {getTotalStats()[1]?.value || 0}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                              mt: 1,
+                            }}
+                          >
+                            <CancelOutlinedIcon fontSize="small" color="error" />
+                            Incorrectas
+                          </Typography>
+                        </Paper>
+                      </Box>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          borderRadius: 3,
+                          bgcolor: "white",
+                          border: "1px solid rgba(0, 0, 0, 0.05)",
+                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                        }}
+                      >
+                        <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                            <Pie
+                              data={getTotalStats()}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              outerRadius={100}
+                              innerRadius={60} // Convertido a donut chart
+                              fill="#8884d8"
+                              dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              paddingAngle={5} // Añade espacio entre segmentos
+                            >
+                              {getTotalStats().map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={COLORS[index % COLORS.length]}
+                                  stroke="none" // Elimina el borde
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend
+                              verticalAlign="bottom"
+                              height={36}
+                              iconType="circle" // Cambia el tipo de icono
+                              iconSize={10} // Tamaño del icono
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <Box
+                          sx={{
+                            mt: 2,
+                            p: 2,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.info.main, 0.05),
+                            border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 1,
+                          }}
+                        >
+                          <QuizIcon color="info" fontSize="small" />
+                          <Typography variant="body2" color="text.secondary">
+                            Total de preguntas respondidas: <strong>{totalQuestions}</strong>
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Box>
+                  ) : (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: 300,
+                        p: 4,
+                        borderRadius: 3,
+                        bgcolor: alpha(theme.palette.info.main, 0.05),
+                        border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                      }}
+                    >
+                      <QuizIcon sx={{ fontSize: 60, color: alpha(theme.palette.info.main, 0.3), mb: 2 }} />
+                      <Typography>No hay datos de sesiones disponibles</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Comienza tu primera partida para ver estadísticas
+                      </Typography>
+                    </Box>
+                  )}
+                </Grid>
+
+                {/* New Game Button - con diseño mejorado */}
+                <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center" }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      p: 4,
+                      borderRadius: 3,
+                      background: secondaryGradient,
+                      color: "white",
+                      boxShadow: "0 10px 30px rgba(245, 124, 0, 0.2)",
+                      position: "relative",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Elementos decorativos */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: -15,
+                        right: -15,
+                        width: 80,
+                        height: 80,
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.1)",
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: -20,
+                        left: -20,
+                        width: 100,
+                        height: 100,
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.1)",
+                      }}
+                    />
+
+                    <Typography
+                      variant="h5"
+                      gutterBottom
+                      align="center"
+                      fontWeight="bold"
+                      sx={{
+                        mb: 3,
+                        position: "relative",
+                        zIndex: 1,
+                      }}
+                    >
+                      ¿Listo para jugar?
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleShowGame}
+                      startIcon={<PlayArrowIcon />}
+                      sx={{
+                        py: 1.5,
+                        px: 4,
+                        borderRadius: 8,
+                        fontWeight: "bold",
+                        textTransform: "none",
+                        fontSize: "1.1rem",
+                        bgcolor: "white",
+                        color: theme.palette.warning.dark,
+                        boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+                        position: "relative",
+                        zIndex: 1,
+                        "&:hover": {
+                          bgcolor: "white",
+                          boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
+                          transform: "translateY(-3px)",
+                          transition: "all 0.3s",
+                        },
+                      }}
+                    >
+                      Nueva partida
+                    </Button>
+                    <Box
+                      sx={{
+                        mt: 4,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1.5,
+                        position: "relative",
+                        zIndex: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          p: 1.5,
+                          borderRadius: 2,
+                          bgcolor: "rgba(255, 255, 255, 0.2)",
+                        }}
+                      >
+                        <AccessTimeIcon fontSize="small" sx={{ mr: 1, color: "white" }} />
+                        <Typography variant="body2" sx={{ color: "white" }}>
+                          <strong>{timePerQuestion}</strong> segundos por pregunta
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          p: 1.5,
+                          borderRadius: 2,
+                          bgcolor: "rgba(255, 255, 255, 0.2)",
+                        }}
+                      >
+                        <QuizIcon fontSize="small" sx={{ mr: 1, color: "white" }} />
+                        <Typography variant="body2" sx={{ color: "white" }}>
+                          <strong>{numQuestions}</strong> preguntas por partida
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Box>
+          </Paper>
+
+          {/* Last 5 Sessions - con diseño mejorado */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 0,
+              borderRadius: 4,
+              overflow: "hidden",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
+              border: "1px solid rgba(0, 0, 0, 0.05)",
+            }}
+          >
+            <Box
+              sx={{
+                p: 3,
+                background: "linear-gradient(90deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%)",
+                borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                color="primary"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <AccessTimeIcon /> Últimas 5 sesiones de juego
+              </Typography>
+            </Box>
+
+            <Box sx={{ p: 4 }}>
+              {loading ? (
+                <Box
+                  sx={{
+                    p: 4,
+                    display: "flex",
+                    justifyContent: "center",
+                    borderRadius: 2,
+                    bgcolor: "rgba(0, 0, 0, 0.02)",
+                  }}
+                >
+                  <Typography>Cargando sesiones...</Typography>
+                </Box>
+              ) : sessionData.length > 0 ? (
+                <Grid container spacing={2}>
+                  {getLastFiveSessions().map((session, index) => (
+                    <Grid item xs={12} key={session._id}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 0,
+                          mb: 1,
+                          borderRadius: 3,
+                          overflow: "hidden",
+                          border: "1px solid rgba(0, 0, 0, 0.05)",
+                          transition: "all 0.3s",
+                          "&:hover": {
+                            boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)",
+                            transform: "translateY(-2px)",
+                          },
+                        }}
+                      >
+                        <Grid container>
+                          {/* Barra lateral con número de sesión */}
+                          <Grid
+                            item
+                            xs={1}
+                            sm={1}
+                            sx={{
+                              background: primaryGradient,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "white",
+                              fontWeight: "bold",
+                              fontSize: "1.2rem",
+                            }}
+                          >
+                            {index + 1}
+                          </Grid>
+
+                          {/* Contenido principal */}
+                          <Grid item xs={11} sm={11}>
+                            <CardContent sx={{ p: 3 }}>
+                              <Grid container spacing={2} alignItems="center">
+                                <Grid item xs={12} sm={4}>
+                                  <Box>
+                                    <Typography variant="subtitle1" color="primary" fontWeight="medium">
+                                      Sesión del {formatDate(session.createdAt).split(" ")[0]}
+                                    </Typography>
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                      sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 0.5,
+                                      }}
+                                    >
+                                      <AccessTimeIcon fontSize="inherit" />
+                                      {formatDate(session.createdAt).split(" ")[1]}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                                <Grid item xs={6} sm={4}>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      p: 1.5,
+                                      borderRadius: 2,
+                                      bgcolor: alpha("#4CAF50", 0.1),
+                                    }}
+                                  >
+                                    <CheckCircleOutlineIcon color="success" sx={{ mr: 1 }} />
+                                    <Typography variant="body2">
+                                      <strong>{session.score}</strong> correctas
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                                <Grid item xs={6} sm={4}>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      p: 1.5,
+                                      borderRadius: 2,
+                                      bgcolor: alpha("#FF5252", 0.1),
+                                    }}
+                                  >
+                                    <CancelOutlinedIcon color="error" sx={{ mr: 1 }} />
+                                    <Typography variant="body2">
+                                      <strong>{session.wrongAnswers}</strong> incorrectas
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                              </Grid>
+                            </CardContent>
+                          </Grid>
+                        </Grid>
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box
+                  sx={{
+                    p: 5,
+                    textAlign: "center",
+                    borderRadius: 3,
+                    bgcolor: alpha(theme.palette.info.main, 0.05),
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  <QuizIcon sx={{ fontSize: 60, color: alpha(theme.palette.info.main, 0.3) }} />
+                  <Typography variant="h6">No hay sesiones de juego registradas</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    ¡Comienza una nueva partida para ver tus estadísticas aquí!
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
     </ConfigContext.Provider>
   )
 }
