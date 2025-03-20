@@ -11,6 +11,7 @@ const app = express();
 const port = 8000;
 
 //const originEndpoint = REACT_APP_API_ORIGIN_ENDPOINT || 'http://localhost:3000';
+const  sessionServiceUrl = process.env.SESSION_SERVICE_URL || 'http://localhost:8005';
 const llmServiceUrl = process.env.LLM_SERVICE_URL || 'http://localhost:8003';
 const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8002';
 const userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:8001';
@@ -72,9 +73,9 @@ app.get('/generateQuestion', async (req, res) => {
     const URL = questionsServiceUrl + '/generateQuestion'; // + '?category=' + req.query.category;     //codigo de prueba
     //console.log("Category" + req.query.category);
     const response = await axios.get(URL);
-    console.log("URL: "+ URL);
+    //console.log("URL: "+ URL);
     res.json(response.data);
-    console.log("Pregunta generada: "+ response.data.responseQuestion);
+    //console.log("Pregunta generada: "+ response.data.responseQuestion);
   }
   catch(error) {
     res.status(error.response.status).json({error: error.response.data.error});
@@ -91,8 +92,15 @@ app.post('/configureGame', async (req, res) => {
   }
 });
 
-
-
+app.post('/save-session', async (req, res) => {
+  try {
+    console.log("Guardando sesión");
+    const response = await axios.post(sessionServiceUrl + '/save-session', req.body);   
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
+  }
+});
 
 
 // Read the OpenAPI YAML file synchronously

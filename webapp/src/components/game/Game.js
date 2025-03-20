@@ -145,12 +145,10 @@ const Game = () => {
     let falladas = numberOfQuestions - score;
 
     //Hacer una petición para guardar la sesión
-    axios.post('http://localhost:8005/api/save-session', {
-    
-      userId: "67db18a0984b55cb62e5a1b4",
+       axios.post(`${apiEndpoint}/save-session`, {
+      userid: localStorage.getItem('username'),
       score: acertadas,
       wrongAnswers: falladas,
-    
     });
   }
 

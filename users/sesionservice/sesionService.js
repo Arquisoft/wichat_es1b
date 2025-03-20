@@ -1,19 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = 8005;
-
-app.use(cookieParser());
-
-app.use(cors({
-  origin: 'http://localhost:3000', // Permite solo este frontend
-  methods: ['GET', 'POST'], // Métodos permitidos
-  allowedHeaders: ['Content-Type'], // Cabeceras permitidas
-}));
 
 app.use(express.json());
 
@@ -38,7 +27,12 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-app.post('/api/save-session', async (req, res) => {
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK' });
+});
+
+app.post('/save-session', async (req, res) => {
   const {userid, score, wrongAnswers } = req.body;
 
   console.log(userid);
@@ -56,9 +50,6 @@ app.post('/api/save-session', async (req, res) => {
     res.status(500).json({ error: 'Error saving session' });
   }
 });
-
-
-
 
 
 // Start the server
