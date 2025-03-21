@@ -12,7 +12,7 @@ global.fetch = require('node-fetch');
 // Constantes
 const {queries:imagesQueries} = require('./question-queries');
 const app = express();
-const generatorEndpoint = process.env.REACT_APP_API_ORIGIN_ENDPOINT  || "http://localhost:8000";
+const generatorEndpoint = process.env.REACT_APP_API_ORIGIN_ENDPOINT  || "http://localhost:3000";
 const port = 8004;
 const wikiURL = "https://query.wikidata.org/sparql";
 const nOptions = 4;

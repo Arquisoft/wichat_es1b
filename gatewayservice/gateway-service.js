@@ -90,7 +90,7 @@ app.get('/generateQuestion', async (req, res) => {
 
 app.get('/nextQuestion', async (req, res) => {
   try {
-    const URL = questionsServiceUrl + '/nextQuestion'; // + '?category=' + req.query.category;     //codigo de prueba
+    const URL = questionsServiceUrl + '/nextQuestion';
     const response = await axios.get(URL);
     res.json(response.data);
   }
