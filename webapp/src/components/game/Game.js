@@ -67,38 +67,38 @@ const Game = () => {
     }
   };
 
-  const handleNewGame = async () => {
+  const handleNewGame = async (category = null) => {
     setLoading(true);
     try {
-      const response = await axios.post(apiEndpoint + '/startGame');
-      if (response.data && response.data.firstQuestion) {
-        const { firstQuestion } = response.data;
-        console.log("First question received:", firstQuestion);
+      setLoading(true);
+      setFinished(false);
+      setScore(0);
+      setQuestionCounter(0);
+      setSelectedAnswer(null);
+      setIsCorrect(null);
 
-        setQuestions([firstQuestion]);
-        setCurrentQuestionIndex(0);
-        setQuestion(firstQuestion.questionObject);
-        setImage(firstQuestion.questionImage);
-        setOptions(firstQuestion.answerOptions);
-        setCorrectAnswer(firstQuestion.correctAnswer);
-        setSelectedAnswer(null);
-        setIsCorrect(false);
-        setScore(0);
-        setTimeLeft(timeLimit);
-        setFinished(false);
-        setQuestionsToAnswer(nQuestions);
-        setIsTimeUp(false);
-        setQuestionCounter(0);
+      console.log("Starting game with category:", category);
 
         setSessionQuestions([]);
 
-        setLoading(false);
+      // Send the category to the backend
+      const response = await axios.post(`${apiEndpoint}/startGame`, {
+        category: category || null // Pass the category or null for all categories
+      });
+
+      if (response.data.firstQuestion) {
+        const question = response.data.firstQuestion;
+        setQuestion(question.questionObject);
+        setImage(question.questionImage);
+        setCorrectAnswer(question.correctAnswer);
+        setOptions(question.answerOptions);
+        resetTimer();
       } else {
-        console.error('Invalid response from startGame:', response.data);
-        setLoading(false);
+        console.error("No question received");
       }
     } catch (error) {
-      console.error('Error starting a new game:', error);
+      console.error("Error starting new game:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -126,8 +126,8 @@ const Game = () => {
         correctAnswer: correctAnswer,
         userAnswer: option,
       }
-    ]);    
-  
+    ]);
+
     // Espera 2 segundos antes de mostrar una nueva pregunta y comprueba si acabo la partida
     setTimeout(async () => {
       if (questionCounter < numberOfQuestions - 1) {
@@ -192,8 +192,17 @@ const Game = () => {
     }
   }, [questionCounter]);
 
-  const handleShowGame = async () => {
-    await handleNewGame();
+  const handleShowGame = async (category = null) => {
+    // Get category from URL params OR from navigation state
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCategory = urlParams.get('category');
+    const stateCategory = location.state?.gameConfig?.category;
+
+    // Use category from either source
+    //const category = urlCategory || stateCategory || null;
+
+    console.log("Using category:", category);
+    await handleNewGame(category);
   };
 
   useEffect(() => {
@@ -247,7 +256,7 @@ const Game = () => {
               <AppBar position="static" color="primary">
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Button color="inherit" onClick={handleHome}>Abandonar</Button>
-                  <Button color="inherit" onClick={handleNewGame}>Empezar nueva partida</Button>
+                  <Button color="inherit" onClick={() => handleNewGame()}>Empezar nueva partida</Button>
                   <Button color="inherit" onClick={handleGoToProfile}>Ir al perfil</Button>
                 </Toolbar>
               </AppBar>

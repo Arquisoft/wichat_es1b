@@ -90,17 +90,20 @@ const HomePage = () => {
     }
   }, [username])
 
-  const handleShowGame = () => {
-    const path = "/Game"
+    const handleShowGame = (category = null) => {
+        // Log the selected category before navigation
+        console.log("Starting game with category:", category);
 
-    // Configuración del juego
-    const gameConfig = {
-      numQuestions: numQuestions,
-      timePerQuestion: timePerQuestion,
-    }
-
-    navigate(path, { state: { gameConfig } })
-  }
+        navigate('/game', {
+            state: {
+                gameConfig: {
+                    numQuestions: numQuestions,
+                    timePerQuestion: timePerQuestion,
+                    category: category  // Explicitly pass the category in state
+                }
+            }
+        });
+    };
 
   // Calculate total statistics across all sessions
   const getTotalStats = () => {
@@ -605,7 +608,7 @@ const HomePage = () => {
                       <Button
                         variant="contained"
                         size="large"
-                        onClick={handleShowGame}
+                        onClick={() => handleShowGame('Geografia')} // You can replace null with a specific category if needed
                         startIcon={<PlayArrowIcon />}
                         className="pulse-button"
                         sx={{
@@ -628,8 +631,95 @@ const HomePage = () => {
                           },
                         }}
                       >
-                        Nueva partida
+                        Geografia
                       </Button>
+                        <br />
+                        <Button
+                            variant="contained"
+                            size="large"
+                            onClick={() => handleShowGame('Cultura')} // You can replace null with a specific category if needed
+                            startIcon={<PlayArrowIcon />}
+                            className="pulse-button"
+                            sx={{
+                                py: 1.5,
+                                px: 4,
+                                borderRadius: 8,
+                                fontWeight: "bold",
+                                textTransform: "none",
+                                fontSize: "1.1rem",
+                                bgcolor: "white",
+                                color: theme.palette.warning.dark,
+                                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+                                position: "relative",
+                                zIndex: 1,
+                                "&:hover": {
+                                    bgcolor: "white",
+                                    boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
+                                    transform: "translateY(-3px)",
+                                    transition: "all 0.3s",
+                                },
+                            }}
+                        >
+                            Cultura
+                        </Button>
+                        <br />
+                        <Button
+                            variant="contained"
+                            size="large"
+                            onClick={() => handleShowGame('Personajes')}
+                            startIcon={<PlayArrowIcon />}
+                            className="pulse-button"
+                            sx={{
+                                py: 1.5,
+                                px: 4,
+                                borderRadius: 8,
+                                fontWeight: "bold",
+                                textTransform: "none",
+                                fontSize: "1.1rem",
+                                bgcolor: "white",
+                                color: theme.palette.warning.dark,
+                                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+                                position: "relative",
+                                zIndex: 1,
+                                "&:hover": {
+                                    bgcolor: "white",
+                                    boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
+                                    transform: "translateY(-3px)",
+                                    transition: "all 0.3s",
+                                },
+                            }}
+                        >
+                            Personajes
+                        </Button>
+                        <br />
+                        <Button
+                            variant="contained"
+                            size="large"
+                            onClick={() => handleShowGame(null)}
+                            startIcon={<PlayArrowIcon />}
+                            className="pulse-button"
+                            sx={{
+                                py: 1.5,
+                                px: 4,
+                                borderRadius: 8,
+                                fontWeight: "bold",
+                                textTransform: "none",
+                                fontSize: "1.1rem",
+                                bgcolor: "white",
+                                color: theme.palette.warning.dark,
+                                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+                                position: "relative",
+                                zIndex: 1,
+                                "&:hover": {
+                                    bgcolor: "white",
+                                    boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
+                                    transform: "translateY(-3px)",
+                                    transition: "all 0.3s",
+                                },
+                            }}
+                        >
+                            Aleatorio
+                        </Button>
                       <Box
                         sx={{
                           mt: 4,
