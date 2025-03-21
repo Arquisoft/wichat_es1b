@@ -4,23 +4,24 @@ import ChatBot from "react-chatbotify";
 import settings from "./chatSettings"
 import axios from 'axios';
 
-const apiEndpoint = process.env.REACT_APP_LLM_ENDPOINT || 'http://localhost:8003';
+
+const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8000';
 
 
 export default function Chat(props) {
 
-    const correctAnswer = props.children;
+    const correctAnswer = props.correctAnswer;
+    const question = props.question;
 
-    configure("Eres un asistente para un juego de adivinar imágenes, tu propósito es ayudar al usuario otorgando únicamente pistas" +
-        "sobre la imagen siguiente dada esta descripción: Se trata de" + correctAnswer +
-        "Tienes prohibido usar las palabras de la descripción de la imagen, tampoco puedes deletrearlas, sumado a esto no deberías de decirle al usuario si " +
-        "ha acertado o no.");
+    configure("Eres un chatbot que debe dar pistas al usuario sobre la pregunta " + question + ", y su respuesta correcta es " + correctAnswer + ". Debes contestar siempre en Español perfecto, y dar pistas CORTAS al usuario. " +
+        "Es extremadamente importante que bajo ningún concepto des al usuario la respuesta correcta en tu pista. Jamás debes escribir la respuesta correcta en la pista. Nunca puedes decir '" + correctAnswer + "'. " +
+        "No pongas contexto como 'aquí va la pista', o 'te voy a decir una pista', debes dar la pista directamente.");
 
     const themes = [
         {id: "robotic", version: "0.1.0"}
     ]
 
-    const [message, setMessage] = useState("Bienvenido, soy Doraemon, el gato robot, y estoy aquí para ayudarte a descubrir qué representa la imagen que ves 🥳");
+    const [message, setMessage] = useState("¡Bienvenido! Soy Doraemon, el gato robot, y estoy aquí para ayudarte a descubrir qué representa la imagen que ves 🥳");
 
     const flow = {
         start: {
@@ -43,13 +44,12 @@ export default function Chat(props) {
 
 async function getMessage(message) {
     try {
-        const response = await axios.post(apiEndpoint+'/ask', {
+        const response = await axios.post(apiEndpoint+'/askllm', {
             question: message,
             apiKey: process.env.REACT_APP_LLM_API_KEY
         });
         return response.data.answer;
     } catch (error) {
-        console.error("Error fetching message:", error);
         return "Error fetching message";
     }
 }
@@ -60,7 +60,6 @@ async function configure(message) {
             moderation: message,
         });
     } catch (error) {
-        console.error("Error fetching message:", error);
         return "Error fetching message";
     }
 }

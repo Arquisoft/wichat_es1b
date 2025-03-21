@@ -1,0 +1,32 @@
+{
+  "name": "sessionservice",
+  "version": "1.0.0",
+  "description": "User service, in charge of handling sesion in the application",
+  "main": "service.js",
+  "scripts": {
+    "start": "node sesionService.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arquisoft/wichat_es1b.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arquisoft/wichat_es1b/issues"
+  },
+  "homepage": "https://github.com/arquisoft/wichat_es1b#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.3",
+    "cookie-parser": "^1.4.5",
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.3",
+    "supertest": "^7.0.0"
+  }
+}

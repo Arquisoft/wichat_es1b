@@ -25,7 +25,8 @@ const AddUser = () => {
     try {
       await axios.post(`${apiEndpoint}/adduser`, { username, password });
       await axios.post(`${apiEndpoint}/login`, { username, password });
-      setOpenSnackbar(true);
+        localStorage.setItem('username', username);
+        setOpenSnackbar(true);
 
       setTimeout(() => {
         navigate("/Home");
