@@ -27,6 +27,8 @@ const Game = () => {
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [questionCounter, setQuestionCounter] = useState(0);
 
+  const [loading, setLoading] = useState(true);
+
   // Configuración de las partidas
   const [numberOfQuestions, setNumberOfQuestions] = useState(gameConfig.numQuestions);
   const [questionsToAnswer, setQuestionsToAnswer] = useState(gameConfig.numQuestions);
@@ -36,6 +38,7 @@ const Game = () => {
   const [isTimeUp, setIsTimeUp] = useState(false);
 
   const getQuestion = async () => {
+
     try {
       const response = await axios.get('http://localhost:8004/nextQuestion');
       const { questionObject, questionImage, correctAnswer, answerOptions } = response.data;
@@ -60,12 +63,14 @@ const Game = () => {
       setIsCorrect(null);
 
       setQuestionCounter(qc => qc + 1);
+
     } catch (error) {
       console.error('Error fetching the next question:', error);
     }
   };
 
   const handleNewGame = async () => {
+    setLoading(true);
     try {
       const response = await axios.post('http://localhost:8004/startGame');
       if (response.data && response.data.firstQuestion) {
@@ -86,11 +91,15 @@ const Game = () => {
         setQuestionsToAnswer(nQuestions);
         setIsTimeUp(false);
         setQuestionCounter(0);
+
+        setLoading(false);
       } else {
         console.error('Invalid response from startGame:', response.data);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error starting a new game:', error);
+      setLoading(false);
     }
   };
 
@@ -188,27 +197,27 @@ const Game = () => {
   };
 
   // Manejo del temporizador
+  // Loading effect (for the questions at the start, in this version
   useEffect(() => {
-    if (!isTimeUp && timeLeft > 0) {
+    if(!loading && !isTimeUp && timeLeft > 0) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
-    } else {
-      if(timeLeft === 0 && !isTimeUp) {
-        setIsTimeUp(true);
-        setSelectedAnswer(correctAnswer);
-        setIsCorrect(false);
-        setQuestionsToAnswer(q => q - 1);
-
-        setTimeout(() => {
-          if (questionCounter < numberOfQuestions - 1) {
-            getQuestion();
-          } else {
-            setFinished(true);
-          }
-        }, 2000);
-      }
     }
-  }, [timeLeft, isTimeUp]);
+    else if(!loading && timeLeft === 0 && !isTimeUp) {
+      setIsTimeUp(true);
+      setSelectedAnswer(correctAnswer);
+      setIsCorrect(false);
+      setQuestionsToAnswer(q => q - 1);
+
+      setTimeout(() => {
+        if (questionCounter < numberOfQuestions - 1) {
+          getQuestion();
+        } else {
+          setFinished(true);
+        }
+      }, 2000);
+    }
+  }, [timeLeft, isTimeUp, loading]);
 
 
   return (
@@ -224,11 +233,32 @@ const Game = () => {
                 </Toolbar>
               </AppBar>
 
+              {loading ? (
+                  <div style={{
+                    padding: '3rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: '300px'
+                  }}>
+                    <img
+                        src="https://i.gifer.com/origin/34/34338d26023e5515f6cc8969aa027bca_w200.gif"
+                        alt="Cargando preguntas..."
+                        style={{ width: '150px', marginBottom: '1.5rem' }}
+                    />
+                    <Typography variant="h6" color="primary">
+                      Cargando preguntas...
+                    </Typography>
+                  </div>
+              ) : (
+                  <>
+
               {/* Grid Preguntas Restantes y Puntuación*/}
               <Grid container spacing={2} style={{ marginTop: '10px', marginBottom: '10px' }}>
                 <Grid item xs={6}>
                   <Typography variant="h6" sx={{ color: 'blue' }}>
-                    Preguntas restantes: {questionCounter}
+                    Preguntas restantes: {numberOfQuestions - questionCounter}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -292,6 +322,8 @@ const Game = () => {
                 ))}
               </div>
               <Chat correctAnswer={correctAnswer} question={question} />
+            </>
+          )}
             </Paper>
         )}
 
