@@ -37,6 +37,9 @@ const Game = () => {
   const [timeLeft, setTimeLeft] = useState(gameConfig.timePerQuestion);
   const [isTimeUp, setIsTimeUp] = useState(false);
 
+  // Guardar las preguntas de la sesión
+  const [sessionCuestions, setSessionQuestions] = useState([]);
+
   const getQuestion = async () => {
 
     try {
@@ -64,7 +67,8 @@ const Game = () => {
     }
   };
 
-  const handleNewGame = async (category) => {
+  const handleNewGame = async () => {
+    setLoading(true);
     try {
       setLoading(true);
       setFinished(false);
@@ -75,6 +79,9 @@ const Game = () => {
 
       console.log("Starting game with category:", category);
 
+        setSessionQuestions([]);
+
+        setLoading(false);
       // Send the category to the backend
       const response = await axios.post(`${apiEndpoint}/startGame`, {
         category: category || null // Pass the category or null for all categories
@@ -112,6 +119,16 @@ const Game = () => {
       setIsCorrect(false);
     }
   
+    // Guardar la pregunta en la sesión
+    setSessionQuestions(prev => [
+      ...prev,
+      {
+        question: question,
+        correctAnswer: correctAnswer,
+        userAnswer: option,
+      }
+    ]);
+
     // Espera 2 segundos antes de mostrar una nueva pregunta y comprueba si acabo la partida
     setTimeout(async () => {
       if (questionCounter < numberOfQuestions - 1) {
@@ -137,8 +154,9 @@ const Game = () => {
   useEffect(() => {
     if (isFinished) {
       let falladas = numberOfQuestions - score;  
-      
+
       axios.post(`${apiEndpoint}/save-session`, {
+        questions: sessionCuestions,
         userid: localStorage.getItem('username'),
         score: score,
         wrongAnswers: falladas,

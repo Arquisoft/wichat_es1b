@@ -15,6 +15,12 @@ const userSchema = new mongoose.Schema({
   createdAt: Date,
   sessions: [
     {      
+      questions: [
+        {
+          question: String,
+          correctAnswer: String,
+          userAnswer: String,          
+        }],
       score: Number,
       wrongAnswers: Number,
       createdAt: {
@@ -33,12 +39,17 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/save-session', async (req, res) => {
-  const {userid, score, wrongAnswers } = req.body;
-  
+  const { userid, score, wrongAnswers, questions } = req.body; // Agregar 'questions'
+
   try {
-    const user = await User.findOne({username: userid});
+    const user = await User.findOne({ username: userid });
+
     if (user) {
-      user.sessions.push({score, wrongAnswers });
+      user.sessions.push({ 
+        score, 
+        wrongAnswers, 
+        questions // Guardar las preguntas en la sesión
+      });
       await user.save();
       res.status(200).json({ message: 'Session saved successfully' });
     } else {
@@ -48,6 +59,7 @@ app.post('/save-session', async (req, res) => {
     res.status(500).json({ error: 'Error saving session' });
   }
 });
+
 
 app.get('/get-sessions/:username', async (req, res) => {
     const { username } = req.params;

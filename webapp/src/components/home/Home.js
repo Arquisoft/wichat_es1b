@@ -1,5 +1,7 @@
 "use client"
 
+import React from "react"
+
 import { createContext, useContext, useState, useEffect } from "react"
 import {
   Container,
@@ -14,6 +16,16 @@ import {
   Skeleton,
   Fade,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Collapse,
 } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -26,6 +38,9 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"
 import QuizIcon from "@mui/icons-material/Quiz"
 import StarIcon from "@mui/icons-material/Star"
 import TrendingUpIcon from "@mui/icons-material/TrendingUp"
+import CloseIcon from "@mui/icons-material/Close"
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import ExpandLessIcon from "@mui/icons-material/ExpandLess"
 import "./Home.css"
 
 const ConfigContext = createContext()
@@ -44,6 +59,9 @@ const HomePage = () => {
   const [timePerQuestion, setTimePerQuestion] = useState(30)
   const [sessionData, setSessionData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [selectedSession, setSelectedSession] = useState(null)
+  const [openDialog, setOpenDialog] = useState(false)
+  const [expandedQuestion, setExpandedQuestion] = useState(null)
 
   // Colors for the pie chart - más vibrantes y con mejor contraste
   const COLORS = ["#4CAF50", "#FF5252"]
@@ -163,12 +181,26 @@ const HomePage = () => {
     if (totalQuestions < 30) return { level: "Aprendiz", color: "#8BC34A" }
     if (totalQuestions < 60) return { level: "Intermedio", color: "#03A9F4" }
     if (totalQuestions < 100) return { level: "Avanzado", color: "#FF9800" }
-    if (totalQuestions < 200) return { level: "Generalísimo", color: "#3f6e45" }
     return { level: "Experto", color: "#F44336" }
   }
 
   const playerLevel = getPlayerLevel()
   const successRate = getSuccessRate()
+
+  const handleOpenSessionDetails = (session) => {
+    setSelectedSession(session)
+    setOpenDialog(true)
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
+    setSelectedSession(null)
+    setExpandedQuestion(null)
+  }
+
+  const toggleQuestion = (index) => {
+    setExpandedQuestion(expandedQuestion === index ? null : index)
+  }
 
   return (
     <ConfigContext.Provider value={configValue}>
@@ -792,6 +824,7 @@ const HomePage = () => {
                         <Paper
                           elevation={0}
                           className="session-card"
+                          onClick={() => handleOpenSessionDetails(session)}
                           sx={{
                             p: 0,
                             mb: 1,
@@ -799,6 +832,7 @@ const HomePage = () => {
                             overflow: "hidden",
                             border: "1px solid rgba(0, 0, 0, 0.05)",
                             transition: "all 0.3s",
+                            cursor: "pointer", // Añadir cursor pointer para indicar que es clickeable
                             "&:hover": {
                               boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)",
                               transform: "translateY(-2px)",
@@ -913,6 +947,195 @@ const HomePage = () => {
           </Fade>
         </Container>
       </Box>
+      {/* Dialog para mostrar detalles de la sesión */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      >
+        {selectedSession && (
+          <>
+            <DialogTitle
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                p: 3,
+                background: primaryGradient,
+                color: "white",
+              }}
+            >
+              <Typography variant="h6" component="div" fontWeight="bold">
+                Detalles de la sesión del {formatDate(selectedSession.createdAt).split(" ")[0]}
+              </Typography>
+              <IconButton edge="end" color="inherit" onClick={handleCloseDialog} aria-label="close">
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ p: 0 }}>
+              <Box sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        p: 2,
+                        borderRadius: 2,
+                        bgcolor: alpha("#4CAF50", 0.1),
+                      }}
+                    >
+                      <CheckCircleOutlineIcon color="success" sx={{ mr: 1 }} />
+                      <Typography variant="body1">
+                        <strong>{selectedSession.score}</strong> respuestas correctas
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        p: 2,
+                        borderRadius: 2,
+                        bgcolor: alpha("#FF5252", 0.1),
+                      }}
+                    >
+                      <CancelOutlinedIcon color="error" sx={{ mr: 1 }} />
+                      <Typography variant="body1">
+                        <strong>{selectedSession.wrongAnswers}</strong> respuestas incorrectas
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Typography variant="h6" sx={{ px: 3, pt: 3, pb: 2 }}>
+                Preguntas de esta sesión
+              </Typography>
+
+              {selectedSession.questions && selectedSession.questions.length > 0 ? (
+                <List sx={{ width: "100%", bgcolor: "background.paper", p: 0 }}>
+                  {selectedSession.questions.map((q, index) => (
+                    <React.Fragment key={index}>
+                      <ListItem
+                        alignItems="flex-start"
+                        button
+                        onClick={() => toggleQuestion(index)}
+                        sx={{
+                          px: 3,
+                          py: 2,
+                          bgcolor: expandedQuestion === index ? alpha(theme.palette.primary.main, 0.05) : "transparent",
+                        }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <Typography variant="subtitle1" fontWeight="medium">
+                                Pregunta {index + 1}
+                              </Typography>
+                              {q.userAnswer === q.correctAnswer ? (
+                                <Chip
+                                  icon={<CheckCircleOutlineIcon />}
+                                  label="Correcta"
+                                  size="small"
+                                  color="success"
+                                  variant="outlined"
+                                />
+                              ) : (
+                                <Chip
+                                  icon={<CancelOutlinedIcon />}
+                                  label="Incorrecta"
+                                  size="small"
+                                  color="error"
+                                  variant="outlined"
+                                />
+                              )}
+                            </Box>
+                          }
+                          secondary={
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                              sx={{ display: "flex", alignItems: "center", mt: 1 }}
+                            >
+                              {q.question}
+                              {expandedQuestion === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                      <Collapse in={expandedQuestion === index} timeout="auto" unmountOnExit>
+                        <Box sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.03) }}>
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                              <Box
+                                sx={{
+                                  p: 2,
+                                  borderRadius: 2,
+                                  bgcolor: alpha("#4CAF50", 0.1),
+                                  border: `1px solid ${alpha("#4CAF50", 0.2)}`,
+                                }}
+                              >
+                                <Typography variant="subtitle2" color="success.main" gutterBottom>
+                                  Respuesta correcta:
+                                </Typography>
+                                <Typography variant="body2">{q.correctAnswer}</Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <Box
+                                sx={{
+                                  p: 2,
+                                  borderRadius: 2,
+                                  bgcolor:
+                                    q.userAnswer === q.correctAnswer ? alpha("#4CAF50", 0.1) : alpha("#FF5252", 0.1),
+                                  border: `1px solid ${
+                                    q.userAnswer === q.correctAnswer ? alpha("#4CAF50", 0.2) : alpha("#FF5252", 0.2)
+                                  }`,
+                                }}
+                              >
+                                <Typography
+                                  variant="subtitle2"
+                                  color={q.userAnswer === q.correctAnswer ? "success.main" : "error.main"}
+                                  gutterBottom
+                                >
+                                  Tu respuesta:
+                                </Typography>
+                                <Typography variant="body2">{q.userAnswer}</Typography>
+                              </Box>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      </Collapse>
+                      <Divider component="li" />
+                    </React.Fragment>
+                  ))}
+                </List>
+              ) : (
+                <Box sx={{ p: 3, textAlign: "center" }}>
+                  <Typography color="text.secondary">
+                    No hay información detallada de preguntas para esta sesión.
+                  </Typography>
+                </Box>
+              )}
+            </DialogContent>
+            <DialogActions sx={{ p: 3 }}>
+              <Button onClick={handleCloseDialog} variant="outlined">
+                Cerrar
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </ConfigContext.Provider>
   )
 }
