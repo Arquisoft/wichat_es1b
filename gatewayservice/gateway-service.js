@@ -88,6 +88,17 @@ app.get('/generateQuestion', async (req, res) => {
   }
 });
 
+app.get('/nextQuestion', async (req, res) => {
+  try {
+    const URL = questionsServiceUrl + '/nextQuestion';
+    const response = await axios.get(URL);
+    res.json(response.data);
+  }
+  catch(error) {
+    res.status(error.response.status).json({error: error.response.data.error});
+  }
+});
+
 app.get('/get-sessions/:username', async (req, res) => {
   try {
     const response = await axios.get(sessionServiceUrl + '/get-sessions/' + req.params.username);
@@ -101,6 +112,15 @@ app.get('/get-sessions/:username', async (req, res) => {
 app.post('/configureGame', async (req, res) => {
   try {
     const response = await axios.post(questionsServiceUrl + '/configureGame', req.body);
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
+  }
+});
+
+app.post('/startGame', async (req, res) => {
+  try {
+    const response = await axios.post(questionsServiceUrl + '/startGame', req.body);
     res.json(response.data);
   } catch (error) {
     res.status(error.response.status).json({ error: error.response.data.error });

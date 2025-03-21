@@ -12,7 +12,7 @@ global.fetch = require('node-fetch');
 // Constantes
 const {queries:imagesQueries} = require('./question-queries');
 const app = express();
-const generatorEndpoint = process.env.REACT_APP_API_ORIGIN_ENDPOINT  || "http://localhost:3000";
+const generatorEndpoint = process.env.REACT_APP_API_ORIGIN_ENDPOINT  || "http://localhost:8000";
 const port = 8004;
 const wikiURL = "https://query.wikidata.org/sparql";
 const nOptions = 4;
@@ -80,11 +80,82 @@ var numberOfOptions = 4;
  */
 async function loadQuestions() {
     questions = [];
-    for (let i = 0; i < maxQuestions; i++) {
-        const question = await generateQuestion();
-        questions.push(question);
+    try {
+        // Select a random query to use for all questions in this game
+        const randomQueryIndex = crypto.randomInt(0, queries.length);
+        const query = queries[randomQueryIndex];
+        const url = wikiURL + "?query=" + encodeURIComponent(query) + "&format=json";
+
+        console.log("Fetching all questions data with query type: ", randomQueryIndex);
+
+        const response = await axios(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if(!response.data || !response.data.results || response.data.results.bindings.length === 0) {
+            console.error("WikiData query did not return any result.");
+            throw new Error("No data returned from WikiData");
+        }
+
+        const data = response.data.results.bindings;
+
+        // Generate all questions from this single dataset
+        for (let i = 0; i < maxQuestions; i++) {
+            const question = generateQuestionFromData(data, randomQueryIndex);
+            questions.push(question);
+        }
+
+        console.log(`Successfully loaded ${questions.length} questions`);
+    }
+    catch(error) {
+        console.error("Error while loading questions:", error);
+        throw error;
     }
 }
+
+
+/**
+ * Generates a single question from the provided dataset
+ * @param {Array} data - The WikiData query results
+ * @param {Number} queryIndex - The index of the query type used
+ * @returns {Object} - A question object
+ */
+function generateQuestionFromData(data, queryIndex) {
+    const answerOptions = [];
+    const fourRows = [];
+    const nElems = data.length;
+    const usedIndices = new Set();
+
+    // Select unique items for options
+    while (fourRows.length < nOptions) {
+        let indexRow = crypto.randomInt(0, nElems);
+
+        // Skip if already used or if label is invalid
+        if (usedIndices.has(indexRow) ||
+            !data[indexRow].optionLabel ||
+            data[indexRow].optionLabel.value.startsWith('Q') ||
+            !data[indexRow].imageLabel) {
+            continue;
+        }
+
+        usedIndices.add(indexRow);
+        fourRows.push(data[indexRow]);
+        answerOptions.push(data[indexRow].optionLabel.value);
+    }
+
+    const indexQuestion = crypto.randomInt(0, nOptions);
+
+    return {
+        questionObject: possiblesQuestions[queryIndex] || "¿Qué muestra esta imagen?",
+        questionImage: fourRows[indexQuestion].imageLabel.value,
+        correctAnswer: fourRows[indexQuestion].optionLabel.value,
+        answerOptions: answerOptions
+    };
+}
+
+
 
 
 /**
