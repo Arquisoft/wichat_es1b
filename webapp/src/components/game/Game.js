@@ -49,11 +49,6 @@ const Game = () => {
       setSelectedAnswer(null);
       setIsCorrect(null);
 
-      console.log(questionObject);
-      console.log(answerOptions);
-      console.log(correctAnswer);
-      console.log(questionImage);
-
       // Reiniciar temporizador y estado de tiempo agotado
       setTimeLeft(gameConfig.timePerQuestion);
       setIsTimeUp(false);
@@ -103,12 +98,12 @@ const Game = () => {
     }
   };
 
-  const handleOptionClick = (option) => {
+   const handleOptionClick = (option) => {
     //Primero, parar el temporizador
     stopTimer();
-
+  
     setSelectedAnswer(option); // Guarda la opción seleccionada
-
+  
     let updatedScore = score;
     if (option === correctAnswer) {
       setIsCorrect(true);
@@ -117,39 +112,48 @@ const Game = () => {
     } else {
       setIsCorrect(false);
     }
-
+  
     // Espera 2 segundos antes de mostrar una nueva pregunta y comprueba si acabo la partida
     setTimeout(async () => {
       if (questionCounter < numberOfQuestions - 1) {
         await getQuestion();
       } else {
-        setFinished(true);
+        handleEndGame();
       }
     }, 2000);
   };
-
+  
   // Finalizar partida
-  const handleEndGame = (finalScore = score) => {
-    console.log("Partida finalizada");
-
+  const handleEndGame = () => {
+  
     // Detener el temporizador y marcar la partida como finalizada
     setFinished(true);
     setTimeLeft(0);
-
+  
     // Resetear las respuestas seleccionadas
     setSelectedAnswer(null);
     setIsCorrect(null);
-
-    let acertadas = finalScore;
-    let falladas = numberOfQuestions - finalScore;
-
-    //Hacer una petición para guardar la sesión
-    axios.post(`${apiEndpoint}/save-session`, {
-      userid: localStorage.getItem('username'),
-      score: acertadas,
-      wrongAnswers: falladas,
-    });
   };
+  
+  useEffect(() => {
+    if (isFinished) {
+      let falladas = numberOfQuestions - score;  
+      
+      axios.post(`${apiEndpoint}/save-session`, {
+        userid: localStorage.getItem('username'),
+        score: score,
+        wrongAnswers: falladas,
+      })
+      .then(response => {
+        console.log("Sesión guardada exitosamente:", response.data);
+      })
+      .catch(error => {
+        console.error("Error al guardar la sesión:", error);
+      });
+    }
+  }, [isFinished]);
+
+
 
   const handleHome = () => {
     navigate('/Home');
@@ -173,7 +177,6 @@ const Game = () => {
   }, [questionCounter]);
 
   const handleShowGame = async () => {
-    console.log("Initializing game...");
     await handleNewGame();
   };
 
@@ -213,7 +216,7 @@ const Game = () => {
         if (questionCounter < numberOfQuestions - 1) {
           getQuestion();
         } else {
-          setFinished(true);
+          handleEndGame();
         }
       }, 2000);
     }
