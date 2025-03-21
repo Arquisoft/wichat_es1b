@@ -99,6 +99,16 @@ app.get('/nextQuestion', async (req, res) => {
   }
 });
 
+app.post('/save-session', async (req, res) => {
+  try {
+    console.log("LLego la petición a gateway")
+    const response = await axios.post(sessionServiceUrl + '/save-session', req.body);   
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
+  }
+});
+
 app.get('/get-sessions/:username', async (req, res) => {
   try {
     const response = await axios.get(sessionServiceUrl + '/get-sessions/' + req.params.username);
@@ -127,14 +137,6 @@ app.post('/startGame', async (req, res) => {
   }
 });
 
-app.post('/save-session', async (req, res) => {
-  try {
-    const response = await axios.post(sessionServiceUrl + '/save-session', req.body);   
-    res.json(response.data);
-  } catch (error) {
-    res.status(error.response.status).json({ error: error.response.data.error });
-  }
-});
 
 
 // Read the OpenAPI YAML file synchronously
