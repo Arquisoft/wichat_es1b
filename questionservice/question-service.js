@@ -83,14 +83,22 @@ async function loadQuestions(category = null) {
     try {
         // If a specific category is provided, use its queries
         let queryPool = queries;
-        let questionPrompt = possiblesQuestions;
+        let questionPrompt = "¿Qué muestra esta imagen?"; // Default question
 
         if (category) {
             await getQueriesByCategory(category);
             queryPool = queries;
+
+            // Set the question text based on the current category
+            const categoryIndex = categories.indexOf(category);
+
+            if (categoryIndex !== -1 && categoryIndex < possiblesQuestions.length) {
+                questionPrompt = possiblesQuestions[categoryIndex];
+            }
+
             // Adjust question prompts according to category
-            questionPrompt = possiblesQuestions.filter((_, index) =>
-                categories.indexOf(category) === index || index === 0);
+            //questionPrompt = possiblesQuestions.filter((_, index) =>
+            //    categories.indexOf(category) === index || index === 0);
         }
 
         // Select a random query from the filtered pool

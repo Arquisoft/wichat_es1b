@@ -73,6 +73,8 @@ const Game = () => {
       setSelectedAnswer(null);
       setIsCorrect(null);
 
+      console.log("Starting game with category:", category);
+
       // Send the category to the backend
       const response = await axios.post(`${apiEndpoint}/startGame`, {
         category: category || null // Pass the category or null for all categories
@@ -173,10 +175,16 @@ const Game = () => {
     }
   }, [questionCounter]);
 
-  const handleShowGame = async () => {
-    // Get category from URL or use a default
+  const handleShowGame = async (category = null) => {
+    // Get category from URL params OR from navigation state
     const urlParams = new URLSearchParams(window.location.search);
-    const category = urlParams.get('category') || null;
+    const urlCategory = urlParams.get('category');
+    const stateCategory = location.state?.gameConfig?.category;
+
+    // Use category from either source
+    //const category = urlCategory || stateCategory || null;
+
+    console.log("Using category:", category);
     await handleNewGame(category);
   };
 
