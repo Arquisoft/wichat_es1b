@@ -106,8 +106,8 @@ jobs:
         registry: ghcr.io
         workdir: users/userservice
 
-  docker-push-sesionservice:
-    name: Push sesion service Docker Image to GitHub Packages
+  docker-push-sessionservice:
+    name: Push session service Docker Image to GitHub Packages
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -118,7 +118,7 @@ jobs:
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:
-        name: arquisoft/wichat_es1b/sesionservice
+        name: arquisoft/wichat_es1b/sessionservice
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         registry: ghcr.io
