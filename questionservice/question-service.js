@@ -78,15 +78,27 @@ var numberOfOptions = 4;
  * Loads the specified number of questions at the beginning of the game.
  * @returns {Promise<void>}
  */
-async function loadQuestions() {
+async function loadQuestions(category = null) {
     questions = [];
     try {
-        // Select a random query to use for all questions in this game
-        const randomQueryIndex = crypto.randomInt(0, queries.length);
-        const query = queries[randomQueryIndex];
+        // If a specific category is provided, use its queries
+        let queryPool = queries;
+        let questionPrompt = possiblesQuestions;
+
+        if (category) {
+            await getQueriesByCategory(category);
+            queryPool = queries;
+            // Adjust question prompts according to category
+            questionPrompt = possiblesQuestions.filter((_, index) =>
+                categories.indexOf(category) === index || index === 0);
+        }
+
+        // Select a random query from the filtered pool
+        const randomQueryIndex = crypto.randomInt(0, queryPool.length);
+        const query = queryPool[randomQueryIndex];
         const url = wikiURL + "?query=" + encodeURIComponent(query) + "&format=json";
 
-        console.log("Fetching all questions data with query type: ", randomQueryIndex);
+        console.log("Fetching questions data for category:", category || "All", "with query type:", randomQueryIndex);
 
         const response = await axios(url, {
             headers: {
@@ -104,10 +116,11 @@ async function loadQuestions() {
         // Generate all questions from this single dataset
         for (let i = 0; i < maxQuestions; i++) {
             const question = generateQuestionFromData(data, randomQueryIndex);
+            question.questionObject = questionPrompt[categories.indexOf(category)] || "¿Qué muestra esta imagen?";
             questions.push(question);
         }
 
-        console.log(`Successfully loaded ${questions.length} questions`);
+        console.log(`Successfully loaded ${questions.length} questions for category: ${category || "All"}`);
     }
     catch(error) {
         console.error("Error while loading questions:", error);
@@ -307,11 +320,17 @@ app.post('/configureGame', async (req, res) => {
 
 app.post('/startGame', async (req, res) => {
     try {
-        await loadQuestions();
+        const category = req.body.category; // Get category from request
+        await loadQuestions(category);
         currentQuestionIndex = 0;
-        res.status(200).json({ message: 'Game started', firstQuestion: questions[currentQuestionIndex] });
+        res.status(200).json({
+            message: 'Game started',
+            category: category || 'All',
+            firstQuestion: questions[currentQuestionIndex]
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error starting game' });
+        console.error("Error starting game:", error);
+        res.status(500).json({ error: 'Error starting game: ' + error.message });
     }
 });
 
@@ -328,13 +347,16 @@ app.get('/nextQuestion', (req, res) => {
 
 // Carga de las queries según la categoría
 async function getQueriesByCategory(category) {
-    if(category == "Geografia") {
-        changeQueriesAndQuestions("Geografia");
-    } else if(category == "Cultura") {
-        changeQueriesAndQuestions("Cultura");
-    } else if(category == "Personajes") {
-        changeQueriesAndQuestions("Personajes");
+    if (!category || category === "All") {
+        queries = getAllValues();
+        return;
+    }
+
+    if (categories.includes(category)) {
+        changeQueriesAndQuestions(category);
+        console.log(`Changed queries to category: ${category}, loaded ${queries.length} queries`);
     } else {
+        console.warn(`Unknown category: ${category}, using all queries instead`);
         queries = getAllValues();
     }
 }

@@ -72,17 +72,18 @@ const HomePage = () => {
     }
   }, [username])
 
-  const handleShowGame = () => {
-    const path = "/Game"
+    const handleShowGame = (category = null) => {
+        const path = "/Game"
 
-    // Configuración del juego
-    const gameConfig = {
-      numQuestions: numQuestions,
-      timePerQuestion: timePerQuestion,
+        // Configuración del juego
+        const gameConfig = {
+            numQuestions: numQuestions,
+            timePerQuestion: timePerQuestion,
+            category: category
+        }
+
+        navigate(path, { state: { gameConfig } })
     }
-
-    navigate(path, { state: { gameConfig } })
-  }
 
   // Calculate total statistics across all sessions
   const getTotalStats = () => {
@@ -573,7 +574,7 @@ const HomePage = () => {
                       <Button
                         variant="contained"
                         size="large"
-                        onClick={handleShowGame}
+                        onClick={() => handleShowGame()} // You can replace null with a specific category if needed
                         startIcon={<PlayArrowIcon />}
                         className="pulse-button"
                         sx={{
