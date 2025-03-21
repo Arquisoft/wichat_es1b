@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Chat from "../chatbot/chat";
 
-const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8000';
+const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8004';
 const timeLimit = 30;
 const nQuestions = 5;
 
@@ -40,7 +40,7 @@ const Game = () => {
   const getQuestion = async () => {
 
     try {
-      const response = await axios.get('http://localhost:8004/nextQuestion');
+      const response = await axios.get(apiEndpoint + '/nextQuestion');
       const { questionObject, questionImage, correctAnswer, answerOptions } = response.data;
       setQuestion(questionObject);
       setImage(questionImage);
