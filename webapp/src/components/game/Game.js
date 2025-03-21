@@ -67,7 +67,7 @@ const Game = () => {
     }
   };
 
-  const handleNewGame = async () => {
+  const handleNewGame = async (category = null) => {
     setLoading(true);
     try {
       setLoading(true);
@@ -81,7 +81,6 @@ const Game = () => {
 
         setSessionQuestions([]);
 
-        setLoading(false);
       // Send the category to the backend
       const response = await axios.post(`${apiEndpoint}/startGame`, {
         category: category || null // Pass the category or null for all categories
