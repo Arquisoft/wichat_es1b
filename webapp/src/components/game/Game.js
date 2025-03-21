@@ -37,6 +37,9 @@ const Game = () => {
   const [timeLeft, setTimeLeft] = useState(gameConfig.timePerQuestion);
   const [isTimeUp, setIsTimeUp] = useState(false);
 
+  // Guardar las preguntas de la sesión
+  const [sessionCuestions, setSessionQuestions] = useState([]);
+
   const getQuestion = async () => {
 
     try {
@@ -87,6 +90,8 @@ const Game = () => {
         setIsTimeUp(false);
         setQuestionCounter(0);
 
+        setSessionQuestions([]);
+
         setLoading(false);
       } else {
         console.error('Invalid response from startGame:', response.data);
@@ -113,6 +118,16 @@ const Game = () => {
       setIsCorrect(false);
     }
   
+    // Guardar la pregunta en la sesión
+    setSessionQuestions(prev => [
+      ...prev,
+      {
+        question: question,
+        correctAnswer: correctAnswer,
+        userAnswer: option,
+      }
+    ]);    
+  
     // Espera 2 segundos antes de mostrar una nueva pregunta y comprueba si acabo la partida
     setTimeout(async () => {
       if (questionCounter < numberOfQuestions - 1) {
@@ -138,8 +153,9 @@ const Game = () => {
   useEffect(() => {
     if (isFinished) {
       let falladas = numberOfQuestions - score;  
-      
+
       axios.post(`${apiEndpoint}/save-session`, {
+        questions: sessionCuestions,
         userid: localStorage.getItem('username'),
         score: score,
         wrongAnswers: falladas,
@@ -230,7 +246,7 @@ const Game = () => {
               {/* Barra de menú */}
               <AppBar position="static" color="primary">
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Button color="inherit" onClick={handleEndGame}>Finalizar partida</Button>
+                  <Button color="inherit" onClick={handleHome}>Abandonar</Button>
                   <Button color="inherit" onClick={handleNewGame}>Empezar nueva partida</Button>
                   <Button color="inherit" onClick={handleGoToProfile}>Ir al perfil</Button>
                 </Toolbar>
