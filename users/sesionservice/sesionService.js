@@ -33,7 +33,6 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/save-session', async (req, res) => {
-  console.log("LLego la petición a sesionService")
   const {userid, score, wrongAnswers } = req.body;
   
   try {

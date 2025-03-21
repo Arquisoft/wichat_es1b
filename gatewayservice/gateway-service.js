@@ -101,7 +101,6 @@ app.get('/nextQuestion', async (req, res) => {
 
 app.post('/save-session', async (req, res) => {
   try {
-    console.log("LLego la petición a gateway")
     const response = await axios.post(sessionServiceUrl + '/save-session', req.body);   
     res.json(response.data);
   } catch (error) {
