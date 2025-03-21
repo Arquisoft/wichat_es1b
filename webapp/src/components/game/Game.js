@@ -230,7 +230,7 @@ const Game = () => {
               {/* Barra de menú */}
               <AppBar position="static" color="primary">
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Button color="inherit" onClick={handleEndGame}>Finalizar partida</Button>
+                  <Button color="inherit" onClick={handleHome}>Abandonar</Button>
                   <Button color="inherit" onClick={handleNewGame}>Empezar nueva partida</Button>
                   <Button color="inherit" onClick={handleGoToProfile}>Ir al perfil</Button>
                 </Toolbar>

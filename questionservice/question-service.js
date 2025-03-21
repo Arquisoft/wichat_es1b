@@ -128,6 +128,8 @@ function generateQuestionFromData(data, queryIndex) {
     const nElems = data.length;
     const usedIndices = new Set();
 
+    const usedOptions = new Set(); //Avoid duplicates
+
     // Select unique items for options
     while (fourRows.length < nOptions) {
         let indexRow = crypto.randomInt(0, nElems);
@@ -139,6 +141,15 @@ function generateQuestionFromData(data, queryIndex) {
             !data[indexRow].imageLabel) {
             continue;
         }
+
+        const answerValue = data[indexRow].optionLabel.value;
+
+        //Skip if the option as it is (not the index) has already been added
+        if(usedOptions.has(answerValue)) {
+            continue;
+        }
+
+        usedOptions.add(answerValue);
 
         usedIndices.add(indexRow);
         fourRows.push(data[indexRow]);
@@ -159,7 +170,7 @@ function generateQuestionFromData(data, queryIndex) {
 
 
 /**
- * Generates a single question
+ * Generates a single question <<OLD>>
  * @returns {Promise<Object>}
  */
 async function generateQuestion() {
@@ -194,7 +205,7 @@ function getQuestionData(data) {
 
     for (let i = 0; i < nOptions; i++) {
         let indexRow = crypto.randomInt(0, nElems);
-        if (!data[indexRow].optionLabel || data[indexRow].optionLabel.value.startsWith('Q')) {
+        if (!data[indexRow].optionLabel || data[indexRow].optionLabel.value.startsWith('Q') || answerOptions.includes(data[indexRow].optionLabel.value)) {
             i--;
         } else {
             fourRows.push(data[indexRow]);
