@@ -49,11 +49,6 @@ const Game = () => {
       setSelectedAnswer(null);
       setIsCorrect(null);
 
-      console.log(questionObject);
-      console.log(answerOptions);
-      console.log(correctAnswer);
-      console.log(questionImage);
-
       // Reiniciar temporizador y estado de tiempo agotado
       setTimeLeft(gameConfig.timePerQuestion);
       setIsTimeUp(false);
@@ -113,7 +108,6 @@ const Game = () => {
     if (option === correctAnswer) {
       setIsCorrect(true);
       updatedScore = score + 1;
-      console.log("Score " + updatedScore);
       setScore(updatedScore);
     } else {
       setIsCorrect(false);
@@ -131,7 +125,6 @@ const Game = () => {
   
   // Finalizar partida
   const handleEndGame = () => {
-    console.log("Partida finalizada");
   
     // Detener el temporizador y marcar la partida como finalizada
     setFinished(true);
@@ -144,16 +137,8 @@ const Game = () => {
   
   useEffect(() => {
     if (isFinished) {
-      let falladas = numberOfQuestions - score;
-  
-      //Hacer una petición para guardar la sesión
-      console.log("Intentando guardar la sesión...");
-      console.log("Datos de la sesión:", {
-        userid: localStorage.getItem('username'),
-        score: score,
-        wrongAnswers: falladas,
-      });
-  
+      let falladas = numberOfQuestions - score;  
+      
       axios.post(`${apiEndpoint}/save-session`, {
         userid: localStorage.getItem('username'),
         score: score,
@@ -192,7 +177,6 @@ const Game = () => {
   }, [questionCounter]);
 
   const handleShowGame = async () => {
-    console.log("Initializing game...");
     await handleNewGame();
   };
 
