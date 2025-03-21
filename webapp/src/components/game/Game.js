@@ -72,7 +72,7 @@ const Game = () => {
   const handleNewGame = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8004/startGame');
+      const response = await axios.post(apiEndpoint + '/startGame');
       if (response.data && response.data.firstQuestion) {
         const { firstQuestion } = response.data;
         console.log("First question received:", firstQuestion);
