@@ -94,12 +94,12 @@ const HomePage = () => {
         // Log the selected category before navigation
         console.log("Starting game with category:", category);
 
-        navigate('/game', {
+        navigate('/Game', {
             state: {
                 gameConfig: {
                     numQuestions: numQuestions,
                     timePerQuestion: timePerQuestion,
-                    category: category  // Explicitly pass the category in state
+                    category: category
                 }
             }
         });

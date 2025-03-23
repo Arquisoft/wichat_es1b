@@ -81,7 +81,6 @@ var numberOfOptions = 4;
 async function loadQuestions(category = null) {
     questions = [];
     try {
-        // If a specific category is provided, use its queries
         let queryPool = queries;
         let questionPrompt = "¿Qué muestra esta imagen?"; // Default question
 
@@ -95,15 +94,11 @@ async function loadQuestions(category = null) {
             if (categoryIndex !== -1 && categoryIndex < possiblesQuestions.length) {
                 questionPrompt = possiblesQuestions[categoryIndex];
             }
-
-            // Adjust question prompts according to category
-            //questionPrompt = possiblesQuestions.filter((_, index) =>
-            //    categories.indexOf(category) === index || index === 0);
         }
 
-        // Select a random query from the filtered pool
+        // Select a random query
         const randomQueryIndex = crypto.randomInt(0, queryPool.length);
-        const query = queryPool[randomQueryIndex];
+        const query = queryPool[randomQueryIndex][0];
         const url = wikiURL + "?query=" + encodeURIComponent(query) + "&format=json";
 
         console.log("Fetching questions data for category:", category || "All", "with query type:", randomQueryIndex);
@@ -124,7 +119,7 @@ async function loadQuestions(category = null) {
         // Generate all questions from this single dataset
         for (let i = 0; i < maxQuestions; i++) {
             const question = generateQuestionFromData(data, randomQueryIndex);
-            question.questionObject = questionPrompt[categories.indexOf(category)] || "¿Qué muestra esta imagen?";
+            question.questionObject = questionPrompt || "¿Qué muestra esta imagen?";
             questions.push(question);
         }
 
@@ -329,6 +324,8 @@ app.post('/configureGame', async (req, res) => {
 app.post('/startGame', async (req, res) => {
     try {
         const category = req.body.category; // Get category from request
+        console.log("Category on question-service /startGame:", category);
+
         await loadQuestions(category);
         currentQuestionIndex = 0;
         res.status(200).json({
