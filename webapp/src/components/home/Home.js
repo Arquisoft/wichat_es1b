@@ -264,7 +264,7 @@ const HomePage = () => {
                   zIndex: 1,
                 }}
               >
-                ¡Bienvenido a WiChat, {username}!
+                ¡Hola, {username}! WiChat te espera
               </Typography>
               <Typography
                 variant="h6"
@@ -603,7 +603,7 @@ const HomePage = () => {
                           zIndex: 1,
                         }}
                       >
-                        ¿Listo para jugar?
+                        Jugar ahora
                       </Typography>
                       <Button
                         variant="contained"
@@ -631,9 +631,9 @@ const HomePage = () => {
                           },
                         }}
                       >
-                        Geografia
+                        Geografía
                       </Button>
-                        <br />
+                        <Box sx={{ mt: 2 }}></Box>
                         <Button
                             variant="contained"
                             size="large"
@@ -662,7 +662,7 @@ const HomePage = () => {
                         >
                             Cultura
                         </Button>
-                        <br />
+                        <Box sx={{ mt: 2 }}></Box>
                         <Button
                             variant="contained"
                             size="large"
@@ -691,7 +691,7 @@ const HomePage = () => {
                         >
                             Personajes
                         </Button>
-                        <br />
+                        <Box sx={{ mt: 2 }}></Box>
                         <Button
                             variant="contained"
                             size="large"
