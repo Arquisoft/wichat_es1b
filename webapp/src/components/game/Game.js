@@ -12,7 +12,7 @@ const nQuestions = 5;
 const Game = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { gameConfig } = location.state || { gameConfig: { numQuestions: 5, timePerQuestion: 10 } };
+  const { gameConfig } = location.state || { gameConfig: { numQuestions: 5, timePerQuestion: 10, category: null } };
 
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -67,9 +67,10 @@ const Game = () => {
     }
   };
 
-  const handleNewGame = async (category = null) => {
+  const handleNewGame = async (category) => {
     setLoading(true);
     try {
+
       setLoading(true);
       setFinished(false);
       setScore(0);
@@ -79,7 +80,7 @@ const Game = () => {
 
       console.log("Starting game with category:", category);
 
-        setSessionQuestions([]);
+      setSessionQuestions([]);
 
       // Send the category to the backend
       const response = await axios.post(`${apiEndpoint}/startGame`, {
@@ -206,7 +207,7 @@ const Game = () => {
   };
 
   useEffect(() => {
-    handleShowGame();
+    handleShowGame(location.state?.gameConfig?.category);
   }, []);
 
   const wrongAnswers = numberOfQuestions - score;
