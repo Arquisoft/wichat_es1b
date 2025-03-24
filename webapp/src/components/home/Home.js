@@ -627,7 +627,7 @@ const HomePage = () => {
                           zIndex: 1,
                         }}
                       >
-                        ¿Listo para jugar?
+                        Jugar ahora
                       </Typography>
 
                       {/* Botón principal con menú desplegable */}
@@ -661,7 +661,7 @@ const HomePage = () => {
                           },
                         }}
                       >
-                        Comenzar juego
+                        Comenzar partida
                       </Button>
 
                       {/* Menú desplegable con opciones de juego */}
