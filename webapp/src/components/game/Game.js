@@ -238,6 +238,16 @@ const Game = () => {
       setIsCorrect(false);
       setQuestionsToAnswer(q => q - 1);
 
+      // Guardar la pregunta en la sesión
+      setSessionQuestions(prev => [
+        ...prev,
+        {
+          question: question,
+          correctAnswer: correctAnswer,
+          userAnswer: "Tiempo agotado",
+        }
+      ]);
+
       setTimeout(() => {
         if (questionCounter < numberOfQuestions - 1) {
           getQuestion();
