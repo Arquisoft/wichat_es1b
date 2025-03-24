@@ -1,8 +1,8 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useEffect } from "react"
 import {
   Container,
   Typography,
@@ -26,6 +26,9 @@ import {
   ListItemText,
   Divider,
   Collapse,
+  Menu,
+  MenuItem,
+  ListItemIcon,
 } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -41,6 +44,11 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp"
 import CloseIcon from "@mui/icons-material/Close"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
 import ExpandLessIcon from "@mui/icons-material/ExpandLess"
+import PublicIcon from "@mui/icons-material/Public"
+import TheaterComedyIcon from "@mui/icons-material/TheaterComedy"
+import PersonIcon from "@mui/icons-material/Person"
+import ShuffleIcon from "@mui/icons-material/Shuffle"
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import "./Home.css"
 
 const ConfigContext = createContext()
@@ -62,6 +70,10 @@ const HomePage = () => {
   const [selectedSession, setSelectedSession] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
   const [expandedQuestion, setExpandedQuestion] = useState(null)
+
+  // Estado para el menú desplegable
+  const [anchorEl, setAnchorEl] = useState(null)
+  const openMenu = Boolean(anchorEl)
 
   // Colors for the pie chart - más vibrantes y con mejor contraste
   const COLORS = ["#4CAF50", "#FF5252"]
@@ -90,20 +102,32 @@ const HomePage = () => {
     }
   }, [username])
 
-    const handleShowGame = (category = null) => {
-        // Log the selected category before navigation
-        console.log("Starting game with category:", category);
+  const handleShowGame = (category = null) => {
+    // Log the selected category before navigation
+    console.log("Starting game with category:", category)
 
-        navigate('/Game', {
-            state: {
-                gameConfig: {
-                    numQuestions: numQuestions,
-                    timePerQuestion: timePerQuestion,
-                    category: category
-                }
-            }
-        });
-    };
+    navigate("/Game", {
+      state: {
+        gameConfig: {
+          numQuestions: numQuestions,
+          timePerQuestion: timePerQuestion,
+          category: category,
+        },
+      },
+    })
+
+    // Cerrar el menú después de seleccionar
+    setAnchorEl(null)
+  }
+
+  // Funciones para manejar el menú desplegable
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null)
+  }
 
   // Calculate total statistics across all sessions
   const getTotalStats = () => {
@@ -549,7 +573,7 @@ const HomePage = () => {
                     )}
                   </Grid>
 
-                  {/* New Game Button - con diseño mejorado */}
+                  {/* New Game Button - con diseño mejorado y menú desplegable */}
                   <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center" }}>
                     <Paper
                       elevation={0}
@@ -605,12 +629,18 @@ const HomePage = () => {
                       >
                         Jugar ahora
                       </Typography>
+
+                      {/* Botón principal con menú desplegable */}
                       <Button
                         variant="contained"
                         size="large"
-                        onClick={() => handleShowGame('Geografia')}
+                        onClick={handleOpenMenu}
+                        endIcon={<KeyboardArrowDownIcon />}
                         startIcon={<PlayArrowIcon />}
                         className="pulse-button"
+                        aria-controls={openMenu ? "game-menu" : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={openMenu ? "true" : undefined}
                         sx={{
                           py: 1.5,
                           px: 4,
@@ -631,95 +661,69 @@ const HomePage = () => {
                           },
                         }}
                       >
-                        Geografía
+                        Comenzar partida
                       </Button>
-                        <Box sx={{ mt: 2 }}></Box>
-                        <Button
-                            variant="contained"
-                            size="large"
-                            onClick={() => handleShowGame('Cultura')}
-                            startIcon={<PlayArrowIcon />}
-                            className="pulse-button"
-                            sx={{
-                                py: 1.5,
-                                px: 4,
-                                borderRadius: 8,
-                                fontWeight: "bold",
-                                textTransform: "none",
-                                fontSize: "1.1rem",
-                                bgcolor: "white",
-                                color: theme.palette.warning.dark,
-                                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-                                position: "relative",
-                                zIndex: 1,
-                                "&:hover": {
-                                    bgcolor: "white",
-                                    boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
-                                    transform: "translateY(-3px)",
-                                    transition: "all 0.3s",
-                                },
-                            }}
-                        >
-                            Cultura
-                        </Button>
-                        <Box sx={{ mt: 2 }}></Box>
-                        <Button
-                            variant="contained"
-                            size="large"
-                            onClick={() => handleShowGame('Personajes')}
-                            startIcon={<PlayArrowIcon />}
-                            className="pulse-button"
-                            sx={{
-                                py: 1.5,
-                                px: 4,
-                                borderRadius: 8,
-                                fontWeight: "bold",
-                                textTransform: "none",
-                                fontSize: "1.1rem",
-                                bgcolor: "white",
-                                color: theme.palette.warning.dark,
-                                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-                                position: "relative",
-                                zIndex: 1,
-                                "&:hover": {
-                                    bgcolor: "white",
-                                    boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
-                                    transform: "translateY(-3px)",
-                                    transition: "all 0.3s",
-                                },
-                            }}
-                        >
-                            Personajes
-                        </Button>
-                        <Box sx={{ mt: 2 }}></Box>
-                        <Button
-                            variant="contained"
-                            size="large"
-                            onClick={() => handleShowGame("All")}
-                            startIcon={<PlayArrowIcon />}
-                            className="pulse-button"
-                            sx={{
-                                py: 1.5,
-                                px: 4,
-                                borderRadius: 8,
-                                fontWeight: "bold",
-                                textTransform: "none",
-                                fontSize: "1.1rem",
-                                bgcolor: "white",
-                                color: theme.palette.warning.dark,
-                                boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-                                position: "relative",
-                                zIndex: 1,
-                                "&:hover": {
-                                    bgcolor: "white",
-                                    boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
-                                    transform: "translateY(-3px)",
-                                    transition: "all 0.3s",
-                                },
-                            }}
-                        >
-                            Aleatorio
-                        </Button>
+
+                      {/* Menú desplegable con opciones de juego */}
+                      <Menu
+                        id="game-menu"
+                        anchorEl={anchorEl}
+                        open={openMenu}
+                        onClose={handleCloseMenu}
+                        MenuListProps={{
+                          "aria-labelledby": "game-button",
+                        }}
+                        PaperProps={{
+                          elevation: 3,
+                          sx: {
+                            mt: 1,
+                            borderRadius: 2,
+                            minWidth: 200,
+                            overflow: "visible",
+                            "&:before": {
+                              content: '""',
+                              display: "block",
+                              position: "absolute",
+                              top: 0,
+                              right: 14,
+                              width: 10,
+                              height: 10,
+                              bgcolor: "background.paper",
+                              transform: "translateY(-50%) rotate(45deg)",
+                              zIndex: 0,
+                            },
+                          },
+                        }}
+                        transformOrigin={{ horizontal: "right", vertical: "top" }}
+                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                      >
+                        <MenuItem onClick={() => handleShowGame("Geografia")} sx={{ py: 1.5 }}>
+                          <ListItemIcon>
+                            <PublicIcon fontSize="small" color="primary" />
+                          </ListItemIcon>
+                          <ListItemText>Geografía</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={() => handleShowGame("Cultura")} sx={{ py: 1.5 }}>
+                          <ListItemIcon>
+                            <TheaterComedyIcon fontSize="small" color="primary" />
+                          </ListItemIcon>
+                          <ListItemText>Cultura</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={() => handleShowGame("Personajes")} sx={{ py: 1.5 }}>
+                          <ListItemIcon>
+                            <PersonIcon fontSize="small" color="primary" />
+                          </ListItemIcon>
+                          <ListItemText>Personajes</ListItemText>
+                        </MenuItem>
+                        <Divider />
+                        <MenuItem onClick={() => handleShowGame("All")} sx={{ py: 1.5 }}>
+                          <ListItemIcon>
+                            <ShuffleIcon fontSize="small" color="primary" />
+                          </ListItemIcon>
+                          <ListItemText>Aleatorio</ListItemText>
+                        </MenuItem>
+                      </Menu>
+
                       <Box
                         sx={{
                           mt: 4,
@@ -1141,4 +1145,3 @@ const HomePage = () => {
 }
 
 export default HomePage
-
