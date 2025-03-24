@@ -76,20 +76,79 @@ describe('Home component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Cerrar/i }));
   });
 
-  it('permite iniciar partidas por categoría', async () => {
+  it('permite iniciar partidas por categoría Geografía', async () => {
     mockAxios.onGet(/get-sessions/).reply(200, []);
 
     render(
       <Router>
         <Home />
       </Router>
-    );
+    );      
 
-    const categorias = ['Geografía', 'Cultura', 'Personajes', 'Aleatorio'];
-    for (const cat of categorias) {
-      const btn = await screen.findByRole('button', { name: cat });
-      fireEvent.click(btn);
-    }
-  });
+    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
+    fireEvent.click(mainButton);
+
+    const btn = await screen.findByRole('menuitem', { name: new RegExp('Geografía', 'i') });
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
   
+    // const categorias = [ 'Cultura', 'Geografía', 'Personajes', 'Aleatorio'];
+    // for (const cat of categorias) {
+    //   const btn = await screen.findByRole('menuitem', { name: new RegExp(cat, 'i') });
+    //   expect(btn).toBeInTheDocument();
+    //   fireEvent.click(btn);
+    // }
+  });
+
+  it('permite iniciar partidas por categoría Cultura', async () => {
+    mockAxios.onGet(/get-sessions/).reply(200, []);
+
+    render(
+      <Router>
+        <Home />
+      </Router>
+    );      
+    
+    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
+    fireEvent.click(mainButton);
+
+    const btn = await screen.findByRole('menuitem', { name: new RegExp('Cultura', 'i') });
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+  });
+
+  it('permite iniciar partidas por categoría Personajes', async () => {
+    mockAxios.onGet(/get-sessions/).reply(200, []);
+
+    render(
+      <Router>
+        <Home />
+      </Router>
+    );      
+
+    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
+    fireEvent.click(mainButton);
+
+    const btn = await screen.findByRole('menuitem', { name: new RegExp('Personajes', 'i') });
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+  });
+
+  it('permite iniciar partidas por categoría Aleatorio', async () => {
+    mockAxios.onGet(/get-sessions/).reply(200, []);
+
+    render(
+      <Router>
+        <Home />
+      </Router>
+    );      
+
+    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
+    fireEvent.click(mainButton);
+
+    const btn = await screen.findByRole('menuitem', { name: new RegExp('Aleatorio', 'i') });
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+  });
+
 });
