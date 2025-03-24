@@ -63,6 +63,11 @@
   animation: fadeIn 0.5s ease-out;
 }
 
+/* Animación para el menú desplegable */
+.MuiMenu-paper {
+  animation: fadeIn 0.2s ease-out;
+}
+
 /* Estilos globales para mejorar la apariencia */
 body {
   background-color: #f5f7fa;
