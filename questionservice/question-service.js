@@ -25,10 +25,8 @@ var maxQuestions = 5;
 var correct = "";
 var question = "";
 var image = "";
-var gameId = null;
 var options = [];
 var questionToSave = null;
-var gameQuestions = [];
 var randomQuery;
 var randomIndexes = [];
 var queries = [
@@ -40,7 +38,7 @@ var queries = [
         OPTIONAL { ?option wdt:P18 ?imageLabel. }    
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-      } LIMIT 50`,
+      } LIMIT ` + maxQuestions,
     `SELECT ?option ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P31 wd:Q4989906; 
@@ -48,7 +46,7 @@ var queries = [
                   wdt:P18 ?imageLabel.                  
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT 50`,
+      LIMIT ` + maxQuestions,
     `SELECT ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P106 wd:Q937857;     
@@ -57,34 +55,32 @@ var queries = [
         ?option wdt:P18 ?imageLabel.     
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT 50`
+      LIMIT ` + maxQuestions
 ];
-var currentNumberOfQuestions = 2;
+
 var language = "es";
 var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las queries y las preguntas
 
 
 
-var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Cuál es el nombre de este futbolista?"];
-var categories = ["Geografia", "Cultura", "Personajes"];
+var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Cuál es el nombre de este futbolista?", "¿Qué muestra esta imagen?"];
+var categories = ["Geografia", "Cultura", "Personajes", "All"];
 var questionObject = "";
 var correctAnswer = "";
 var answerOptions = [];
 var questionImage = "";
-var numberOfOptions = 4;
 
 
 /**
  * Loads the specified number of questions at the beginning of the game.
  * @returns {Promise<void>}
  */
-async function loadQuestions(category = null) {
+async function loadQuestions(category = "All") {
     questions = [];
     try {
         let queryPool = queries;
         let questionPrompt = "¿Qué muestra esta imagen?"; // Default question
 
-        if (category) {
             await getQueriesByCategory(category);
             queryPool = queries;
 
@@ -94,7 +90,6 @@ async function loadQuestions(category = null) {
             if (categoryIndex !== -1 && categoryIndex < possiblesQuestions.length) {
                 questionPrompt = possiblesQuestions[categoryIndex];
             }
-        }
 
         // Select a random query
         const randomQueryIndex = crypto.randomInt(0, queryPool.length);
@@ -352,8 +347,9 @@ app.get('/nextQuestion', (req, res) => {
 
 // Carga de las queries según la categoría
 async function getQueriesByCategory(category) {
-    if (!category || category === "All") {
-        queries = getAllValues();
+    if (category === "All" || !category) {
+        rand = crypto.randomInt(0, categories.length);
+        changeQueriesAndQuestions(categories[rand]);
         return;
     }
 

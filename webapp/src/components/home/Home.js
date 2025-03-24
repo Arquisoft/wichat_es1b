@@ -608,7 +608,7 @@ const HomePage = () => {
                       <Button
                         variant="contained"
                         size="large"
-                        onClick={() => handleShowGame('Geografia')} // You can replace null with a specific category if needed
+                        onClick={() => handleShowGame('Geografia')}
                         startIcon={<PlayArrowIcon />}
                         className="pulse-button"
                         sx={{
@@ -637,7 +637,7 @@ const HomePage = () => {
                         <Button
                             variant="contained"
                             size="large"
-                            onClick={() => handleShowGame('Cultura')} // You can replace null with a specific category if needed
+                            onClick={() => handleShowGame('Cultura')}
                             startIcon={<PlayArrowIcon />}
                             className="pulse-button"
                             sx={{
@@ -695,7 +695,7 @@ const HomePage = () => {
                         <Button
                             variant="contained"
                             size="large"
-                            onClick={() => handleShowGame(null)}
+                            onClick={() => handleShowGame("All")}
                             startIcon={<PlayArrowIcon />}
                             className="pulse-button"
                             sx={{
