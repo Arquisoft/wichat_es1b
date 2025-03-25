@@ -6,6 +6,8 @@ info:
 servers:
   - url: http://localhost:7000
     description: Development server
+  - url: http://SOMEIP:7000
+    description: Production server
 tags:
   - name: User Sessions
     description: Endpoints related to user question sessions
