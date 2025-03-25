@@ -75,6 +75,7 @@ services:
       - mynetwork
     environment:
       MONGODB_URI: mongodb://mongodb:27017/userdb
+      MONGODB_URI_QUESTIONS: mongodb://mongodb:27017/questionsDb
 
   gatewayservice:
     container_name: gatewayservice-wichat_es1b

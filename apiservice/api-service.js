@@ -16,35 +16,66 @@ app.get('/questions/:username', async (req, res) => {
         const response = await axios.get(apiEndpoint + '/get-sessions/' + req.params.username);
         const sessions = response.data;
 
-        let totalScore = 0;
-        let totalWrongAnswers = 0;
-        const allQuestions = [];
+        // Transform sessions to remove _id and group questions by session
+        const sessionsFormatted = sessions.map(session => {
+            // Format questions to remove _id
+            const questionsWithoutId = session.questions?.map(question => ({
+                question: question.question,
+                correctAnswer: question.correctAnswer,
+                userAnswer: question.userAnswer
+            })) || [];
 
-        sessions.forEach(session => {
-            // Add to totals
-            totalScore += session.score || 0;
-            totalWrongAnswers += session.wrongAnswers || 0;
-
-            // Add questions with session info
-            if (session.questions && session.questions.length > 0) {
-                const questionsWithSessionInfo = session.questions.map(question => ({
-                    ...question,
-                    sessionDate: session.createdAt
-                }));
-
-                allQuestions.push(...questionsWithSessionInfo);
-            }
+            // Return session info without _id
+            return {
+                sessionDate: session.createdAt,
+                score: session.score || 0,
+                wrongAnswers: session.wrongAnswers || 0,
+                questions: questionsWithoutId
+            };
         });
 
         res.json({
-            totalScore,
-            totalWrongAnswers,
-            questions: allQuestions
+            sessions: sessionsFormatted
         });
     } catch (error) {
         res.status(error.response?.status || 500).json({
             error: error.response?.data?.error || 'An error occurred'
         });
+    }
+});
+
+
+app.get('/statistics/:username', async (req, res) => {
+    try {
+        const response = await axios.get(apiEndpoint + '/get-sessions/' + req.params.username);
+        const sessions = response.data;
+
+        const totalSessions = sessions.length;
+        const totalScore = sessions.reduce((acc, session) => acc + (session.score || 0), 0);
+        const totalWrongAnswers = sessions.reduce((acc, session) => acc + (session.wrongAnswers || 0), 0);
+
+        res.json({
+            totalSessions,
+            correctAnswers: totalScore,
+            wrongAnswers: totalWrongAnswers,
+            averageScore: totalScore / totalSessions,
+            averageWrongAnswers: totalWrongAnswers / totalSessions
+        });
+    } catch (error) {
+        res.status(error.response?.status || 500).json({
+            error: error.response?.data?.error || 'An error occurred'
+        });
+    }
+})
+
+app.get('/generatedQuestions', async (req, res) => {
+    try {
+        const response = await axios.get( apiEndpoint + '/generatedQuestion', {
+            params: req.query
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response.status).json({ error: error.response.data.error });
     }
 });
 
