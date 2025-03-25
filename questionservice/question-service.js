@@ -38,7 +38,7 @@ var queries = [
         OPTIONAL { ?option wdt:P18 ?imageLabel. }    
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-      } LIMIT ` + maxQuestions,
+      } LIMIT 30`,
     `SELECT ?option ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P31 wd:Q4989906; 
@@ -46,7 +46,7 @@ var queries = [
                   wdt:P18 ?imageLabel.                  
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT ` + maxQuestions,
+      LIMIT 30`,
     `SELECT ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P106 wd:Q937857;     
@@ -55,7 +55,7 @@ var queries = [
         ?option wdt:P18 ?imageLabel.     
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT ` + maxQuestions
+      LIMIT 30`
 ];
 var imagesQueries = {};
 imagesQueries["es"] = {
@@ -73,7 +73,7 @@ imagesQueries["es"] = {
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
       }
-      LIMIT ` + maxQuestions, "¿Cuál es el lugar de la imagen?"]
+      LIMIT 30`, "¿Cuál es el lugar de la imagen?"]
         ],
 
     "Cultura":
@@ -88,7 +88,7 @@ imagesQueries["es"] = {
                   wdt:P18 ?imageLabel.                  
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT ` + maxQuestions, "¿Qué monumento es este?"]
+      LIMIT 30`, "¿Qué monumento es este?"]
         ],
 
     "Personajes":
@@ -104,7 +104,7 @@ imagesQueries["es"] = {
         ?option wdt:P18 ?imageLabel.     
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT ` + maxQuestions, "¿Cuál es el nombre de este futbolista?"]
+      LIMIT 30`, "¿Cuál es el nombre de este futbolista?"]
         ]
 }
 
