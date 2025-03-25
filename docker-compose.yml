@@ -100,6 +100,18 @@ services:
       QUESTION_SERVICE_URL: http://questionservice:8004
       SESSION_SERVICE_URL: http://sessionservice:8005
 
+  apiservice:
+    container_name: apiservice-wichat_es1b
+    image: ghcr.io/arquisoft/wichat_es1b/apiservice:latest
+    profiles: [ "dev", "prod" ]
+    build: ./apiservice
+    depends_on:
+      - gatewayservice
+    ports:
+      - "7000:7000"
+    networks:
+      - mynetwork
+
   webapp:
     container_name: webapp-wichat_es1b
     image: ghcr.io/arquisoft/wichat_es1b/webapp:latest
