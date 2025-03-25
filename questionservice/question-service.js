@@ -10,7 +10,7 @@ global.fetch = require('node-fetch');
 
 
 // Constantes
-const {queries:imagesQueries} = require('./question-queries');
+//const {queries:imagesQueries} = require('./question-queries');
 const app = express();
 const generatorEndpoint = process.env.REACT_APP_API_ORIGIN_ENDPOINT  || "http://localhost:8000";
 const port = 8004;
@@ -38,7 +38,7 @@ var queries = [
         OPTIONAL { ?option wdt:P18 ?imageLabel. }    
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-      } LIMIT ` + maxQuestions,
+      } LIMIT 30`,
     `SELECT ?option ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P31 wd:Q4989906; 
@@ -46,7 +46,7 @@ var queries = [
                   wdt:P18 ?imageLabel.                  
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT ` + maxQuestions,
+      LIMIT 30`,
     `SELECT ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P106 wd:Q937857;     
@@ -55,8 +55,59 @@ var queries = [
         ?option wdt:P18 ?imageLabel.     
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT ` + maxQuestions
+      LIMIT 30`
 ];
+var imagesQueries = {};
+imagesQueries["es"] = {
+    "Geografia":
+        [
+            /* pregunta = imagen de un país, opción = nombre del país */
+            [
+                `
+      SELECT DISTINCT ?option ?optionLabel ?imageLabel
+      WHERE {
+        ?option wdt:P31 wd:Q6256;               
+              rdfs:label ?optionLabel;          
+        
+        OPTIONAL { ?option wdt:P18 ?imageLabel. }    
+        FILTER(lang(?optionLabel) = "es")       
+        FILTER EXISTS { ?option wdt:P18 ?imageLabel }
+      }
+      LIMIT 30`, "¿Cuál es el lugar de la imagen?"]
+        ],
+
+    "Cultura":
+        [
+            /* pregunta = imagen monumento, opción = nombre del monumento */
+            [
+                `
+      SELECT ?option ?optionLabel ?imageLabel
+      WHERE {
+        ?option wdt:P31 wd:Q4989906; 
+                  wdt:P17 wd:Q29;                
+                  wdt:P18 ?imageLabel.                  
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
+      }
+      LIMIT 30`, "¿Qué monumento es este?"]
+        ],
+
+    "Personajes":
+        [
+            /* pregunta = imagen futbolista, opción = nombre futbolista */
+            [
+                `
+      SELECT ?optionLabel ?imageLabel
+      WHERE {
+        ?option wdt:P106 wd:Q937857;     
+                wdt:P569 ?birthdate.     
+        FILTER(YEAR(?birthdate) >= 1970)  
+        ?option wdt:P18 ?imageLabel.     
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
+      }
+      LIMIT 30`, "¿Cuál es el nombre de este futbolista?"]
+        ]
+}
+
 
 var language = "es";
 var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las queries y las preguntas
@@ -346,19 +397,20 @@ app.get('/nextQuestion', (req, res) => {
 
 
 // Carga de las queries según la categoría
-async function getQueriesByCategory(category) {
+async function getQueriesByCategory(category = "All") {
     if (category === "All" || !category) {
-        rand = crypto.randomInt(0, categories.length);
+        let rand = crypto.randomInt(0, categories.length);
         changeQueriesAndQuestions(categories[rand]);
-        return;
     }
-
-    if (categories.includes(category)) {
-        changeQueriesAndQuestions(category);
-        console.log(`Changed queries to category: ${category}, loaded ${queries.length} queries`);
-    } else {
-        console.warn(`Unknown category: ${category}, using all queries instead`);
-        queries = getAllValues();
+    else {
+        if (categories.includes(category)) {
+            changeQueriesAndQuestions(category);
+            console.log(`Changed queries to category: ${category}, loaded ${queries.length} queries`);
+        } else {
+            console.warn(`Unknown category: ${category}, using all queries instead`);
+            let rand = crypto.randomInt(0, categories.length);
+            changeQueriesAndQuestions(categories[rand]);
+        }
     }
 }
 
@@ -368,11 +420,8 @@ function changeQueriesAndQuestions(category) {
 
 function getAllValues() {
     var data = [];
-    for (var category in queriesAndQuestions) {
-        var categoryQueries = queriesAndQuestions[category];
-        if (categoryQueries[language]) {
-            data = data.concat(categoryQueries[language]);
-        }
+    for (var category in queriesAndQuestions[language]) {
+        data = data.concat(queriesAndQuestions[language][category]);
     }
     return data;
 }
@@ -397,67 +446,6 @@ function getQueriesAndQuestions(images) {
 }
 
 
-
-function processData(data) {
-
-    options = []; //Reset options
-    data = data.results.bindings;
-    randomIndexes = [];
-    var optionsSelected = [];
-
-    //Obtener cuatro índices aleatorios sin repeticiones
-    while (randomIndexes.length < nOptions) {
-        var i = crypto.randomInt(0, data.length);
-        var opt = data[i].optionLabel.value;
-        var quest = "";
-
-        // Se comprueba que la opción no esté repetida, y que no sea una entidad de Wikidata ni un enlace
-        if (!randomIndexes.includes(i) && (quest === "" || (!(opt.startsWith("Q") || opt.startsWith("http"))
-            && !(quest.startsWith("Q") || quest.startsWith("http")))) && !optionsSelected.includes(opt)) {
-            randomIndexes.push(i);
-            optionsSelected.push(opt);
-        }
-    }
-
-    // Seleccionar un índice aleatorio para la opción correcta
-    var correctIndex = crypto.randomInt(0, nOptions);
-    correct = data[randomIndexes[correctIndex]].optionLabel.value;
-
-    question = queries[0][1];
-    image = data[randomIndexes[correctIndex]].imageLabel.value;
-
-    // Mezclar opciones
-    for(var i = 0; i < nOptions; i++) {
-        var optionIndex = randomIndexes[i];
-        var option = data[optionIndex].optionLabel.value;
-        options.push(option);
-    }
-}
-
-
-
-async function saveData() {
-    try {
-        var falseOptions = options.filter(o => o !== correct);
-
-        const newQuestion = new Question({
-            question: question,
-            correctAnswer: correct,
-            inc_answer_1: falseOptions[0],
-            inc_answer_2: falseOptions[1],
-            inc_answer_3: falseOptions[2],
-        });
-
-        await newQuestion.save();
-
-        questionToSave = newQuestion;
-
-        return newQuestion._id;
-    }
-    catch(error) {
-        console.error("Error while saving a new question: " + error);
-    }
-}
 
 
 const server = app.listen(port, () => {

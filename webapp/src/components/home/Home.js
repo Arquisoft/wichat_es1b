@@ -102,7 +102,7 @@ const HomePage = () => {
     }
   }, [username])
 
-  const handleShowGame = (category = null) => {
+  const handleShowGame = (category = "All") => {
     // Log the selected category before navigation
     console.log("Starting game with category:", category)
 
