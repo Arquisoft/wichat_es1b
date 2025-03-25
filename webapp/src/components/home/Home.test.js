@@ -7,6 +7,14 @@ import Home from './Home';
 
 const mockAxios = new MockAdapter(axios);
 
+const renderComponent = () => {
+  return render(
+    <Router>
+      <Home />
+    </Router>
+  );
+};
+
 describe('Home component', () => {
   const mockSession = {
     _id: 'session1',
@@ -35,26 +43,17 @@ describe('Home component', () => {
   it('renderiza correctamente sin sesiones', async () => {
     mockAxios.onGet(/get-sessions/).reply(200, []);
 
-    render(
-      <Router>
-        <Home />
-      </Router>
-    );
+    renderComponent();
 
     expect(await screen.findByText(/WiChat te espera/i)).toBeInTheDocument();
 
-    // Esperar al mensaje de no sesiones
     expect(await screen.findByText(/No hay datos de sesiones disponibles/i)).toBeInTheDocument();
   });
 
   it('renderiza con sesiones y permite ver detalles de una sesión', async () => {
     mockAxios.onGet(/get-sessions/).reply(200, [mockSession]);
 
-    render(
-      <Router>
-        <Home />
-      </Router>
-    );
+    renderComponent();
 
     // Espera a que se cargue la sesión
     expect(await screen.findByText(/Sesión del/i)).toBeInTheDocument();
@@ -76,79 +75,43 @@ describe('Home component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Cerrar/i }));
   });
 
-  it('permite iniciar partidas por categoría Geografía', async () => {
-    mockAxios.onGet(/get-sessions/).reply(200, []);
+  it('permite iniciar partidas por cada categoría', async () => {
+    const categorias = ['Geografía', 'Cultura', 'Personajes', 'Aleatorio'];
 
-    render(
-      <Router>
-        <Home />
-      </Router>
-    );      
+    for (const categoria of categorias) {
+      mockAxios.resetHandlers(); // limpiar mocks anteriores
+      mockAxios.onGet(/get-sessions/).reply(200, []);
 
-    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
-    fireEvent.click(mainButton);
+      renderComponent(); // nuevo render para cada categoría
 
-    const btn = await screen.findByRole('menuitem', { name: new RegExp('Geografía', 'i') });
-    expect(btn).toBeInTheDocument();
-    fireEvent.click(btn);
-  
-    // const categorias = [ 'Cultura', 'Geografía', 'Personajes', 'Aleatorio'];
-    // for (const cat of categorias) {
-    //   const btn = await screen.findByRole('menuitem', { name: new RegExp(cat, 'i') });
-    //   expect(btn).toBeInTheDocument();
-    //   fireEvent.click(btn);
-    // }
+      const mainButton = await screen.findAllByRole('button', { name: /comenzar partida/i });
+      expect(mainButton.length).toBeGreaterThan(0);
+      fireEvent.click(mainButton[0]); // usar el primero
+
+      const menuItem = await screen.findByRole('menuitem', { name: new RegExp(categoria, 'i') });
+      expect(menuItem).toBeInTheDocument();
+      fireEvent.click(menuItem);
+    }
   });
 
-  it('permite iniciar partidas por categoría Cultura', async () => {
-    mockAxios.onGet(/get-sessions/).reply(200, []);
+  it('muestra correctamente el nivel de jugador para diferentes cantidades de preguntas', async () => {
+    const niveles = [
+      { level: 'Principiante', data: [{ score: 2, wrongAnswers: 3 }] }, // totalQuestions: 5
+      { level: 'Aprendiz', data: [{ score: 15, wrongAnswers: 10 }] },   // totalQuestions: 25
+      { level: 'Intermedio', data: [{ score: 35, wrongAnswers: 20 }] }, // totalQuestions: 55
+      { level: 'Avanzado', data: [{ score: 50, wrongAnswers: 45 }] },   // totalQuestions: 95
+      { level: 'Experto', data: [{ score: 100, wrongAnswers: 10 }] },   // totalQuestions: 110
+    ];
 
-    render(
-      <Router>
-        <Home />
-      </Router>
-    );      
-    
-    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
-    fireEvent.click(mainButton);
+    for (const { level, data } of niveles) {
+      mockAxios.resetHandlers();
+      mockAxios.onGet(/get-sessions/).reply(200, data);
 
-    const btn = await screen.findByRole('menuitem', { name: new RegExp('Cultura', 'i') });
-    expect(btn).toBeInTheDocument();
-    fireEvent.click(btn);
-  });
+      renderComponent();
 
-  it('permite iniciar partidas por categoría Personajes', async () => {
-    mockAxios.onGet(/get-sessions/).reply(200, []);
-
-    render(
-      <Router>
-        <Home />
-      </Router>
-    );      
-
-    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
-    fireEvent.click(mainButton);
-
-    const btn = await screen.findByRole('menuitem', { name: new RegExp('Personajes', 'i') });
-    expect(btn).toBeInTheDocument();
-    fireEvent.click(btn);
-  });
-
-  it('permite iniciar partidas por categoría Aleatorio', async () => {
-    mockAxios.onGet(/get-sessions/).reply(200, []);
-
-    render(
-      <Router>
-        <Home />
-      </Router>
-    );      
-
-    const mainButton = await screen.findByRole('button', { name: /comenzar partida/i });
-    fireEvent.click(mainButton);
-
-    const btn = await screen.findByRole('menuitem', { name: new RegExp('Aleatorio', 'i') });
-    expect(btn).toBeInTheDocument();
-    fireEvent.click(btn);
+      const chip = await screen.findByText(new RegExp(`Nivel: ${level}`, 'i'));
+      expect(chip).toBeInTheDocument();
+    }
   });
 
 });
