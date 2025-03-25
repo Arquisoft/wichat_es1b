@@ -15,6 +15,14 @@ global.crypto = {
     }
 };
 
+// Mock de ResizeObserver para evitar errores en Jest
+global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+  
+
 // Mock de AudioContext para evitar errores en Jest
 global.AudioContext = class MockAudioContext {
     constructor() {
