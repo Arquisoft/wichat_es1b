@@ -2,6 +2,8 @@ const request = require('supertest');
 const axios = require('axios');
 const app = require('./gateway-service');
 
+let newString = 'S345_Bs';
+
 jest.mock('axios');
 
 afterAll(() => {
@@ -10,7 +12,7 @@ afterAll(() => {
 
 describe('Gateway Service', () => {
   const postEndpoints = [
-    ['/login', { username: 'user', password: '123' }, { token: 'mockedToken' }],
+    ['/login', { username: 'user', password: newString }, { token: 'mockedToken' }],
     ['/adduser', { name: 'Alice' }, { userId: 'mockedUserId' }],
     ['/askllm', { prompt: 'Hola' }, { answer: 'mockedAnswer' }],
     ['/configureAssistant', { config: true }, { success: true }],
