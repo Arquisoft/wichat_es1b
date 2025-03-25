@@ -131,8 +131,14 @@ app.post('/startGame', async (req, res) => {
   try {
     const response = await axios.post(questionsServiceUrl + '/startGame', req.body);
     res.json(response.data);
-  } catch (error) {
-    res.status(error.response.status).json({ error: error.response.data.error });
+  }
+  catch(error) {
+    // Check if error.response is defined before accessing its properties
+    if (error.response) {
+      res.status(error.response.status).json({ error: error.response.data.error });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred' });
+    }
   }
 });
 

@@ -38,7 +38,7 @@ const Game = () => {
   const [isTimeUp, setIsTimeUp] = useState(false);
 
   // Guardar las preguntas de la sesión
-  const [sessionCuestions, setSessionQuestions] = useState([]);
+  const [sessionQuestions, setSessionQuestions] = useState([]);
 
   const getQuestion = async () => {
 
@@ -81,6 +81,7 @@ const Game = () => {
       console.log("Starting game with category:", category);
 
       setSessionQuestions([]);
+
 
       // Send the category to the backend
       const response = await axios.post(`${apiEndpoint}/startGame`, {
@@ -156,7 +157,7 @@ const Game = () => {
       let falladas = numberOfQuestions - score;  
 
       axios.post(`${apiEndpoint}/save-session`, {
-        questions: sessionCuestions,
+        questions: sessionQuestions,
         userid: localStorage.getItem('username'),
         score: score,
         wrongAnswers: falladas,
@@ -193,7 +194,7 @@ const Game = () => {
     }
   }, [questionCounter]);
 
-  const handleShowGame = async (category = null) => {
+  const handleShowGame = async (category = "All") => {
     // Get category from URL params OR from navigation state
     const urlParams = new URLSearchParams(window.location.search);
     const urlCategory = urlParams.get('category');
