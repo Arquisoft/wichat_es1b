@@ -8,6 +8,9 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 global.fetch = require('node-fetch');
 
+const mongoUri = process.env.MONGODB_URI_QUESTIONS || 'mongodb://localhost:27017/questionsDb';
+mongoose.connect(mongoUri);
+
 
 // Constantes
 //const {queries:imagesQueries} = require('./question-queries');
@@ -373,11 +376,14 @@ app.post('/startGame', async (req, res) => {
         console.log("Category on question-service /startGame:", category);
 
         await loadQuestions(category);
-        currentQuestionIndex = 0;
+
+        let quest = questions[0]
+        saveQuestions(questions)
+
         res.status(200).json({
             message: 'Game started',
             category: category || 'All',
-            firstQuestion: questions[currentQuestionIndex]
+            firstQuestion: quest
         });
     } catch (error) {
         console.error("Error starting game:", error);
@@ -389,7 +395,8 @@ app.post('/startGame', async (req, res) => {
 app.get('/nextQuestion', (req, res) => {
     if (currentQuestionIndex < questions.length - 1) {
         currentQuestionIndex++;
-        res.status(200).json(questions[currentQuestionIndex]);
+        let quest = questions[currentQuestionIndex];
+        res.status(200).json(quest);
     } else {
         res.status(400).json({ error: 'No more questions' });
     }
@@ -445,11 +452,92 @@ function getQueriesAndQuestions(images) {
     return data;
 }
 
+async function saveQuestions(questions) {
+    for (let question of questions) {
+        await saveQuestion(question);
+    }
+}
 
+async function saveQuestion(question) {
+    try {
+        // Properly await the query
+        const existingQuestion = await Question.findOne({ image: question.questionImage });
+
+        if (existingQuestion) {
+            console.log("Question with same image already exists:", question.questionImage);
+            return null;
+        }
+
+        // Get incorrect answers (excluding the correct one)
+        const incorrectAnswers = question.answerOptions.filter(
+            option => option !== question.correctAnswer
+        );
+
+        // Ensure we have exactly 3 incorrect answers
+        while (incorrectAnswers.length < 3) {
+            incorrectAnswers.push("No disponible");
+        }
+
+        // Determine category if not provided
+        const category = question.category || getCategoryFromQuestion(question.questionObject);
+
+        // Create new Question document
+        const newQuestion = new Question({
+            question: question.questionObject,
+            correctAnswer: question.correctAnswer,
+            inc_answer_1: incorrectAnswers[0],
+            inc_answer_2: incorrectAnswers[1],
+            inc_answer_3: incorrectAnswers[2],
+            category: category,
+            image: question.questionImage
+        });
+
+        // Save and await the result
+        await newQuestion.save();
+        console.log("Question saved successfully:", question.questionObject);
+    } catch (error) {
+        console.error("Error saving question to database:", error);
+        return null;
+    }
+}
+
+app.get('/generatedQuestion', async (req, res) => {
+    try {
+        const category = req.query.category; // Get category from query parameter
+
+        // Create a filter object - empty if no category specified
+        const filter = category ? { category } : {};
+
+        // Query the database with the filter
+        const questions = await Question.find(filter);
+
+        if (questions.length === 0) {
+            return res.status(200).json({ message: 'No questions found for the specified criteria' });
+        }
+
+        res.status(200).json(questions);
+    } catch (error) {
+        console.error('Error retrieving questions:', error);
+        res.status(500).json({ error: 'Error retrieving questions from database' });
+    }
+});
+
+// Helper function to determine category from question text
+function getCategoryFromQuestion(questionText) {
+    if (questionText.includes("lugar")) return "Geografia";
+    if (questionText.includes("monumento")) return "Cultura";
+    if (questionText.includes("futbolista") || questionText.includes("personaje")) return "Personajes";
+    return "General";
+}
 
 
 const server = app.listen(port, () => {
     console.log(`Question generator service listening at http://localhost:${port}`);
+});
+
+server.on('close', () => {
+    // Close the Mongoose connection
+    mongoose.connection.close();
 });
 
 module.exports = server;

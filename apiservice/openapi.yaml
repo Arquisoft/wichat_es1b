@@ -1,0 +1,186 @@
+openapi: 3.0.0
+info:
+  title: WiChat API
+  description: API for managing questions, user sessions, and statistics
+  version: 1.0.0
+servers:
+  - url: http://localhost:7000
+    description: Development server
+  - url: http://SOMEIP:7000
+    description: Production server
+tags:
+  - name: User Sessions
+    description: Endpoints related to user question sessions
+  - name: Statistics
+    description: Endpoints related to user performance statistics
+  - name: Questions
+    description: Endpoints related to game questions
+paths:
+  /questions/{username}:
+    get:
+      tags:
+        - User Sessions
+      summary: Get user questions and sessions
+      description: Retrieves all sessions with questions for a specific user
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Username of the player
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /statistics/{username}:
+    get:
+      tags:
+        - Statistics
+      summary: Get user statistics
+      description: Retrieves aggregated statistics for a specific user
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Username of the player
+      responses:
+        '200':
+          description: |
+            Returns user performance statistics across all game sessions, including:
+            - totalSessions: Count of all played sessions
+            - correctAnswers: Sum of all correct answers across all sessions
+            - wrongAnswers: Sum of all incorrect answers across all sessions
+            - averageScore: Mean score per session (correct answers / session count)
+            - averageWrongAnswers: Mean wrong answers per session (wrong answers / session count)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /generatedQuestions:
+    get:
+      tags:
+        - Questions
+      summary: Get generated questions
+      description: Retrieves questions, optionally filtered by category
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ Geografia, Cultura, Personajes, General ]
+          description: Category to filter questions, by omitting the parameter all questions are returned
+      responses:
+        '200':
+          description: Questions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Question:
+      type: object
+      properties:
+        question:
+          type: string
+          description: The question text
+        correctAnswer:
+          type: string
+          description: The correct answer
+        inc_answer_1:
+          type: string
+          description: First incorrect answer option
+        inc_answer_2:
+          type: string
+          description: Second incorrect answer option
+        inc_answer_3:
+          type: string
+          description: Third incorrect answer option
+        category:
+          type: string
+          description: Question category
+        image:
+          type: string
+          description: URL to the question image
+    Session:
+      type: object
+      properties:
+        sessionDate:
+          type: string
+          format: date-time
+          description: Date when the session was created
+        score:
+          type: integer
+          description: Number of correct answers
+        wrongAnswers:
+          type: integer
+          description: Number of wrong answers
+        questions:
+          type: array
+          items:
+            type: object
+            properties:
+              question:
+                type: string
+              correctAnswer:
+                type: string
+              userAnswer:
+                type: string
+    Statistics:
+      type: object
+      properties:
+        totalSessions:
+          type: integer
+          description: Total number of sessions
+        correctAnswers:
+          type: integer
+          description: Total correct answers across all sessions
+        wrongAnswers:
+          type: integer
+          description: Total wrong answers across all sessions
+        averageScore:
+          type: number
+          format: float
+          description: Average score per session
+        averageWrongAnswers:
+          type: number
+          format: float
+          description: Average wrong answers per session
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
