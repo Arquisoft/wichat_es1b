@@ -27,19 +27,18 @@ const questionSchema = new mongoose.Schema( {
         required: true,
     },
 
-    time: {
-        type: Number,
-        required: true,
-        default: 60,  //TODO: cambiar por el valor que se acuerde.
-    },
-
     category: {
         type: String,
         required: true,
     },
 
+    image: {
+        type: String,
+        required: false,
+    }
+
 });
 
-const Question = mongoose.model('Question', questionSchema);
+const Question = mongoose.model('Questions', questionSchema);
 
 module.exports = Question

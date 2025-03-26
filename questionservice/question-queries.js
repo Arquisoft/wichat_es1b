@@ -48,7 +48,7 @@ queries["es"] = {
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
       LIMIT 100
-      `, "¿Cuál es el nombre de este futbolista?"]
+      `, "¿Quién es esta persona famosa?"]
             ]
 }
 

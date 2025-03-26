@@ -75,6 +75,7 @@ services:
       - mynetwork
     environment:
       MONGODB_URI: mongodb://mongodb:27017/userdb
+      MONGODB_URI_QUESTIONS: mongodb://mongodb:27017/questionsDb
 
   gatewayservice:
     container_name: gatewayservice-wichat_es1b
@@ -98,6 +99,18 @@ services:
       LLM_SERVICE_URL: http://llmservice:8003
       QUESTION_SERVICE_URL: http://questionservice:8004
       SESSION_SERVICE_URL: http://sessionservice:8005
+
+  apiservice:
+    container_name: apiservice-wichat_es1b
+    image: ghcr.io/arquisoft/wichat_es1b/apiservice:latest
+    profiles: [ "dev", "prod" ]
+    build: ./apiservice
+    depends_on:
+      - gatewayservice
+    ports:
+      - "7000:7000"
+    networks:
+      - mynetwork
 
   webapp:
     container_name: webapp-wichat_es1b

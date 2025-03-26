@@ -143,6 +143,18 @@ app.post('/startGame', async (req, res) => {
 });
 
 
+app.get('/generatedQuestion', async (req, res) => {
+    try {
+        const response = await axios.get(questionsServiceUrl + '/generatedQuestion', {
+          params: req.query
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response.status).json({ error: error.response.data.error });
+    }
+})
+
+
 
 // Read the OpenAPI YAML file synchronously
 openapiPath='./openapi.yaml'

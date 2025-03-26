@@ -48,6 +48,7 @@ import PublicIcon from "@mui/icons-material/Public"
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy"
 import PersonIcon from "@mui/icons-material/Person"
 import ShuffleIcon from "@mui/icons-material/Shuffle"
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import "./Home.css"
 
@@ -715,6 +716,12 @@ const HomePage = () => {
                           </ListItemIcon>
                           <ListItemText>Personajes</ListItemText>
                         </MenuItem>
+                          <MenuItem onClick={() => handleShowGame("Videojuegos")} sx={{ py: 1.5 }}>
+                              <ListItemIcon>
+                                  <SportsEsportsIcon fontSize="small" color="primary" />
+                              </ListItemIcon>
+                              <ListItemText>Videojuegos</ListItemText>
+                          </MenuItem>
                         <Divider />
                         <MenuItem onClick={() => handleShowGame("All")} sx={{ py: 1.5 }}>
                           <ListItemIcon>
