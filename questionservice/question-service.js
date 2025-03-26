@@ -26,34 +26,8 @@ let currentQuestionIndex = 0;
 var maxQuestions = 5;
 
 var randomQuery;
-var queries = [
-    `SELECT DISTINCT ?option ?optionLabel ?imageLabel
-      WHERE {
-        ?option wdt:P31 wd:Q6256;               
-              rdfs:label ?optionLabel;          
-        
-        OPTIONAL { ?option wdt:P18 ?imageLabel. }    
-        FILTER(lang(?optionLabel) = "es")       
-        FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-      } LIMIT 30`,
-    `SELECT ?option ?optionLabel ?imageLabel
-      WHERE {
-        ?option wdt:P31 wd:Q4989906; 
-                  wdt:P17 wd:Q29;                
-                  wdt:P18 ?imageLabel.                  
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
-      }
-      LIMIT 30`,
-    `SELECT ?optionLabel ?imageLabel
-      WHERE {
-        ?option wdt:P106 wd:Q937857;     
-                wdt:P569 ?birthdate.     
-        FILTER(YEAR(?birthdate) >= 1970)  
-        ?option wdt:P18 ?imageLabel.     
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
-      }
-      LIMIT 30`
-];
+var queries = [];
+var shownQuestions = [];
 var imagesQueries = {};
 imagesQueries["es"] = {
     "Geografia":
@@ -102,6 +76,21 @@ imagesQueries["es"] = {
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
       LIMIT 30`, "¿Cuál es el nombre de este futbolista?"]
+        ],
+
+
+    "Videojuegos":
+        [
+            /* pregunta = imagen de un videojuego, opción = nombre del videojuego */
+            [
+                `
+      SELECT ?option ?optionLabel ?imageLabel
+      WHERE {
+        ?option wdt:P31 wd:Q7889;  # Instancia de videojuego
+                wdt:P18 ?imageLabel.  # Imagen del videojuego
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
+      }
+      LIMIT 30`, "¿A qué videojuego pertenece esta imagen?"]
         ]
 }
 
@@ -111,8 +100,8 @@ var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las
 
 
 
-var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Cuál es el nombre de este futbolista?", "¿Qué muestra esta imagen?"];
-var categories = ["Geografia", "Cultura", "Personajes", "All"];
+var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Cuál es el nombre de este futbolista?", "¿Qué videojuego es este?", "¿Qué muestra esta imagen?"];
+var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "All"];
 var questionObject = "";
 var correctAnswer = "";
 var answerOptions = [];
@@ -125,6 +114,7 @@ var questionImage = "";
  */
 async function loadQuestions(category = "All") {
     questions = [];
+    shownQuestions = [];
     currentQuestionIndex = 0;
     queriesAndQuestions = getQueriesAndQuestions(imagesQueries);
 
@@ -164,10 +154,31 @@ async function loadQuestions(category = "All") {
 
         // Generate all questions from this single dataset
         console.log("Maxquestions: " + maxQuestions);
+        // Initialize a Set to track used images
+        const usedImages = new Set();
+        let attempts = 0;
+        const maxAttempts = Math.min(100, data.length * 2); // Prevent infinite loops
+
         for (let i = 0; i < maxQuestions; i++) {
             const question = generateQuestionFromData(data, randomQueryIndex);
             question.questionObject = questionPrompt || "¿Qué muestra esta imagen?";
-            questions.push(question);
+
+            // Check if this image has already been used
+            if (!usedImages.has(question.questionImage)) {
+                usedImages.add(question.questionImage);
+                questions.push(question);
+                attempts = 0; // Reset attempts counter after success
+            } else {
+                // This is a duplicate, try again
+                i--;
+                attempts++;
+
+                // Break the loop if we're struggling to find unique questions
+                if (attempts >= maxAttempts) {
+                    console.log(`Warning: Could only generate ${questions.length} unique questions out of ${maxQuestions} requested`);
+                    break;
+                }
+            }
         }
 
         console.log(`Successfully loaded ${questions.length} questions for category: ${category || "All"}`);
