@@ -64,18 +64,29 @@ imagesQueries["es"] = {
 
     "Personajes":
         [
-            /* pregunta = imagen futbolista, opción = nombre futbolista */
+            /* pregunta = imagen de una persona famosa, opción = nombre de la persona */
             [
                 `
-      SELECT ?optionLabel ?imageLabel
-      WHERE {
-        ?option wdt:P106 wd:Q937857;     
-                wdt:P569 ?birthdate.     
-        FILTER(YEAR(?birthdate) >= 1970)  
-        ?option wdt:P18 ?imageLabel.     
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
-      }
-      LIMIT 30`, "¿Cuál es el nombre de este futbolista?"]
+        SELECT DISTINCT ?option ?optionLabel ?imageLabel
+        WHERE {
+        ?option wdt:P31 wd:Q5;               # Instance of human
+                rdfs:label ?optionLabel;       # Get their label/name
+                wdt:P106 ?occupation.          # Has occupation
+  
+         # Famous occupations filter
+         VALUES ?occupation { 
+            wd:Q33999   # Actor
+            wd:Q177220  # Singer
+            wd:Q937857  # Football player
+            wd:Q82955   # Politician
+            wd:Q36180   # Writer
+         }
+  
+        OPTIONAL { ?option wdt:P18 ?imageLabel. }    
+        FILTER(lang(?optionLabel) = "es")       
+        FILTER EXISTS { ?option wdt:P18 ?imageLabel }
+}
+LIMIT 30`, "¿Quién es esta persona famosa?"]
         ],
 
 
@@ -100,7 +111,7 @@ var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las
 
 
 
-var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Cuál es el nombre de este futbolista?", "¿Qué videojuego es este?", "¿Qué muestra esta imagen?"];
+var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué muestra esta imagen?"];
 var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "All"];
 var questionObject = "";
 var correctAnswer = "";
@@ -535,7 +546,7 @@ app.get('/generatedQuestion', async (req, res) => {
 function getCategoryFromQuestion(questionText) {
     if (questionText.includes("lugar")) return "Geografia";
     if (questionText.includes("monumento")) return "Cultura";
-    if (questionText.includes("futbolista") || questionText.includes("personaje")) return "Personajes";
+    if (questionText.includes("famosa") || questionText.includes("personaje")) return "Personajes";
     return "General";
 }
 
