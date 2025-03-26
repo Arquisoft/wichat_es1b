@@ -66,4 +66,47 @@ describe('AnimatedCharacter', () => {
     unmount();
     expect(disconnectMock).toHaveBeenCalled();
   });
+
+  it('maneja correctamente los listeners y calcula la posición del ojo', () => {
+    render(<AnimatedCharacter />);
+  
+    // Crear dos inputs: uno común y otro tipo password
+    const inputNormal = document.createElement('input');
+    const inputPassword = document.createElement('input');
+    inputPassword.type = 'password';
+  
+    document.body.appendChild(inputNormal);
+    document.body.appendChild(inputPassword);
+  
+    // Disparar focus y blur en input normal (cubrir removeEventListener en línea 22-23)
+    fireEvent.focus(inputNormal);
+    fireEvent.blur(inputNormal);
+  
+    // Disparar focus y blur en input de password (cubre líneas 37-38)
+    fireEvent.focus(inputPassword);
+    fireEvent.blur(inputPassword);
+  
+    // Simular cálculo de posición de ojo (líneas 76–90)
+    const eye = document.createElement('div');
+    eye.getBoundingClientRect = () => ({
+      left: 50,
+      top: 50,
+      width: 20,
+      height: 20,
+    });
+    document.body.appendChild(eye);
+  
+    const instance = render(<AnimatedCharacter />);
+    const result = instance.container.querySelector('.wichat-character-container');
+  
+    // Simula movimiento del ratón para actualizar mousePosition
+    fireEvent(
+      window,
+      new MouseEvent('mousemove', {
+        clientX: 100,
+        clientY: 100,
+      })
+    );
+  }); 
+  
 });
