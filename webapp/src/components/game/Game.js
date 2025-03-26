@@ -268,7 +268,6 @@ const Game = () => {
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Button color="inherit" onClick={handleHome}>Abandonar</Button>
                   <Button color="inherit" onClick={() => handleNewGame()}>Empezar nueva partida</Button>
-                  <Button color="inherit" onClick={handleGoToProfile}>Ir al perfil</Button>
                 </Toolbar>
               </AppBar>
 
@@ -394,10 +393,21 @@ const Game = () => {
                 </div>
               </div>
 
-              {/* Botón Menú principal */}
-              <Button onClick={handleHome} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
-                Volver al menú principal
-              </Button>
+              <Grid container spacing={2} justifyContent="center">
+                {/* Botón Menú principal */}
+                <Grid item>
+                  <Button onClick={handleHome} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
+                    Volver al menú principal
+                  </Button>
+                </Grid>
+
+                {/* Botón Perfil */}
+                <Grid item>
+                  <Button onClick={handleGoToProfile} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
+                    Ver perfil
+                  </Button>
+                </Grid>
+              </Grid>
             </Paper>
         )}
       </Container>
