@@ -102,7 +102,7 @@ const HomePage = () => {
     }
   }, [username])
 
-  const handleShowGame = (category = null) => {
+  const handleShowGame = (category = "All") => {
     // Log the selected category before navigation
     console.log("Starting game with category:", category)
 
@@ -1030,6 +1030,7 @@ const HomePage = () => {
                   {selectedSession.questions.map((q, index) => (
                     <React.Fragment key={index}>
                       <ListItem
+                        component="div"
                         alignItems="flex-start"
                         button
                         onClick={() => toggleQuestion(index)}

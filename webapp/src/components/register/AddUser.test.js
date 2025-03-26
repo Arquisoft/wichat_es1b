@@ -12,7 +12,7 @@ describe('AddUser component', () => {
     mockAxios.reset();
   });
 
-  it('should add user successfully', async () => {
+  it('añade usuario correctamente', async () => {
     render(
         <Router>
           <AddUser />
@@ -25,7 +25,8 @@ describe('AddUser component', () => {
     const addUserButton = screen.getByRole('button', { name: /Crear usuario/i });
 
     // Mock the axios.post request to simulate a successful response
-    mockAxios.onPost('/adduser').reply(200);
+    mockAxios.onPost(/adduser/).reply(200);
+    mockAxios.onPost(/login/).reply(200);
 
     // Simulate user input
     fireEvent.change(usernameInput, { target: { value: 'testUser' } });
@@ -41,7 +42,24 @@ describe('AddUser component', () => {
     });
   });
 
-  it('should handle error when adding user', async () => {
+  it('muestra error si las contraseñas no coinciden', async () => {
+    render(
+      <Router>
+        <AddUser />
+      </Router>
+    );
+
+    fireEvent.change(screen.getByLabelText(/Username/i), { target: { value: 'testUser' } });
+    fireEvent.change(screen.getByLabelText(/Password/i), { target: { value: '123' } });
+    fireEvent.change(screen.getByLabelText(/Confirmar Contraseña/i), { target: { value: '456' } });
+    fireEvent.click(screen.getByRole('button', { name: /crear usuario/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/las contraseñas no coinciden/i)).toBeInTheDocument();
+    });
+  });
+
+  it('muestra error si la petición falla', async () => {
     render(
         <Router>
           <AddUser />
