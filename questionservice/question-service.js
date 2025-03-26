@@ -426,8 +426,15 @@ app.get('/nextQuestion', (req, res) => {
 // Carga de las queries según la categoría
 async function getQueriesByCategory(category = "All") {
     if (category === "All" || !category) {
-        let rand = crypto.randomInt(0, categories.length);
-        changeQueriesAndQuestions(categories[rand]);
+        queries = [];
+        for (let cat of categories) {
+            if (cat !== "All") {
+                queries = queries.concat(queriesAndQuestions["es"][cat]);
+            }
+        }
+
+        //let rand = crypto.randomInt(0, categories.length);
+        //changeQueriesAndQuestions(categories[rand]);
     }
     else {
         if (categories.includes(category)) {
