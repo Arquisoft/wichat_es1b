@@ -25,13 +25,7 @@ let questions = [];
 let currentQuestionIndex = 0;
 var maxQuestions = 5;
 
-var correct = "";
-var question = "";
-var image = "";
-var options = [];
-var questionToSave = null;
 var randomQuery;
-var randomIndexes = [];
 var queries = [
     `SELECT DISTINCT ?option ?optionLabel ?imageLabel
       WHERE {
@@ -131,19 +125,22 @@ var questionImage = "";
  */
 async function loadQuestions(category = "All") {
     questions = [];
+    currentQuestionIndex = 0;
+    queriesAndQuestions = getQueriesAndQuestions(imagesQueries);
+
     try {
-        let queryPool = queries;
+        //let queryPool = queries;
         let questionPrompt = "¿Qué muestra esta imagen?"; // Default question
 
-            await getQueriesByCategory(category);
-            queryPool = queries;
+        await getQueriesByCategory(category);
+        let queryPool = queries;
 
-            // Set the question text based on the current category
-            const categoryIndex = categories.indexOf(category);
+        // Set the question text based on the current category
+        const categoryIndex = categories.indexOf(category);
 
-            if (categoryIndex !== -1 && categoryIndex < possiblesQuestions.length) {
-                questionPrompt = possiblesQuestions[categoryIndex];
-            }
+        if (categoryIndex !== -1 && categoryIndex < possiblesQuestions.length) {
+            questionPrompt = possiblesQuestions[categoryIndex];
+        }
 
         // Select a random query
         const randomQueryIndex = crypto.randomInt(0, queryPool.length);
@@ -166,6 +163,7 @@ async function loadQuestions(category = "All") {
         const data = response.data.results.bindings;
 
         // Generate all questions from this single dataset
+        console.log("Maxquestions: " + maxQuestions);
         for (let i = 0; i < maxQuestions; i++) {
             const question = generateQuestionFromData(data, randomQueryIndex);
             question.questionObject = questionPrompt || "¿Qué muestra esta imagen?";
