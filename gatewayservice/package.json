@@ -5,7 +5,8 @@
     "main": "service.js",
     "scripts": {
         "start": "node gateway-service.js",
-        "test": "jest"
+        "test": "jest",
+        "test:coverage": "jest --coverage"
     },
     "repository": {
         "type": "git",
@@ -29,5 +30,18 @@
     "devDependencies": {
         "jest": "^29.7.0",
         "supertest": "^7.0.0"
+    },
+    "jest": {
+        "collectCoverageFrom": [
+            "gateway-service.js"
+        ],
+        "coverageThreshold": {
+            "global": {
+                "statements": 80,
+                "branches": 80,
+                "functions": 80,
+                "lines": 80
+            }
+        }
     }
 }

@@ -21,9 +21,10 @@ app.use(express.json());
 
 app.get('/questions/:username', async (req, res) => {
     try {
+
         const response = await axios.get(apiEndpoint + '/get-sessions/' + req.params.username);
         const sessions = response.data;
-
+        console.log(sessions);
         // Transform sessions to remove _id and group questions by session
         const sessionsFormatted = sessions.map(session => {
             // Format questions to remove _id
@@ -46,6 +47,7 @@ app.get('/questions/:username', async (req, res) => {
             sessions: sessionsFormatted
         });
     } catch (error) {
+        console.log(error)
         res.status(error.response?.status || 500).json({
             error: error.response?.data?.error || 'An error occurred'
         });

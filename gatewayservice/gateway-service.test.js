@@ -6,6 +6,12 @@ let newString = 'S345_Bs';
 
 jest.mock('axios');
 
+// Reset mocks before all tests
+beforeEach(() => {
+  axios.get.mockReset();
+  axios.post.mockReset();
+});
+
 afterAll(() => {
   app.close();
 });
@@ -24,7 +30,17 @@ describe('Gateway Service', () => {
   const getEndpoints = [
     ['/generateQuestion', { question: '¿Capital?' }],
     ['/nextQuestion', { question: '¿Siguiente?' }],
-    ['/get-sessions/testuser', { sessions: ['s1', 's2'] }],
+    ['/get-sessions/testuser', { sessions: [{ id: 1, score: 90 }] }],
+    ['/health', { status: 'OK' }],
+    ['/generatedQuestion', {
+      question: "¿Cuál es el lugar de la imagen?",
+      correctAnswer: "Dinamarca",
+      inc_answer_1: "Omán",
+      inc_answer_2: "Países Bajos",
+      inc_answer_3: "Francia",
+      category: "Geografia",
+      image: "http://commons.wikimedia.org/wiki/Special:FilePath/Dannebrog.jpg"
+    }],
   ];
 
   describe('POST endpoints', () => {
@@ -51,14 +67,20 @@ describe('Gateway Service', () => {
 
   describe('Error handling', () => {
     it('should return error when POST /login fails', async () => {
-      axios.post.mockRejectedValueOnce({ response: { status: 401, data: { error: 'Unauthorized' } } });
+      axios.post.mockRejectedValueOnce({
+        response: { status: 401, data: { error: 'Unauthorized' } }
+      });
+
       const res = await request(app).post('/login').send({});
       expect(res.statusCode).toBe(401);
       expect(res.body).toEqual({ error: 'Unauthorized' });
     });
 
     it('should return error when GET /generateQuestion fails', async () => {
-      axios.get.mockRejectedValueOnce({ response: { status: 500, data: { error: 'Question error' } } });
+      axios.get.mockRejectedValueOnce({
+        response: { status: 500, data: { error: 'Question error' } }
+      });
+
       const res = await request(app).get('/generateQuestion');
       expect(res.statusCode).toBe(500);
       expect(res.body).toEqual({ error: 'Question error' });

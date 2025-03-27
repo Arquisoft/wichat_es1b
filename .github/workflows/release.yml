@@ -183,27 +183,29 @@ jobs:
         registry: ghcr.io
         workdir: gatewayservice
 
-    docker-push-apiservice:
-      name: Push API service Docker Image to GitHub Packages
-      runs-on: ubuntu-latest
-      permissions:
-        contents: read
-        packages: write
-      needs: [ e2e-tests ]
-      steps:
-        - uses: actions/checkout@v4
-        - name: Update OpenAPI configuration
-          run: |
-            DEPLOY_HOST=${{ secrets.DEPLOY_HOST }}
-            sed -i "s/SOMEIP/${DEPLOY_HOST}/g" apiservice/openapi.yaml
-        - name: Publish to Registry
-          uses: elgohr/Publish-Docker-Github-Action@v5
-          with:
-            name: arquisoft/wichat_es1b/apiservice
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
-            registry: ghcr.io
-            workdir: apiservice
+  docker-push-apiservice:
+    name: Push API service Docker Image to GitHub Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    needs: [ e2e-tests ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update OpenAPI configuration
+        run: |
+          DEPLOY_HOST=${{ secrets.DEPLOY_HOST }}
+          sed -i "s/SOMEIP/${DEPLOY_HOST}/g" apiservice/openapi.yaml
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        env:
+          API_URI: http://${{ secrets.DEPLOY_HOST }}:8000
+        with:
+          name: arquisoft/wichat_es1b/apiservice
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          workdir: apiservice
   deploy:
     name: Deploy over SSH
     runs-on: ubuntu-latest

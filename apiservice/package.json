@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "api-service-model.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
     "start": "node api-service.js"
   },
   "keywords": [],
@@ -11,11 +12,28 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "axios": "^1.8.4",
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "swagger-ui-express": "^5.0.1",
     "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "api-service.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 80,
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
+      }
+    }
   }
 }
