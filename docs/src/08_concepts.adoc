@@ -7,11 +7,11 @@ ifndef::imagesdir[:imagesdir: ../images]
 
 * *_Metodología de desarrollo_* 
 
-Se utilizara una metodología agil en el proyecto intentando seguir scrum de la mejor manera posible.
+Se utilizará una metodología ágil en el proyecto intentando seguir scrum de la mejor manera posible.
 
-* *_Tareas y proridades_* 
+* *_Tareas y prioridades_*
 
-Las tareas y prioridades se gestionaran mediante la una planificación en GitHub y se recogerán en un acta durante cada reunion semanal.
+Las tareas y prioridades se gestionarán mediante la una planificación en GitHub y se recogerán en un acta durante cada reunion semanal.
 
 
 === _Arquitectura y patrones de diseño_

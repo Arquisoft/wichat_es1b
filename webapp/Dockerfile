@@ -8,8 +8,6 @@ RUN npm install --omit=dev
 
 ARG API_URI="http://localhost:8000"
 
-#TODO cambiar por la url de la MV para el despliegue, en local DEJAR EN LOCAHOST
-#ARG LLM_URI="http://40.113.105.107:8003"
 ARG LLM_API_KEY
 ENV REACT_APP_LLM_API_KEY=$LLM_API_KEY
 ENV REACT_APP_API_ENDPOINT=$API_URI

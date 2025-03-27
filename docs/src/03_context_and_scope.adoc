@@ -23,7 +23,7 @@ Los principales objetivos comerciales de WIChat son:
 image::31_BusinessContext.png[]
 
 
-=== Contexto tecnico
+=== Contexto técnico
 
 WIChat es una aplicación web compuesta por diversos módulos y tecnologías que permiten su funcionamiento fluido y escalable. La arquitectura se basa en un enfoque de microservicios, con integración de APIs para la generación de preguntas y el procesamiento de lenguaje natural.
 
