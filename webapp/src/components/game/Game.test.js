@@ -3,8 +3,9 @@ import React from 'react';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { BrowserRouter } from 'react-router-dom';
+import { useNavigate, BrowserRouter as Router } from "react-router-dom";
 import Game from './Game';
+import { red } from '@mui/material/colors';
 
 // Configure Axios mock
 const mockAxios = new MockAdapter(axios);
@@ -12,8 +13,16 @@ const mockAxios = new MockAdapter(axios);
 // Create mock navigation function
 const mockNavigate = jest.fn();
 
+const renderComponent = () => {
+  return render(
+    <Router>
+      <Game />
+    </Router>
+  );
+};
+
 // Mock localStorage
-const localStorageMock = (function() {
+const localStorageMock = (function () {
   let store = {};
   return {
     getItem: jest.fn(key => store[key] || null),
@@ -61,40 +70,37 @@ jest.mock("../chatbot/chat", () => {
   };
 });
 
+// Al principio del archivo Game.test.js
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+
 describe('Game Component', () => {
   const mockFirstQuestion = {
-    questionObject: "¿Cuál es la capital de Francia?",
-    answerOptions: ["Madrid", "París", "Londres", "Berlín"],
-    correctAnswer: "París",
-    questionImage: "https://example.com/image.jpg"
+    questionObject: '¿Cuál es la capital de España?',
+    questionImage: 'https://example.com/madrid.jpg',
+    correctAnswer: 'Madrid',
+    answerOptions: ['Londres', 'Lisboa', 'Madrid', 'Roma']
   };
 
   const mockNextQuestion = {
-    questionObject: "¿Cuál es la capital de España?",
-    answerOptions: ["Madrid", "París", "Lisboa", "Roma"],
-    correctAnswer: "Madrid",
-    questionImage: "https://example.com/spain.jpg"
+    questionObject: '¿Cuál es la capital de Francia?',
+    questionImage: 'https://example.com/paris.jpg',
+    correctAnswer: 'París',
+    answerOptions: ['París', 'Varsovia', 'Atenas', 'Dublín']
   };
+
 
   beforeEach(() => {
     mockAxios.reset(); // Reset mocks before each test
     jest.useFakeTimers();
-    mockNavigate.mockClear();
 
-    localStorage.setItem('username', 'testuser');
-
-    // Mock startGame endpoint
-    mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
-      firstQuestion: mockFirstQuestion
-    });
-
-    // Mock nextQuestion endpoint
-    mockAxios.onGet('http://localhost:8004/nextQuestion').reply(200, mockNextQuestion);
-
-    // Mock save-session endpoint
-    mockAxios.onPost('http://localhost:8000/save-session').reply(200, {
-      success: true
-    });
   });
 
   afterEach(() => {
@@ -102,138 +108,78 @@ describe('Game Component', () => {
     jest.useRealTimers();
   });
 
-  it('debe mostrar la pantalla de carga inicialmente', async () => {
-    render(
-        <BrowserRouter>
-          <Game />
-        </BrowserRouter>
-    );
-
-    expect(screen.getByText("Cargando preguntas...")).toBeInTheDocument();
-  });
-
-  it('debe mostrar correctamente el contador de preguntas restantes', async () => {
-    render(
-        <BrowserRouter>
-          <Game />
-        </BrowserRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByText("Cargando preguntas...")).not.toBeInTheDocument();
+  it('el usuario responde correctamente a la primera pregunta', async () => {
+    mockAxios.onPost('http://localhost:8000/startGame').reply(200, {
+      message: 'Game started',
+      category: 'All',
+      firstQuestion: mockFirstQuestion
     });
-
-    expect(screen.getByText("Preguntas restantes: 5")).toBeInTheDocument();
+  
+    mockAxios.onGet('http://localhost:8000/nextQuestion').reply(200, mockNextQuestion);
+  
+    renderComponent();
+  
+    const question = await screen.findByTestId('question');
+    expect(question).toHaveTextContent('¿Cuál es la capital de España?');
+  
+    const opciones = ['Londres', 'Lisboa', 'Madrid', 'Roma'];
+    opciones.forEach((opcion) => {
+      expect(screen.getByRole('button', { name: opcion })).toBeInTheDocument();
+    });
+  
+    const correctBtn = screen.getByRole('button', { name: 'Madrid' });
+    fireEvent.click(correctBtn);
+  
+    await waitFor(() => {
+      expect(correctBtn).toHaveStyle({ backgroundColor: 'green' });
+    });
+  
+    // Avanzar el tiempo en un bloque 'act' async
+    await act(async () => {
+      jest.advanceTimersByTime(3000); // Simula 3s en vez de 5s
+    });
+  
+    await waitFor(() => {
+      const updatedQuestion = screen.getByTestId('question');
+      expect(updatedQuestion).toHaveTextContent('¿Cuál es la capital de Francia?');
+    }, { timeout: 5000 });
   });
 
-  // it('debe mostrar la pregunta y las opciones correctamente después de cargar', async () => {
-  //   render(
-  //       <BrowserRouter>
-  //         <Game />
-  //       </BrowserRouter>
-  //   );
-
-  //   await waitFor(() => {
-  //     expect(screen.queryByText("Cargando preguntas...")).not.toBeInTheDocument();
-  //   });
-
-  //   expect(screen.getByText("¿Cuál es la capital de Francia?")).toBeInTheDocument();
-  //   expect(screen.getByText("Madrid")).toBeInTheDocument();
-  //   expect(screen.getByText("París")).toBeInTheDocument();
-  //   expect(screen.getByText("Londres")).toBeInTheDocument();
-  //   expect(screen.getByText("Berlín")).toBeInTheDocument();
-  // });
-
-  // it('debe mostrar correctamente la imagen de la pregunta', async () => {
-  //   render(
-  //       <BrowserRouter>
-  //         <Game />
-  //       </BrowserRouter>
-  //   );
-
-  //   await waitFor(() => {
-  //     expect(screen.queryByText("Cargando preguntas...")).not.toBeInTheDocument();
-  //   });
-
-  //   const image = screen.getByAltText("Imagen de la pregunta");
-  //   expect(image).toBeInTheDocument();
-  //   expect(image.src).toBe("https://example.com/image.jpg");
-  // });
-
-  // it('debe cambiar el color del botón al responder correctamente', async () => {
-  //   render(
-  //       <BrowserRouter>
-  //         <Game />
-  //       </BrowserRouter>
-  //   );
-
-  //   await waitFor(() => {
-  //     expect(screen.queryByText("Cargando preguntas...")).not.toBeInTheDocument();
-  //   });
-
-  //   const correctButton = screen.getByText("París");
-  //   fireEvent.click(correctButton);
-
-  //   expect(correctButton).toHaveStyle('background-color: green');
-  // });
-
-  // it('debe cambiar el color del botón al responder incorrectamente', async () => {
-  //   render(
-  //       <BrowserRouter>
-  //         <Game />
-  //       </BrowserRouter>
-  //   );
-
-  //   await waitFor(() => {
-  //     expect(screen.queryByText("Cargando preguntas...")).not.toBeInTheDocument();
-  //   });
-
-  //   const incorrectButton = screen.getByText("Madrid");
-  //   fireEvent.click(incorrectButton);
-
-  //   expect(incorrectButton).toHaveStyle('background-color: red');
-  // });
-
-  // it('debe incrementar la puntuación cuando se responde correctamente', async () => {
-  //   render(
-  //       <BrowserRouter>
-  //         <Game />
-  //       </BrowserRouter>
-  //   );
-
-  //   await waitFor(() => {
-  //     expect(screen.queryByText("Cargando preguntas...")).not.toBeInTheDocument();
-  //   });
-
-  //   const correctButton = screen.getByText("París");
-  //   fireEvent.click(correctButton);
-
-  //   expect(screen.getByText("Puntuación: 1")).toBeInTheDocument();
-  // });
-
-  // it('debe pasar a la siguiente pregunta después de responder', async () => {
-  //   render(
-  //       <BrowserRouter>
-  //         <Game />
-  //       </BrowserRouter>
-  //   );
-
-  //   await waitFor(() => {
-  //     expect(screen.queryByText("Cargando preguntas...")).not.toBeInTheDocument();
-  //   });
-
-  //   const correctButton = screen.getByText("París");
-  //   fireEvent.click(correctButton);
-
-  //   // Advance timers to execute setTimeout
-  //   act(() => {
-  //     jest.advanceTimersByTime(2000);
-  //   });
-
-  //   await waitFor(() => {
-  //     expect(screen.getByText("¿Cuál es la capital de España?")).toBeInTheDocument();
-  //   });
-  // });
+  it('vuelve al home al hacer clic en "Abandonar"', async () => {
+    renderComponent();
+    const abandonButton = screen.getByRole('button', { name: /Abandonar/i });
+    fireEvent.click(abandonButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/Home');
+  });
+  
+  it('muestra error si falla la carga de la siguiente pregunta', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {}); // 💡 IMPORTANTE
+  
+    mockAxios.onPost('http://localhost:8000/startGame').reply(200, {
+      message: 'Game started',
+      category: 'All',
+      firstQuestion: mockFirstQuestion
+    });
+  
+    mockAxios.onGet('http://localhost:8000/nextQuestion').replyOnce(500); // Forzar error
+  
+    renderComponent();
+  
+    const question = await screen.findByTestId('question');
+    fireEvent.click(screen.getByRole('button', { name: 'Madrid' }));
+  
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+  
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error fetching the next question:'),
+        expect.any(Error)
+      );
+    });
+  });
+  
 
 
 });

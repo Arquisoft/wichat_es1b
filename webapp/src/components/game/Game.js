@@ -319,7 +319,7 @@ const Game = () => {
               </Typography>
 
               {/* Pregunta */}
-              <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+              <Typography data-testid="question" variant="h6" sx={{ marginBottom: '10px' }}>
                 {question}
               </Typography>
 
