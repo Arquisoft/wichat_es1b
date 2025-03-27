@@ -1,6 +1,5 @@
 // Imports
 const Question = require('./question-model');
-const Game = require('./game-model');
 const mongoose = require('mongoose');
 const express = require('express');
 const axios = require('axios');
@@ -97,7 +96,7 @@ imagesQueries["es"] = {
                 `
       SELECT ?option ?optionLabel ?imageLabel
       WHERE {
-        ?option wdt:P31 wd:Q7058673;  # Instancia de videojuego
+        ?option wdt:P31 wd:Q7889;  # Instancia de videojuego
                 wdt:P18 ?imageLabel.  # Imagen del videojuego
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
@@ -126,7 +125,7 @@ LIMIT 30`, "¿Qué avión es este?"]
 
 
 var language = "es";
-var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las queries y las preguntas
+var queriesAndQuestions = []; // almacena las queries y las preguntas
 
 
 
@@ -273,32 +272,7 @@ function generateQuestionFromData(data, queryIndex) {
 
 
 
-/**
- * Generates a single question <<OLD>>
- * @returns {Promise<Object>}
- */
-async function generateQuestion() {
-    const randomQuery = crypto.randomInt(0, queries.length);
-    const url = wikiURL + "?query=" + encodeURIComponent(queries[randomQuery]) + "&format=json";
 
-    try {
-        const response = await axios(url, {
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if(!response.data || !response.data.results || response.data.results.bindings.length === 0) {
-            console.error("WikiData query did not return any result.");
-        }
-
-        return getQuestionData(response.data.results.bindings);
-    }
-    catch(error) {
-        console.error("Error while generating a question: " + error);
-        throw error;
-    }
-}
 
 
 
@@ -469,14 +443,6 @@ async function getQueriesByCategory(category = "All") {
 
 function changeQueriesAndQuestions(category) {
     queries = queriesAndQuestions["es"][category];
-}
-
-function getAllValues() {
-    var data = [];
-    for (var category in queriesAndQuestions[language]) {
-        data = data.concat(queriesAndQuestions[language][category]);
-    }
-    return data;
 }
 
 
