@@ -153,7 +153,7 @@ describe('Game Component', () => {
   });
   
   it('muestra error si falla la carga de la siguiente pregunta', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {}); // 💡 IMPORTANTE
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Spy verdadero
   
     mockAxios.onPost('http://localhost:8000/startGame').reply(200, {
       message: 'Game started',
@@ -173,13 +173,14 @@ describe('Game Component', () => {
     });
   
     await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith(
+      expect(errorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error fetching the next question:'),
         expect.any(Error)
       );
     });
+  
+    errorSpy.mockRestore(); // Limpieza
   });
   
-
-
+  
 });
