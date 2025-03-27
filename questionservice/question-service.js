@@ -97,7 +97,7 @@ imagesQueries["es"] = {
                 `
       SELECT ?option ?optionLabel ?imageLabel
       WHERE {
-        ?option wdt:P31 wd:Q7889;  # Instancia de videojuego
+        ?option wdt:P31 wd:Q7058673;  # Instancia de videojuego
                 wdt:P18 ?imageLabel.  # Imagen del videojuego
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
@@ -111,25 +111,16 @@ imagesQueries["es"] = {
             [
                 `
     SELECT DISTINCT ?option ?optionLabel ?imageLabel
-        WHERE {
-        ?option wdt:P31 wd:Q15056993;               # Instance of aircraft family
-                rdfs:label ?optionLabel.     # Get their label
-  
-         VALUES ?manufacturer { 
-            wd:Q67
-            wd:Q8793
-         }
-  
-        OPTIONAL { ?option wdt:P18 ?imageLabel. }    
-        FILTER(lang(?optionLabel) = "es")       
-        FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-        
-        # Exclude helicopters and fighters
-        MINUS { ?option wdt:P31 wd:Q34486 }  # Exclude helicopters
-        MINUS { ?option wdt:P31 wd:Q127771 }  # Exclude fighter jets
+WHERE {
+  ?option wdt:P31 wd:Q15056993;        # Instance of commercial aircraft family or its subclasses
+          rdfs:label ?optionLabel.      # Get their label
 
-        }
-        LIMIT 30`, "¿Qué avión es este?"]
+  OPTIONAL { ?option wdt:P18 ?imageLabel. }  
+  FILTER(lang(?optionLabel) IN ("en", "es"))   
+  FILTER NOT EXISTS { ?option wdt:P279 wd:Q1518049 }  # Exclude subclasses of Q1518049  
+  FILTER EXISTS { ?option wdt:P18 ?imageLabel }
+}
+LIMIT 30`, "¿Qué avión es este?"]
         ]
 }
 
@@ -139,7 +130,7 @@ var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las
 
 
 
-var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué modelo de avión es este?", "¿Qué muestra esta imagen?"];
+var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué avión es este?", "¿Qué muestra esta imagen?"];
 var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "Aviones", "All"];
 var questionObject = "";
 var correctAnswer = "";
