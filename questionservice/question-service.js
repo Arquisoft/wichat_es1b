@@ -85,8 +85,8 @@ imagesQueries["es"] = {
         OPTIONAL { ?option wdt:P18 ?imageLabel. }    
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-}
-LIMIT 30`, "¿Quién es esta persona famosa?"]
+        }
+        LIMIT 30`, "¿Quién es esta persona famosa?"]
         ],
 
 
@@ -102,6 +102,34 @@ LIMIT 30`, "¿Quién es esta persona famosa?"]
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
       LIMIT 30`, "¿A qué videojuego pertenece esta imagen?"]
+        ],
+
+
+    "Aviones":
+        [
+            /* pregunta = imagen de avión, opción = nombre del avión */
+            [
+                `
+    SELECT DISTINCT ?option ?optionLabel ?imageLabel
+        WHERE {
+        ?option wdt:P31 wd:Q15056993;               # Instance of aircraft family
+                rdfs:label ?optionLabel.     # Get their label
+  
+         VALUES ?manufacturer { 
+            wd:Q67
+            wd:Q8793
+         }
+  
+        OPTIONAL { ?option wdt:P18 ?imageLabel. }    
+        FILTER(lang(?optionLabel) = "es")       
+        FILTER EXISTS { ?option wdt:P18 ?imageLabel }
+        
+        # Exclude helicopters and fighters
+        MINUS { ?option wdt:P31 wd:Q34486 }  # Exclude helicopters
+        MINUS { ?option wdt:P31 wd:Q127771 }  # Exclude fighter jets
+
+        }
+        LIMIT 30`, "¿Qué avión es este?"]
         ]
 }
 
@@ -111,8 +139,8 @@ var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las
 
 
 
-var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué muestra esta imagen?"];
-var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "All"];
+var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué modelo de avión es este?", "¿Qué muestra esta imagen?"];
+var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "Aviones", "All"];
 var questionObject = "";
 var correctAnswer = "";
 var answerOptions = [];
