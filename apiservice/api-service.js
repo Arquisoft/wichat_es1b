@@ -9,9 +9,9 @@ const fs = require("fs")
 const YAML = require('yaml')
 
 const app = express();
-const port = 7000;
+const port = 8015;
 
-const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8000';
+const apiEndpoint = 'http://gatewayservice:8000';
 
 app.use(cors());
 app.use(express.json());

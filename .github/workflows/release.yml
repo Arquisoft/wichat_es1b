@@ -198,8 +198,6 @@ jobs:
           sed -i "s/SOMEIP/${DEPLOY_HOST}/g" apiservice/openapi.yaml
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
-        env:
-          API_URI: http://${{ secrets.DEPLOY_HOST }}:8000
         with:
           name: arquisoft/wichat_es1b/apiservice
           username: ${{ github.actor }}
