@@ -1,6 +1,5 @@
 // Imports
 const Question = require('./question-model');
-const Game = require('./game-model');
 const mongoose = require('mongoose');
 const express = require('express');
 const axios = require('axios');
@@ -85,8 +84,8 @@ imagesQueries["es"] = {
         OPTIONAL { ?option wdt:P18 ?imageLabel. }    
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-}
-LIMIT 30`, "¿Quién es esta persona famosa?"]
+        }
+        LIMIT 30`, "¿Quién es esta persona famosa?"]
         ],
 
 
@@ -102,17 +101,36 @@ LIMIT 30`, "¿Quién es esta persona famosa?"]
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
       LIMIT 30`, "¿A qué videojuego pertenece esta imagen?"]
+        ],
+
+
+    "Aviones":
+        [
+            /* pregunta = imagen de avión, opción = nombre del avión */
+            [
+                `
+    SELECT DISTINCT ?option ?optionLabel ?imageLabel
+WHERE {
+  ?option wdt:P31 wd:Q15056993;        # Instance of commercial aircraft family or its subclasses
+          rdfs:label ?optionLabel.      # Get their label
+
+  OPTIONAL { ?option wdt:P18 ?imageLabel. }  
+  FILTER(lang(?optionLabel) IN ("en", "es"))   
+  FILTER NOT EXISTS { ?option wdt:P279 wd:Q1518049 }  # Exclude subclasses of Q1518049  
+  FILTER EXISTS { ?option wdt:P18 ?imageLabel }
+}
+LIMIT 30`, "¿Qué avión es este?"]
         ]
 }
 
 
 var language = "es";
-var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las queries y las preguntas
+var queriesAndQuestions = []; // almacena las queries y las preguntas
 
 
 
-var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué muestra esta imagen?"];
-var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "All"];
+var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué avión es este?", "¿Qué muestra esta imagen?"];
+var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "Aviones", "All"];
 var questionObject = "";
 var correctAnswer = "";
 var answerOptions = [];
@@ -254,32 +272,7 @@ function generateQuestionFromData(data, queryIndex) {
 
 
 
-/**
- * Generates a single question <<OLD>>
- * @returns {Promise<Object>}
- */
-async function generateQuestion() {
-    const randomQuery = crypto.randomInt(0, queries.length);
-    const url = wikiURL + "?query=" + encodeURIComponent(queries[randomQuery]) + "&format=json";
 
-    try {
-        const response = await axios(url, {
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if(!response.data || !response.data.results || response.data.results.bindings.length === 0) {
-            console.error("WikiData query did not return any result.");
-        }
-
-        return getQuestionData(response.data.results.bindings);
-    }
-    catch(error) {
-        console.error("Error while generating a question: " + error);
-        throw error;
-    }
-}
 
 
 
@@ -450,14 +443,6 @@ async function getQueriesByCategory(category = "All") {
 
 function changeQueriesAndQuestions(category) {
     queries = queriesAndQuestions["es"][category];
-}
-
-function getAllValues() {
-    var data = [];
-    for (var category in queriesAndQuestions[language]) {
-        data = data.concat(queriesAndQuestions[language][category]);
-    }
-    return data;
 }
 
 

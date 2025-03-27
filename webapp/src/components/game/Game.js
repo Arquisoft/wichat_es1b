@@ -6,16 +6,13 @@ import axios from 'axios';
 import Chat from "../chatbot/chat";
 
 const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:8004';
-const timeLimit = 30;
-const nQuestions = 5;
+let timeLimit = 30;
 
 const Game = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { gameConfig } = location.state || { gameConfig: { numQuestions: 5, timePerQuestion: 10, category: null } };
 
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [question, setQuestion] = useState('');
   const [image, setImage] = useState('');
   const [options, setOptions] = useState([]);
@@ -53,6 +50,7 @@ const Game = () => {
       setIsCorrect(null);
 
       // Reiniciar temporizador y estado de tiempo agotado
+      timeLimit = gameConfig.timePerQuestion;
       setTimeLeft(gameConfig.timePerQuestion);
       setIsTimeUp(false);
 
