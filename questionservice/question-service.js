@@ -515,7 +515,9 @@ async function saveQuestion(question) {
 
 app.get('/generatedQuestion', async (req, res) => {
     try {
-        const category = req.query.category; // Get category from query parameter
+        let category = req.query.category; // Get category from query parameter
+
+        category=category.toLowerCase();
 
         // Create a filter object - empty if no category specified
         const filter = category ? { category } : {};
@@ -536,9 +538,11 @@ app.get('/generatedQuestion', async (req, res) => {
 
 // Helper function to determine category from question text
 function getCategoryFromQuestion(questionText) {
-    if (questionText.includes("lugar")) return "Geografia";
-    if (questionText.includes("monumento")) return "Cultura";
-    if (questionText.includes("famosa") || questionText.includes("personaje")) return "Personajes";
+    if (questionText.includes("lugar")) return "geografia";
+    if (questionText.includes("monumento")) return "cultura";
+    if (questionText.includes("famosa") || questionText.includes("personaje")) return "personajes";
+    if (questionText.includes("avión") || questionText.includes("avion")) return "aviones";
+    if (questionText.includes("videojuego")) return "videojuegos";
     return "General";
 }
 
