@@ -4,9 +4,7 @@ info:
   description: API for managing questions, user sessions, and statistics
   version: 1.0.0
 servers:
-  - url: http://localhost:7000
-    description: Development server
-  - url: http://SOMEIP:7000
+  - url: http://SOMEIP:8015
     description: Production server
 tags:
   - name: User Sessions
@@ -91,7 +89,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [ Geografia, Cultura, Personajes, General ]
+            enum: [geografia, cultura, personajes, videojuegos, aviones, general]
           description: Category to filter questions, by omitting the parameter all questions are returned
       responses:
         '200':

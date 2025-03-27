@@ -108,7 +108,7 @@ services:
     depends_on:
       - gatewayservice
     ports:
-      - "7000:7000"
+      - "8015:8015"
     networks:
       - mynetwork
 
