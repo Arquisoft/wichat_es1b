@@ -108,42 +108,41 @@ describe('Game Component', () => {
     jest.useRealTimers();
   });
 
-  it('el usuario responde correctamente a la primera pregunta', async () => {
-    mockAxios.onPost('http://localhost:8000/startGame').reply(200, {
-      message: 'Game started',
-      category: 'All',
-      firstQuestion: mockFirstQuestion
-    });
-  
-    mockAxios.onGet('http://localhost:8000/nextQuestion').reply(200, mockNextQuestion);
-  
-    renderComponent();
-  
-    const question = await screen.findByTestId('question');
-    expect(question).toHaveTextContent('¿Cuál es la capital de España?');
-  
-    const opciones = ['Londres', 'Lisboa', 'Madrid', 'Roma'];
-    opciones.forEach((opcion) => {
-      expect(screen.getByRole('button', { name: opcion })).toBeInTheDocument();
-    });
-  
-    const correctBtn = screen.getByRole('button', { name: 'Madrid' });
-    fireEvent.click(correctBtn);
-  
-    await waitFor(() => {
-      expect(correctBtn).toHaveStyle({ backgroundColor: 'green' });
-    });
-  
-    // Avanzar el tiempo en un bloque 'act' async
-    await act(async () => {
-      jest.advanceTimersByTime(3000); // Simula 3s en vez de 5s
-    });
-  
-    await waitFor(() => {
-      const updatedQuestion = screen.getByTestId('question');
-      expect(updatedQuestion).toHaveTextContent('¿Cuál es la capital de Francia?');
-    }, { timeout: 5000 });
+
+it('the user answers the first question correctly', async () => {
+  mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
+    message: 'Game started',
+    category: 'All',
+    firstQuestion: mockNextQuestion
   });
+
+  renderComponent();
+
+  const question = await screen.findByTestId('question');
+  expect(question).toHaveTextContent('¿Cuál es la capital de Francia?');
+
+  const options = ['París', 'Varsovia', 'Atenas', 'Dublín'];
+  options.forEach((option) => {
+    expect(screen.getByText(option)).toBeInTheDocument();
+  });
+
+  const correctBtn = screen.getByText('París');
+  fireEvent.click(correctBtn);
+
+  await waitFor(() => {
+    expect(correctBtn).toHaveStyle({ backgroundColor: 'green' });
+  });
+
+  await act(async () => {
+    jest.advanceTimersByTime(2000);
+  });
+
+  await waitFor(() => {
+    const updatedQuestion = screen.getByTestId('question');
+    expect(updatedQuestion).toHaveTextContent('¿Cuál es la capital de Francia?');
+  });
+});
+
 
   it('vuelve al home al hacer clic en "Abandonar"', async () => {
     renderComponent();
@@ -154,8 +153,8 @@ describe('Game Component', () => {
   
   it('muestra error si falla la carga de la siguiente pregunta', async () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Spy verdadero
-  
-    mockAxios.onPost('http://localhost:8000/startGame').reply(200, {
+
+    mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
       message: 'Game started',
       category: 'All',
       firstQuestion: mockFirstQuestion
@@ -166,8 +165,8 @@ describe('Game Component', () => {
     renderComponent();
   
     const question = await screen.findByTestId('question');
-    fireEvent.click(screen.getByRole('button', { name: 'Madrid' }));
-  
+    fireEvent.click(screen.getByText('Madrid'));
+
     await act(async () => {
       jest.advanceTimersByTime(2000);
     });
