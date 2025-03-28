@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Paper, AppBar, Toolbar, Button, Grid2, Typography, LinearProgress } from '@mui/material';
+import { Container, Paper, AppBar, Toolbar, Button, Grid, Typography, LinearProgress } from '@mui/material';
 import { PieChart, Pie, Cell } from 'recharts';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -103,12 +103,12 @@ const Game = () => {
     }
   };
 
-   const handleOptionClick = (option) => {
+  const handleOptionClick = (option) => {
     //Primero, parar el temporizador
     stopTimer();
-  
+
     setSelectedAnswer(option); // Guarda la opción seleccionada
-  
+
     let updatedScore = score;
     if (option === correctAnswer) {
       setIsCorrect(true);
@@ -117,7 +117,7 @@ const Game = () => {
     } else {
       setIsCorrect(false);
     }
-  
+
     // Guardar la pregunta en la sesión
     setSessionQuestions(prev => [
       ...prev,
@@ -137,22 +137,22 @@ const Game = () => {
       }
     }, 2000);
   };
-  
+
   // Finalizar partida
   const handleEndGame = () => {
-  
+
     // Detener el temporizador y marcar la partida como finalizada
     setFinished(true);
     setTimeLeft(0);
-  
+
     // Resetear las respuestas seleccionadas
     setSelectedAnswer(null);
     setIsCorrect(null);
   };
-  
+
   useEffect(() => {
     if (isFinished) {
-      let falladas = numberOfQuestions - score;  
+      let falladas = numberOfQuestions - score;
 
       axios.post(`${apiEndpoint}/save-session`, {
         questions: sessionQuestions,
@@ -160,12 +160,12 @@ const Game = () => {
         score: score,
         wrongAnswers: falladas,
       })
-      .then(response => {
-        console.log("Sesión guardada exitosamente:", response.data);
-      })
-      .catch(error => {
-        console.error("Error al guardar la sesión:", error);
-      });
+          .then(response => {
+            console.log("Sesión guardada exitosamente:", response.data);
+          })
+          .catch(error => {
+            console.error("Error al guardar la sesión:", error);
+          });
     }
   }, [isFinished]);
 
@@ -287,76 +287,76 @@ const Game = () => {
               ) : (
                   <>
 
-              {/* Grid Preguntas Restantes y Puntuación*/}
-              <Grid2 container spacing={2} style={{ marginTop: '10px', marginBottom: '10px' }}>
-                <Grid2 item xs={6}>
-                  <Typography variant="h6" sx={{ color: 'blue' }}>
-                    Preguntas restantes: {numberOfQuestions - questionCounter}
-                  </Typography>
-                </Grid2>
-                <Grid2 item xs={6}>
-                  <Typography variant="h6" sx={{ color: 'blue' }}>
-                    Puntuación: {score}
-                  </Typography>
-                </Grid2>
-              </Grid2>
+                    {/* Grid Preguntas Restantes y Puntuación*/}
+                    <Grid container spacing={2} style={{ marginTop: '10px', marginBottom: '10px' }}>
+                      <Grid item xs={6}>
+                        <Typography variant="h6" sx={{ color: 'blue' }}>
+                          Preguntas restantes: {numberOfQuestions - questionCounter}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6" sx={{ color: 'blue' }}>
+                          Puntuación: {score}
+                        </Typography>
+                      </Grid>
+                    </Grid>
 
-              {/* Linea Regresiva Temporizador */}
-              <LinearProgress
-                  variant="determinate"
-                  value={(timeLeft / timeLimit) * 100}
-                  sx={{
-                    height: 10,
-                    backgroundColor: 'primary',
-                    '& .MuiLinearProgress-bar': { backgroundColor: timeLeft <= 5 ? 'red' : 'blue' },
-                    marginTop: '10px'
-                  }}
-              />
-              <Typography variant="caption" sx={{ display: 'block', marginBottom: '10px' }}>
-                Tiempo restante: {timeLeft}s
-              </Typography>
+                    {/* Linea Regresiva Temporizador */}
+                    <LinearProgress
+                        variant="determinate"
+                        value={(timeLeft / timeLimit) * 100}
+                        sx={{
+                          height: 10,
+                          backgroundColor: 'primary',
+                          '& .MuiLinearProgress-bar': { backgroundColor: timeLeft <= 5 ? 'red' : 'blue' },
+                          marginTop: '10px'
+                        }}
+                    />
+                    <Typography variant="caption" sx={{ display: 'block', marginBottom: '10px' }}>
+                      Tiempo restante: {timeLeft}s
+                    </Typography>
 
               {/* Pregunta */}
               <Typography data-testid="question" variant="h6" sx={{ marginBottom: '10px' }}>
                 {question}
               </Typography>
 
-              {/* Imagen */}
-              {image && <img src={image} alt="Imagen de la pregunta" width="40%" height="auto" style={{ marginBottom: '20px'}} />}
+                    {/* Imagen */}
+                    {image && <img src={image} alt="Imagen de la pregunta" width="40%" height="auto" style={{ marginBottom: '20px'}} />}
 
-              {/* Opciones de respuesta */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '10px',
-                alignItems: 'center',
-                marginTop: '20px',
-                marginBottom: '20px'
-              }}>
-                {options.map((option, index) => (
-                    <Button
-                        key={index}
-                        variant="contained"
-                        onClick={() => handleOptionClick(option)}
-                        style={{
-                          backgroundColor: selectedAnswer ?
-                              (selectedAnswer === option
-                                  ? (isCorrect ? 'green' : 'red')
-                                  : (option === correctAnswer && selectedAnswer !== null ? 'green' : ''))
-                              : '',
-                          color: (selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer))
-                              ? 'white'
-                              : 'black'
-                        }}
-                        disabled={selectedAnswer !== null} // Deshabilita los botones tras hacer clic
-                    >
-                      {option}
-                    </Button>
-                ))}
-              </div>
-              <Chat correctAnswer={correctAnswer} question={question} />
-            </>
-          )}
+                    {/* Opciones de respuesta */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: '10px',
+                      alignItems: 'center',
+                      marginTop: '20px',
+                      marginBottom: '20px'
+                    }}>
+                      {options.map((option, index) => (
+                          <Button
+                              key={index}
+                              variant="contained"
+                              onClick={() => handleOptionClick(option)}
+                              style={{
+                                backgroundColor: selectedAnswer ?
+                                    (selectedAnswer === option
+                                        ? (isCorrect ? 'green' : 'red')
+                                        : (option === correctAnswer && selectedAnswer !== null ? 'green' : ''))
+                                    : '',
+                                color: (selectedAnswer === option || (selectedAnswer !== null && option === correctAnswer))
+                                    ? 'white'
+                                    : 'black'
+                              }}
+                              disabled={selectedAnswer !== null} // Deshabilita los botones tras hacer clic
+                          >
+                            {option}
+                          </Button>
+                      ))}
+                    </div>
+                    <Chat correctAnswer={correctAnswer} question={question} />
+                  </>
+              )}
             </Paper>
         )}
 
