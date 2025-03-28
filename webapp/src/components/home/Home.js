@@ -7,7 +7,7 @@ import {
   Container,
   Typography,
   Button,
-  Grid,
+  Grid2,
   Paper,
   Box,
   CardContent,
@@ -357,9 +357,9 @@ const HomePage = () => {
               </Box>
 
               <Box sx={{ p: 4 }}>
-                <Grid container spacing={4}>
+                <Grid2 container spacing={4}>
                   {/* Chart - con diseño mejorado */}
-                  <Grid item xs={12} md={8}>
+                  <Grid2 item xs={12} md={8}>
                     {loading ? (
                       <Box
                         sx={{
@@ -573,10 +573,10 @@ const HomePage = () => {
                         </Typography>
                       </Box>
                     )}
-                  </Grid>
+                  </Grid2>
 
                   {/* New Game Button - con diseño mejorado y menú desplegable */}
-                  <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center" }}>
+                  <Grid2 item xs={12} md={4} sx={{ display: "flex", alignItems: "center" }}>
                     <Paper
                       elevation={0}
                       sx={{
@@ -778,8 +778,8 @@ const HomePage = () => {
                         </Box>
                       </Box>
                     </Paper>
-                  </Grid>
-                </Grid>
+                  </Grid2>
+                </Grid2>
               </Box>
             </Paper>
           </Fade>
@@ -836,9 +836,9 @@ const HomePage = () => {
                     ))}
                   </Box>
                 ) : sessionData.length > 0 ? (
-                  <Grid container spacing={2}>
+                  <Grid2 container spacing={2}>
                     {getLastFiveSessions().map((session, index) => (
-                      <Grid item xs={12} key={session._id}>
+                      <Grid2 item xs={12} key={session._id}>
                         <Paper
                           elevation={0}
                           className="session-card"
@@ -857,9 +857,9 @@ const HomePage = () => {
                             },
                           }}
                         >
-                          <Grid container>
+                          <Grid2 container>
                             {/* Barra lateral con número de sesión */}
-                            <Grid
+                            <Grid2
                               item
                               xs={1}
                               sm={1}
@@ -874,13 +874,13 @@ const HomePage = () => {
                               }}
                             >
                               {index + 1}
-                            </Grid>
+                            </Grid2>
 
                             {/* Contenido principal */}
-                            <Grid item xs={11} sm={11}>
+                            <Grid2 item xs={11} sm={11}>
                               <CardContent sx={{ p: 3 }}>
-                                <Grid container spacing={2} alignItems="center">
-                                  <Grid item xs={12} sm={4}>
+                                <Grid2 container spacing={2} alignItems="center">
+                                  <Grid2 item xs={12} sm={4}>
                                     <Box>
                                       <Typography variant="subtitle1" color="primary" fontWeight="medium">
                                         Sesión del {formatDate(session.createdAt).split(" ")[0]}
@@ -898,8 +898,8 @@ const HomePage = () => {
                                         {formatDate(session.createdAt).split(" ")[1]}
                                       </Typography>
                                     </Box>
-                                  </Grid>
-                                  <Grid item xs={6} sm={4}>
+                                  </Grid2>
+                                  <Grid2 item xs={6} sm={4}>
                                     <Box
                                       sx={{
                                         display: "flex",
@@ -914,8 +914,8 @@ const HomePage = () => {
                                         <strong>{session.score}</strong> correctas
                                       </Typography>
                                     </Box>
-                                  </Grid>
-                                  <Grid item xs={6} sm={4}>
+                                  </Grid2>
+                                  <Grid2 item xs={6} sm={4}>
                                     <Box
                                       sx={{
                                         display: "flex",
@@ -930,15 +930,15 @@ const HomePage = () => {
                                         <strong>{session.wrongAnswers}</strong> incorrectas
                                       </Typography>
                                     </Box>
-                                  </Grid>
-                                </Grid>
+                                  </Grid2>
+                                </Grid2>
                               </CardContent>
-                            </Grid>
-                          </Grid>
+                            </Grid2>
+                          </Grid2>
                         </Paper>
-                      </Grid>
+                      </Grid2>
                     ))}
-                  </Grid>
+                  </Grid2>
                 ) : (
                   <Box
                     sx={{
@@ -999,8 +999,8 @@ const HomePage = () => {
             </DialogTitle>
             <DialogContent sx={{ p: 0 }}>
               <Box sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                <Grid2 container spacing={2}>
+                  <Grid2 item xs={6}>
                     <Box
                       sx={{
                         display: "flex",
@@ -1015,8 +1015,8 @@ const HomePage = () => {
                         <strong>{selectedSession.score}</strong> respuestas correctas
                       </Typography>
                     </Box>
-                  </Grid>
-                  <Grid item xs={6}>
+                  </Grid2>
+                  <Grid2 item xs={6}>
                     <Box
                       sx={{
                         display: "flex",
@@ -1031,8 +1031,8 @@ const HomePage = () => {
                         <strong>{selectedSession.wrongAnswers}</strong> respuestas incorrectas
                       </Typography>
                     </Box>
-                  </Grid>
-                </Grid>
+                  </Grid2>
+                </Grid2>
               </Box>
 
               <Typography variant="h6" sx={{ px: 3, pt: 3, pb: 2 }}>
@@ -1094,8 +1094,8 @@ const HomePage = () => {
                       </ListItem>
                       <Collapse in={expandedQuestion === index} timeout="auto" unmountOnExit>
                         <Box sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.03) }}>
-                          <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
+                          <Grid2 container spacing={2}>
+                            <Grid2 item xs={12} sm={6}>
                               <Box
                                 sx={{
                                   p: 2,
@@ -1109,8 +1109,8 @@ const HomePage = () => {
                                 </Typography>
                                 <Typography variant="body2">{q.correctAnswer}</Typography>
                               </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
+                            </Grid2>
+                            <Grid2 item xs={12} sm={6}>
                               <Box
                                 sx={{
                                   p: 2,
@@ -1131,8 +1131,8 @@ const HomePage = () => {
                                 </Typography>
                                 <Typography variant="body2">{q.userAnswer}</Typography>
                               </Box>
-                            </Grid>
-                          </Grid>
+                            </Grid2>
+                          </Grid2>
                         </Box>
                       </Collapse>
                       <Divider component="li" />

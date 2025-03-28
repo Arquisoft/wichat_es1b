@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Paper, AppBar, Toolbar, Button, Grid, Typography, LinearProgress } from '@mui/material';
+import { Container, Paper, AppBar, Toolbar, Button, Grid2, Typography, LinearProgress } from '@mui/material';
 import { PieChart, Pie, Cell } from 'recharts';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -288,18 +288,18 @@ const Game = () => {
                   <>
 
               {/* Grid Preguntas Restantes y Puntuación*/}
-              <Grid container spacing={2} style={{ marginTop: '10px', marginBottom: '10px' }}>
-                <Grid item xs={6}>
+              <Grid2 container spacing={2} style={{ marginTop: '10px', marginBottom: '10px' }}>
+                <Grid2 item xs={6}>
                   <Typography variant="h6" sx={{ color: 'blue' }}>
                     Preguntas restantes: {numberOfQuestions - questionCounter}
                   </Typography>
-                </Grid>
-                <Grid item xs={6}>
+                </Grid2>
+                <Grid2 item xs={6}>
                   <Typography variant="h6" sx={{ color: 'blue' }}>
                     Puntuación: {score}
                   </Typography>
-                </Grid>
-              </Grid>
+                </Grid2>
+              </Grid2>
 
               {/* Linea Regresiva Temporizador */}
               <LinearProgress
@@ -317,7 +317,7 @@ const Game = () => {
               </Typography>
 
               {/* Pregunta */}
-              <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+              <Typography data-testid="question" variant="h6" sx={{ marginBottom: '10px' }}>
                 {question}
               </Typography>
 
