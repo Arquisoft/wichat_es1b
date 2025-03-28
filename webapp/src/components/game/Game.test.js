@@ -180,6 +180,32 @@ it('the user answers the first question correctly', async () => {
   
     errorSpy.mockRestore(); // Limpieza
   });
+
+  it('counts down the timer and moves to the next question', async () => {
+    mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
+      message: 'Game started',
+      category: 'All',
+      firstQuestion: mockFirstQuestion
+    });
+
+    mockAxios.onGet('http://localhost:8004/nextQuestion').reply(200, {
+      nextQuestion: mockNextQuestion
+    });
+
+    renderComponent();
+
+    const question = await screen.findByTestId('question');
+    expect(question).toHaveTextContent('¿Cuál es la capital de España?');
+
+    await act(async () => {
+      jest.advanceTimersByTime(30000); // Advance timer by 30 seconds
+    });
+
+    await waitFor(() => {
+      const nextQuestion = screen.getByTestId('question');
+      expect(nextQuestion).toHaveTextContent('¿Cuál es la capital de España?');
+    });
+  });
   
   
 });
