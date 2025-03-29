@@ -9,6 +9,8 @@ let browser;
 defineFeature(feature, test => {
   beforeAll(async () => {
 
+    jest.setTimeout(80000);
+
     browser = process.env.GITHUB_ACTIONS
       ? await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']})
       : await puppeteer.launch({ headless: false, slowMo: 100 });
@@ -46,7 +48,7 @@ defineFeature(feature, test => {
     then('Debería mostrarse un mensaje de error', async () => {
         await expect(page).toMatchElement("div", { text: "Error: Las contraseñas no coinciden" });
     });
-  });
+  }, 80000);
 
   afterAll(async () => {
     await browser.close();

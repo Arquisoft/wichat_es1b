@@ -239,7 +239,6 @@ const HomePage = () => {
     navigate('/');
   };
 
-  // Función para volver a la página principal
   const handleGoToProfile = () => {
     console.log("Ir al perfil");
     navigate('/Profile');

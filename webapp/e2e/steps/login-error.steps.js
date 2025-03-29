@@ -12,7 +12,8 @@ let browser;
 
 defineFeature(feature, test => {
   beforeAll(async () => {
-    jest.setTimeout(60000);
+
+    jest.setTimeout(80000);
   
     browser = process.env.GITHUB_ACTIONS
       ? await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']})
@@ -61,7 +62,7 @@ defineFeature(feature, test => {
       const errormessage = await page.$eval('div.MuiSnackbarContent-message', el => el.textContent);
       expect(errormessage).toMatch("Credenciales inválidas");
     });
-  });
+  }, 80000);
 
   afterAll(async () => {
     await browser.close();

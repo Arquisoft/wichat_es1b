@@ -169,7 +169,10 @@ const Game = () => {
     }
   }, [isFinished]);
 
-
+  const handleGoToProfile = () => {
+    console.log("Ir al perfil");
+    navigate('/Profile');
+  };
 
   const handleHome = () => {
     navigate('/Home');
@@ -262,10 +265,8 @@ const Game = () => {
               <AppBar position="static" color="primary">
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Button color="inherit" onClick={handleHome}>Abandonar</Button>
-
                   <Button color="inherit" onClick={() => handleNewGame()}>Empezar nueva partida</Button>
                   <Button color="inherit" onClick={() => handleGoToProfile()}>Ver perfil</Button>
-
                 </Toolbar>
               </AppBar>
 

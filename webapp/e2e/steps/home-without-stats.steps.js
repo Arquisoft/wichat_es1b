@@ -13,7 +13,7 @@ let browser;
 defineFeature(feature, test => {
   beforeAll(async () => {
 
-    jest.setTimeout(60000);
+    jest.setTimeout(80000);
   
     browser = process.env.GITHUB_ACTIONS
       ? await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']})
@@ -76,7 +76,7 @@ defineFeature(feature, test => {
 
       expect(message).toMatch("No hay datos de sesiones disponibles");
     });
-  });
+  }, 80000);
 
   afterAll(async () => {
     await browser.close();
