@@ -10,7 +10,7 @@ For running Prometheus and Grafana we can use several docker images. Check `dock
 
 <mark>Note: in the `prometheus.yml` we are telling prometheus where is our restapi metrics end point. In Grafana `datasources/datasource.yml` we are telling where to find prometheus data.</mark>
 
-<mark>In both configuration files we need to stablish the uris of restapi metrics and the prometheus datasource. Right now they are configured to work using docker-compose network. If you want to use these individual docker commands, you need to change these uris to point to localhost</mark>
+<mark>In both configuration files we need to establish the uris of restapi metrics and the prometheus datasource. Right now they are configured to work using docker-compose network. If you want to use these individual docker commands, you need to change these uris to point to localhost</mark>
 
 Once launched all the system is launched (see the Quick Start Guide), we can simulate a few petitions to our webservice:
 

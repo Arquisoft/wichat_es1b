@@ -99,7 +99,7 @@ export default function AnimatedCharacter() {
         style={{ position: "relative", height: "100%", width: "100%" }}
       >
         {/* SVG para Doraemon */}
-        <svg viewBox="0 0 200 200" style={{ height: "100%", width: "100%" }}>
+        <svg data-testid="character-svg" viewBox="0 0 200 200" style={{ height: "100%", width: "100%" }}>
           {/* Sombra */}
           <ellipse cx="100" cy="190" rx="40" ry="8" fill="rgba(0,0,0,0.2)" />
 
