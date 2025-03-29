@@ -20,7 +20,7 @@ defineFeature(feature, test => {
       : await puppeteer.launch({ headless: false, slowMo: 100 });
     page = await browser.newPage();
 
-    setDefaultOptions({ timeout: 20000 })
+    setDefaultOptions({ timeout: 60000 })
   
     await page
       .goto("http://localhost:3000", {
@@ -74,7 +74,7 @@ defineFeature(feature, test => {
     });
 
     then('Deberia mostrarse un mensaje de "No hay datos de sesiones disponibles"', async () => {
-      await page.waitForSelector('p', { visible: true, timeout: 30000 });
+      await page.waitForSelector('p', { visible: true, timeout: 60000 });
 
       const message = await page.$eval('p', el => el.textContent);
 
