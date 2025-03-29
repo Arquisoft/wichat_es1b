@@ -169,7 +169,10 @@ const Game = () => {
     }
   }, [isFinished]);
 
-
+  const handleGoToProfile = () => {
+    console.log("Ir al perfil");
+    navigate('/Profile');
+  };
 
   const handleHome = () => {
     navigate('/Home');
@@ -388,10 +391,21 @@ const Game = () => {
                 </div>
               </div>
 
-              {/* Botón Menú principal */}
-              <Button onClick={handleHome} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
-                Volver al menú principal
-              </Button>
+              <Grid container spacing={2} justifyContent="center">
+                {/* Botón Menú principal */}
+                <Grid item>
+                  <Button onClick={handleHome} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
+                    Volver al menú principal
+                  </Button>
+                </Grid>
+
+                {/* Botón Perfil */}
+                <Grid item>
+                  <Button onClick={handleGoToProfile} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
+                    Ver perfil
+                  </Button>
+                </Grid>
+              </Grid>
             </Paper>
         )}
       </Container>

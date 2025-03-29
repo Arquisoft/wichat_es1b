@@ -4,31 +4,33 @@ import React, { useState } from "react"
 
 import { createContext, useContext, useEffect } from "react"
 import {
-    Container,
-    Typography,
-    Button,
-    Grid,
-    Paper,
-    Box,
-    CardContent,
-    useTheme,
-    alpha,
-    Skeleton,
-    Fade,
-    Chip,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    IconButton,
-    List,
-    ListItem,
-    ListItemText,
-    Divider,
-    Collapse,
-    Menu,
-    MenuItem,
-    ListItemIcon,
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Paper,
+  Box,
+  CardContent,
+  useTheme,
+  alpha,
+  Skeleton,
+  Fade,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Collapse,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  AppBar,
+  Toolbar,
 } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -51,6 +53,8 @@ import ShuffleIcon from "@mui/icons-material/Shuffle"
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports"
 import FlightIcon from "@mui/icons-material/Flight"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import "./Home.css"
 
 const ConfigContext = createContext()
@@ -228,133 +232,212 @@ const HomePage = () => {
         setExpandedQuestion(expandedQuestion === index ? null : index)
     }
 
-    return (
-        <ConfigContext.Provider value={configValue}>
-            <Box
-                sx={{
-                    minHeight: "100vh",
-                    background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
-                    pt: 4,
-                    pb: 10,
-                }}
+  // Función para cerrar sesión y redirigir al login
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    console.log("Cerrar sesión");
+    navigate('/');
+  };
+
+  const handleGoToProfile = () => {
+    console.log("Ir al perfil");
+    navigate('/Profile');
+  };
+
+  const [showMessage, setShowMessage] = useState("");
+
+  return (
+    <ConfigContext.Provider value={configValue}>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
+          pt: 4,
+          pb: 10,
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Menú Superior */}
+          <AppBar
+            position="sticky"
+            sx={{
+              background: "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)",
+              marginBottom: '20px',
+              borderRadius: 4,
+              boxShadow: 'none',
+            }}
+          >
+            <Toolbar
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
             >
-                <Container maxWidth="lg">
-                    {/* Welcome Message - con diseño mejorado */}
-                    <Fade in={true} timeout={800}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                mb: 4,
-                                textAlign: "center",
-                                p: 4,
-                                borderRadius: 4,
-                                background: primaryGradient,
-                                color: "white",
-                                boxShadow: "0 10px 30px rgba(25, 118, 210, 0.3)",
-                                position: "relative",
-                                overflow: "hidden",
-                            }}
-                        >
-                            {/* Elementos decorativos de fondo */}
-                            <Box
-                                sx={{
-                                    position: "absolute",
-                                    top: -20,
-                                    left: -20,
-                                    width: 120,
-                                    height: 120,
-                                    borderRadius: "50%",
-                                    background: "rgba(255,255,255,0.1)",
-                                }}
-                            />
-                            <Box
-                                sx={{
-                                    position: "absolute",
-                                    bottom: -30,
-                                    right: -30,
-                                    width: 150,
-                                    height: 150,
-                                    borderRadius: "50%",
-                                    background: "rgba(255,255,255,0.1)",
-                                }}
-                            />
+              <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
+                WiChat - Home
+              </Typography>
 
-                            <Typography
-                                variant="h3"
-                                component="h1"
-                                gutterBottom
-                                fontWeight="bold"
-                                sx={{
-                                    textShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                                    position: "relative",
-                                    zIndex: 1,
-                                }}
-                            >
-                                ¡Hola, {username}! WiChat te espera
-                            </Typography>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    opacity: 0.9,
-                                    position: "relative",
-                                    zIndex: 1,
-                                    mb: 2,
-                                }}
-                            >
-                                Revisa tus estadísticas y comienza una nueva partida
-                            </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <MenuItem
+                  onClick={handleGoToProfile}
+                  onMouseEnter={() => setShowMessage("Ir al perfil")}
+                  onMouseLeave={() => setShowMessage("")}
+                  sx={{ display: 'flex', alignItems: 'center' }}
+                >
+                  <AccountCircleIcon sx={{ mr: 1 }} />
+                </MenuItem>
 
-                            {/* Nivel del jugador */}
-                            {!loading && sessionData.length > 0 && (
-                                <Chip
-                                    icon={<StarIcon />}
-                                    label={`Nivel: ${playerLevel.level}`}
-                                    sx={{
-                                        bgcolor: alpha(playerLevel.color, 0.2),
-                                        color: "white",
-                                        border: `1px solid ${alpha(playerLevel.color, 0.5)}`,
-                                        fontWeight: "bold",
-                                        position: "relative",
-                                        zIndex: 1,
-                                    }}
-                                />
-                            )}
-                        </Paper>
-                    </Fade>
+                <MenuItem
+                  onClick={handleLogout}
+                  onMouseEnter={() => setShowMessage("Cerrar sesión")}
+                  onMouseLeave={() => setShowMessage("")}
+                  sx={{ display: 'flex', alignItems: 'center' }}
+                >
+                  <ExitToAppIcon sx={{ mr: 1 }} />
+                </MenuItem>
 
-                    {/* Statistics and New Game Button in the same container - con diseño mejorado */}
-                    <Fade in={true} timeout={1000}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 0,
-                                mb: 4,
-                                borderRadius: 4,
-                                overflow: "hidden",
-                                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
-                                border: "1px solid rgba(0, 0, 0, 0.05)",
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    p: 3,
-                                    background: "linear-gradient(90deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%)",
-                                    borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-                                }}
-                            >
-                                <Typography
-                                    variant="h5"
-                                    fontWeight="bold"
-                                    color="primary"
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 1,
-                                    }}
-                                >
-                                    <EmojiEventsIcon /> Estadísticas Totales
-                                </Typography>
-                            </Box>
+                {showMessage && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: '90%',
+                      left: '0%',
+                      transform: 'translateX(10px)',
+                      bgcolor: 'rgba(25,118,210,0.7)',
+                      color: 'white',
+                      padding: '5px 10px',
+                      borderRadius: '5px',
+                      fontSize: '0.9rem',
+                      whiteSpace: 'nowrap',
+                      opacity: 1,
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                    }}
+                  >
+                    {showMessage}
+                  </Box>
+                )}
+              </Box>
+            </Toolbar>
+          </AppBar>
+
+          {/* Welcome Message - con diseño mejorado */}
+          <Fade in={true} timeout={800}>
+            <Paper
+              elevation={0}
+              sx={{
+                mb: 4,
+                textAlign: "center",
+                p: 4,
+                borderRadius: 4,
+                background: primaryGradient,
+                color: "white",
+                boxShadow: "0 10px 30px rgba(25, 118, 210, 0.3)",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {/* Elementos decorativos de fondo */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: -20,
+                  left: -20,
+                  width: 120,
+                  height: 120,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.1)",
+                }}
+              />
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: -30,
+                  right: -30,
+                  width: 150,
+                  height: 150,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.1)",
+                }}
+              />
+
+              <Typography
+                variant="h3"
+                component="h1"
+                gutterBottom
+                fontWeight="bold"
+                sx={{
+                  textShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                ¡Hola, {username}! WiChat te espera
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  opacity: 0.9,
+                  position: "relative",
+                  zIndex: 1,
+                  mb: 2,
+                }}
+              >
+                Revisa tus estadísticas y comienza una nueva partida
+              </Typography>
+
+              {/* Nivel del jugador */}
+              {!loading && sessionData.length > 0 && (
+                <Chip
+                  icon={<StarIcon />}
+                  label={`Nivel: ${playerLevel.level}`}
+                  sx={{
+                    bgcolor: alpha(playerLevel.color, 0.2),
+                    color: "white",
+                    border: `1px solid ${alpha(playerLevel.color, 0.5)}`,
+                    fontWeight: "bold",
+                    position: "relative",
+                    zIndex: 1,
+                  }}
+                />
+              )}
+            </Paper>
+          </Fade>
+
+          {/* Statistics and New Game Button in the same container - con diseño mejorado */}
+          <Fade in={true} timeout={1000}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 0,
+                mb: 4,
+                borderRadius: 4,
+                overflow: "hidden",
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
+                border: "1px solid rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <Box
+                sx={{
+                  p: 3,
+                  background: "linear-gradient(90deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%)",
+                  borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  color="primary"
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <EmojiEventsIcon /> Estadísticas Totales
+                </Typography>
+              </Box>
 
                             <Box sx={{ p: 4 }}>
                                 <Grid container spacing={4}>
