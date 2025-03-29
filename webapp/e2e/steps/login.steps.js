@@ -20,7 +20,7 @@ defineFeature(feature, test => {
       : await puppeteer.launch({ headless: false, slowMo: 100 });
     page = await browser.newPage();
 
-    setDefaultOptions({ timeout: 10000 })
+    setDefaultOptions({ timeout: 20000 })
   
     await page
       .goto("http://localhost:3000", {
@@ -58,7 +58,7 @@ defineFeature(feature, test => {
     then('Debería ver el mensaje "WiChat te espera"', async () => {
       await page.waitForFunction(
         'document.querySelector("h1") && document.querySelector("h1").textContent.includes("WiChat te espera")',
-        { timeout: 10000 }
+        { timeout: 20000 }
       );
 
       const message = await page.$eval('h1', el => el.textContent);

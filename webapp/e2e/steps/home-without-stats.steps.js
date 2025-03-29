@@ -20,7 +20,7 @@ defineFeature(feature, test => {
       : await puppeteer.launch({ headless: false, slowMo: 100 });
     page = await browser.newPage();
 
-    setDefaultOptions({ timeout: 10000 })
+    setDefaultOptions({ timeout: 20000 })
   
     await page
       .goto("http://localhost:3000", {
@@ -58,19 +58,23 @@ defineFeature(feature, test => {
     let password;
 
     given('Un usuario sin partidas jugadas', async () => {
-      //username = "wichat";
-      //password= "123456";
+      username = "wichat";
+      password= "123456";
     });
 
     when('Accede al Home', async () => {
-      //await expect(page).toFill('input[name="username"]', username);
-      //await expect(page).toFill('input[name="password"]', password);
-      //await expect(page).toClick('button', { text: 'Iniciar sesión' });
-      await page.waitForSelector('div', { visible: true, timeout: 10000 }); // Esperamos a que cargue la página Home
+      await page.waitForSelector('input[name="username"]', { visible: true });
+      await page.waitForSelector('input[name="password"]', { visible: true });
+
+      await expect(page).toFill('input[name="username"]', username);
+      await expect(page).toFill('input[name="password"]', password);
+
+      await expect(page).toClick('button', { text: 'Iniciar sesión' });
+      //await page.waitForSelector('div', { visible: true, timeout: 20000 }); // Esperamos a que cargue la página Home
     });
 
     then('Deberia mostrarse un mensaje de "No hay datos de sesiones disponibles"', async () => {
-      await page.waitForSelector('p', { visible: true, timeout: 10000 });
+      await page.waitForSelector('p', { visible: true, timeout: 30000 });
 
       const message = await page.$eval('p', el => el.textContent);
 

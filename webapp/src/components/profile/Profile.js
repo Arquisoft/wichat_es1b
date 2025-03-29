@@ -214,6 +214,17 @@ const Profile = () => {
     setSelectedSession(null);
     setExpandedQuestion(null);
   };
+
+    const getGreetingMessage = () => {
+        const currentHour = new Date().getHours();
+        if (currentHour >= 5 && currentHour < 12) {
+            return "¡Buenos días";
+        } else if (currentHour >= 12 && currentHour < 20) {
+            return "¡Buenas tardes";
+        } else {
+            return "¡Buenas noches";
+        }
+    };
   
   return (
       <Box
@@ -341,7 +352,7 @@ const Profile = () => {
                   zIndex: 1,
                 }}
               >
-                ¡Hola, {username}!
+                  {getGreetingMessage()}, {username}!
               </Typography>
   
               <Typography

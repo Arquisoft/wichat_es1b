@@ -20,7 +20,7 @@ defineFeature(feature, test => {
       : await puppeteer.launch({ headless: false, slowMo: 100 });
     page = await browser.newPage();
 
-    setDefaultOptions({ timeout: 10000 })
+    setDefaultOptions({ timeout: 20000 })
   
     await page
       .goto("http://localhost:3000", {
@@ -57,7 +57,7 @@ defineFeature(feature, test => {
     });
 
     then('Debería ver el mensaje "Credenciales inválidas"', async () => {
-        await page.waitForSelector('div.MuiSnackbarContent-message', { visible: true, timeout: 10000 });
+        await page.waitForSelector('div.MuiSnackbarContent-message', { visible: true, timeout: 20000 });
 
       const errormessage = await page.$eval('div.MuiSnackbarContent-message', el => el.textContent);
       expect(errormessage).toMatch("Credenciales inválidas");

@@ -266,7 +266,6 @@ const Game = () => {
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Button color="inherit" onClick={handleHome}>Abandonar</Button>
                   <Button color="inherit" onClick={() => handleNewGame()}>Empezar nueva partida</Button>
-                  <Button color="inherit" onClick={() => handleGoToProfile()}>Ver perfil</Button>
                 </Toolbar>
               </AppBar>
 
