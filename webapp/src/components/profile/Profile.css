@@ -1,0 +1,72 @@
+/* Profile.css */
+
+/* Animación para el fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilo para la cabecera simplificada */
+.profile-header {
+  background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
+  color: white;
+  text-align: center;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(25, 118, 210, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-header .decorative-circle {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.profile-header .circle-top-left {
+  top: -20px;
+  left: -20px;
+  width: 120px;
+  height: 120px;
+}
+
+.profile-header .circle-bottom-right {
+  bottom: -30px;
+  right: -30px;
+  width: 150px;
+  height: 150px;
+}
+
+/* Estilos del texto */
+.profile-header h1 {
+  font-weight: bold;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para el texto pequeño */
+.profile-header h6 {
+  opacity: 0.9;
+  font-weight: normal;
+  margin-bottom: 16px;
+}
+
+.MuiMenuItem-root {
+  font-size: 1rem;
+  color: #1976d2;
+}
+
+.MuiIconButton-root {
+  margin-right: 10px;
+}
+
+/* Animación para el menú desplegable */
+.MuiMenu-paper {
+  animation: fadeIn 0.2s ease-out;
+}
