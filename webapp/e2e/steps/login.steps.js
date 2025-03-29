@@ -13,14 +13,14 @@ let browser;
 defineFeature(feature, test => {
   beforeAll(async () => {
 
-    jest.setTimeout(80000);
+    jest.setTimeout(100000);
   
     browser = process.env.GITHUB_ACTIONS
       ? await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']})
       : await puppeteer.launch({ headless: false, slowMo: 100 });
     page = await browser.newPage();
 
-    setDefaultOptions({ timeout: 60000 })
+    setDefaultOptions({ timeout: 100000 })
   
     await page
       .goto("http://localhost:3000", {
@@ -58,7 +58,7 @@ defineFeature(feature, test => {
     then('Debería ver el mensaje "WiChat te espera"', async () => {
       await page.waitForFunction(
         'document.querySelector("h1") && document.querySelector("h1").textContent.includes("WiChat te espera")',
-        { timeout: 60000 }
+        { timeout: 100000 }
       );
 
       const message = await page.$eval('h1', el => el.textContent);

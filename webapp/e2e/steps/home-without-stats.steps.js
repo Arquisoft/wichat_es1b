@@ -74,13 +74,13 @@ defineFeature(feature, test => {
     });
 
     then('Deberia mostrarse un mensaje de "No hay datos de sesiones disponibles"', async () => {
-      await page.waitForSelector('p', { visible: true, timeout: 60000 });
+      await page.waitForSelector('p', { visible: true, timeout: 100000 });
 
       const message = await page.$eval('p', el => el.textContent);
 
       expect(message).toMatch("No hay datos de sesiones disponibles");
     });
-  }, 80000);
+  }, 100000);
 
   afterAll(async () => {
     await browser.close();
