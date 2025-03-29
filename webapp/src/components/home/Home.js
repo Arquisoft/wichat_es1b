@@ -29,6 +29,8 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
+  AppBar,
+  Toolbar,
 } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -49,6 +51,8 @@ import TheaterComedyIcon from "@mui/icons-material/TheaterComedy"
 import PersonIcon from "@mui/icons-material/Person"
 import ShuffleIcon from "@mui/icons-material/Shuffle"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import "./Home.css"
 
 const ConfigContext = createContext()
@@ -226,6 +230,21 @@ const HomePage = () => {
     setExpandedQuestion(expandedQuestion === index ? null : index)
   }
 
+  // Función para cerrar sesión y redirigir al login
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    console.log("Cerrar sesión");
+    navigate('/');
+  };
+
+  // Función para volver a la página principal
+  const handleGoToProfile = () => {
+    console.log("Ir al perfil");
+    navigate('/Profile');
+  };
+
+  const [showMessage, setShowMessage] = useState("");
+
   return (
     <ConfigContext.Provider value={configValue}>
       <Box
@@ -237,6 +256,71 @@ const HomePage = () => {
         }}
       >
         <Container maxWidth="lg">
+          {/* Menú Superior */}
+          <AppBar
+            position="sticky"
+            sx={{
+              background: "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)",
+              marginBottom: '20px',
+              borderRadius: 4,
+              boxShadow: 'none',
+            }}
+          >
+            <Toolbar
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
+                WiChat - Home
+              </Typography>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <MenuItem
+                  onClick={handleGoToProfile}
+                  onMouseEnter={() => setShowMessage("Ir al perfil")}
+                  onMouseLeave={() => setShowMessage("")}
+                  sx={{ display: 'flex', alignItems: 'center' }}
+                >
+                  <AccountCircleIcon sx={{ mr: 1 }} />
+                </MenuItem>
+
+                <MenuItem
+                  onClick={handleLogout}
+                  onMouseEnter={() => setShowMessage("Cerrar sesión")}
+                  onMouseLeave={() => setShowMessage("")}
+                  sx={{ display: 'flex', alignItems: 'center' }}
+                >
+                  <ExitToAppIcon sx={{ mr: 1 }} />
+                </MenuItem>
+
+                {showMessage && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: '90%',
+                      left: '0%',
+                      transform: 'translateX(10px)',
+                      bgcolor: 'rgba(25,118,210,0.7)',
+                      color: 'white',
+                      padding: '5px 10px',
+                      borderRadius: '5px',
+                      fontSize: '0.9rem',
+                      whiteSpace: 'nowrap',
+                      opacity: 1,
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                    }}
+                  >
+                    {showMessage}
+                  </Box>
+                )}
+              </Box>
+            </Toolbar>
+          </AppBar>
+
           {/* Welcome Message - con diseño mejorado */}
           <Fade in={true} timeout={800}>
             <Paper
