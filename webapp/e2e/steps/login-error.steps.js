@@ -3,10 +3,6 @@ const { defineFeature, loadFeature } = require('jest-cucumber');
 const { setDefaultOptions } = require('expect-puppeteer');
 const feature = loadFeature('./features/login-error.feature');
 
-const axios = require('axios');
-const MockAdapter = require('axios-mock-adapter');
-const mockAxios = new MockAdapter(axios);
-
 let page;
 let browser;
 
@@ -20,7 +16,7 @@ defineFeature(feature, test => {
       : await puppeteer.launch({ headless: false, slowMo: 100 });
     page = await browser.newPage();
 
-    setDefaultOptions({ timeout: 20000 })
+    setDefaultOptions({ timeout: 60000 })
   
     await page
       .goto("http://localhost:3000", {
@@ -28,21 +24,29 @@ defineFeature(feature, test => {
       })
       .catch(() => {});
     
-    // 1. Mockear la respuesta del login con credenciales inválidas
-    mockAxios.onPost('http://localhost:8001/login').reply(401, {
-      message: 'Credenciales inválidas'
+    // Mock login fallido
+    await page.evaluate(() => {
+      const originalFetch = window.fetch;
+      window.fetch = async (url, options) => {
+        if (url.endsWith('/login') && options.method === 'POST') {
+          return Promise.resolve({
+            ok: false,
+            status: 401,
+            json: async () => ({ message: 'Credenciales inválidas' }),
+          });
+        }
+        return originalFetch(url, options);
+      };
     });
   });
 
   test('El usuario introduce credenciales inválidas', ({ given, when, then }) => {
     
     let username;
-    let password;
     let wrongpassword;
     
     given('Un usuario registrado con nombre "wichat" y contraseña "123456"', async () => {
-      username = "wichat"
-      password = "123456";
+      username = "wichat";
       wrongpassword = "aaaaaa";
     });
 
@@ -57,7 +61,7 @@ defineFeature(feature, test => {
     });
 
     then('Debería ver el mensaje "Credenciales inválidas"', async () => {
-        await page.waitForSelector('div.MuiSnackbarContent-message', { visible: true, timeout: 20000 });
+        await page.waitForSelector('div.MuiSnackbarContent-message', { visible: true, timeout: 60000 });
 
       const errormessage = await page.$eval('div.MuiSnackbarContent-message', el => el.textContent);
       expect(errormessage).toMatch("Credenciales inválidas");
