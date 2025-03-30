@@ -223,4 +223,4 @@ jobs:
             docker-compose --profile prod down
             docker-compose --profile dev down
             docker-compose --profile dev up --build -d --pull always
-            docker rmi -f $(docker images -aq)
+            docker rmi $(docker images -aq)
