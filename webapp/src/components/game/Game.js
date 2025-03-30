@@ -402,7 +402,7 @@ const Game = () => {
                 {/* Botón Perfil */}
                 <Grid item>
                   <Button onClick={handleGoToProfile} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
-                    Ver perfil
+                    Ir al perfil
                   </Button>
                 </Grid>
               </Grid>
