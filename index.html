@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>Wichat en español - Equipo 1-B</title>
+<title>WiChat en español - Equipo 1-B</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,7 +436,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1><span class="image"><img src="./images/logo.png" alt="logo"></span> <span class="image"><img src="./images/arc42-logo.png" alt="arc42"></span> Wichat en español - Equipo 1-B</h1>
+<h1><span class="image"><img src="./images/logo.png" alt="logo"></span> <span class="image"><img src="./images/arc42-logo.png" alt="arc42"></span> WiChat en español - Equipo 1-B</h1>
 <div class="details">
 <span id="revnumber">version 8.2 EN,</span>
 <span id="revdate">February 2025</span>
@@ -461,7 +461,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#section-context-and-scope">3. Contexto y Alcance</a>
 <ul class="sectlevel2">
 <li><a href="#_contexto_empresarial">3.1. Contexto Empresarial</a></li>
-<li><a href="#_contexto_tecnico">3.2. Contexto tecnico</a></li>
+<li><a href="#_contexto_técnico">3.2. Contexto técnico</a></li>
 </ul>
 </li>
 <li><a href="#section-solution-strategy">4. Estrategia de solución</a>
@@ -520,15 +520,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p><strong>About arc42</strong></p>
 </div>
-<div class="paragraph lead">
-<p>arc42, the template for documentation of software and system architecture.</p>
-</div>
 <div class="paragraph">
 <p>Template Version 8.2 EN. (based upon AsciiDoc version), February 2025</p>
-</div>
-<div class="paragraph">
-<p>Created, maintained and &#169; by Dr. Peter Hruschka, Dr. Gernot Starke and contributors.
-See <a href="https://arc42.org" class="bare">https://arc42.org</a>.</p>
 </div>
 <hr>
 <div class="sidebarblock arc42help">
@@ -789,7 +782,7 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_contexto_tecnico">3.2. Contexto tecnico</h3>
+<h3 id="_contexto_técnico">3.2. Contexto técnico</h3>
 <div class="paragraph">
 <p>WIChat es una aplicación web compuesta por diversos módulos y tecnologías que permiten su funcionamiento fluido y escalable. La arquitectura se basa en un enfoque de microservicios, con integración de APIs para la generación de preguntas y el procesamiento de lenguaje natural.</p>
 </div>
@@ -908,7 +901,7 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <p><strong>Docker:</strong> se utiliza para hacer el despliegue de la aplicación.</p>
 </li>
 <li>
-<p><strong>Maquina Virtual:</strong> por decidir</p>
+<p><strong>Máquina Virtual:</strong> delegada a los servicios de Azure, donde se desplegará la aplicación.</p>
 </li>
 </ul>
 </div>
@@ -927,7 +920,7 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <p><strong>Usabilidad</strong>: La aplicación será clara, intuitiva y familiar para el usuario.</p>
 </li>
 <li>
-<p><strong>Mantenibilidad</strong>: La aplicación será mantenible gracias al diseño por componentes, lo que nos permitirá tener un código con baja acoplamiento y alta mucha cohesión, ayudándonos a que realizar cambios sea más sencillo y rápido. La documentación se revisará para tenerla actualizada.</p>
+<p><strong>Mantenibilidad</strong>: La aplicación será mantenible gracias al diseño por componentes, lo que nos permitirá tener un código con baja acoplamiento y alta mucha cohesión, ayudándonos a que realizar cambios sea más sencillo y rápido. La documentación se revisará para tenerla actualizada. Además, se implementará y configurará un sistema de CI (Integración Continua) para que cada vez que se realice un cambio en el código, se lleven a cabo pruebas automáticas y se despliegue la aplicación en la nube, dadas ciertas precondiciones.</p>
 </li>
 </ul>
 </div>
@@ -937,13 +930,13 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Los miembros del equipo mantenemos comunicación a través de WhatsApp y Discord para las dudas que surjan u otras decisiones que haya que tomar entre todos los miembros del equipo.</p>
+<p>Los miembros del equipo mantenemos comunicación a través de WhatsApp para las dudas que surjan u otras decisiones que haya que tomar entre todos los miembros del equipo.</p>
 </li>
 <li>
-<p>Se realizan reuniones semanales en las que se expone el trabajo realizado, si alguno ha tenido algún problema y se revisarán las tareas que tiene cada miembro del equipo.</p>
+<p>Se realizan reuniones semanales en las que se expone el trabajo realizado y si alguno ha tenido algún problema. También se revisan las tareas que tiene cada miembro del equipo.</p>
 </li>
 <li>
-<p>Utilizamos un tablero Kanban dentro de GitHub para organizar las tareas que cada miembro del equipo tiene que realizar/está realizando.</p>
+<p>Utilizamos un tablero Kanban dentro de GitHub para organizar las tareas que cada miembro del equipo tiene que realizar/está realizando. Esto, junto con la asignación de las Github Issues, nos permite tener un control de las tareas que se están realizando y de las que quedan por hacer.</p>
 </li>
 </ul>
 </div>
@@ -1243,32 +1236,29 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Se utilizara una metodología agil en el proyecto intentando seguir scrum de la mejor manera posible.</p>
+<p>Se utilizará una metodología ágil en el proyecto intentando seguir "scrum" de la mejor manera posible.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong><em>Tareas y proridades</em></strong></p>
+<p><strong><em>Tareas y prioridades</em></strong></p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Las tareas y prioridades se gestionaran mediante la una planificación en GitHub y se recogeran en un acta durante cada reunion semanal.</p>
+<p>Las tareas y prioridades se gestionarán mediante la una planificación en GitHub y se recogerán en un acta durante cada reunion semanal.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_arquitectura_y_patrones_de_diseño">8.2. <em>Arquitectura y patrones de diseño</em></h3>
 <div class="paragraph">
-<p>El proyecto sigue una arquitectura de microservicios, que es un patrón de diseño el cual estructura una aplicación como una colección de servicios acoplados de manera flexible. Esto hace que la aplicación sea más escalable y fácil de mantener.</p>
-</div>
-<div class="paragraph">
-<p>&#8230;&#8203;</p>
+<p>El proyecto sigue una arquitectura de microservicios, que es un patrón arquitectónico que describe la estructura una aplicación como una colección de servicios acoplados de manera flexible. Esto hace que la aplicación sea más escalable y fácil de mantener.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_libreria_chatbotify">8.3. <em>Libreria ChatBotify</em></h3>
 <div class="paragraph">
-<p>Libreria encargada de la gestion del chatbot, se encargara de la gestion de las peticiones del usuario y respuestas del chatbot.</p>
+<p>Librería encargada de la gestión del chatbot, se encargará de la gestión de las peticiones del usuario y respuestas del chatbot.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1486,9 +1476,9 @@ There you will find links and examples about ADR.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Baja</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&#8230;&#8203;</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&#8230;&#8203;</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&#8230;&#8203;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Dependencia de Azure</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Actualmente, dependemos totalmente de la infraestructura del servicio de Microsoft para acceder a la versión en producción de la aplicación. Cualquier incidencia que tengan en sus servidores, se verá reflejada en el funcionamiento de WiChat, pudiendo evitar el acceso de los clientes temporal o definitivamente a la aplicación.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Baja</p></td>
 </tr>
 </tbody>
 </table>
@@ -1508,8 +1498,20 @@ There you will find links and examples about ADR.</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&#8230;&#8203;</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&#8230;&#8203;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Refactorización del código</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algunas partes del código no siguen las mejores prácticas y necesitan ser refactorizadas para mejorar la mantenibilidad y legibilidad.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Actualización de dependencias</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Algunas dependencias del proyecto están desactualizadas y necesitan ser actualizadas para asegurar la compatibilidad y seguridad del sistema.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Máquina virtual delegada a Azure</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Delegamos la gestión de la máquina virtual a Azure, lo que puede generar problemas de rendimiento y escalabilidad, además de futuros problemas si se quiere cambiar el despliegue a un servidor propio.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Falta de documentación</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La documentación del proyecto no está completa o actualizada, lo que puede dificultar la comprensión y mantenimiento del código por parte de nuevos desarrolladores.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1548,7 +1550,7 @@ There you will find links and examples about ADR.</p>
 <div id="footer">
 <div id="footer-text">
 Version 8.2 EN<br>
-Last updated 2025-03-07 15:47:35 +0100
+Last updated 2025-03-27 12:58:08 +0100
 </div>
 </div>
 </body>
