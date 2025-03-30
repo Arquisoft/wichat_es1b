@@ -3,10 +3,6 @@ const { defineFeature, loadFeature } = require('jest-cucumber');
 const { setDefaultOptions } = require('expect-puppeteer');
 const feature = loadFeature('./features/login.feature');
 
-const axios = require('axios');
-const MockAdapter = require('axios-mock-adapter');
-const mockAxios = new MockAdapter(axios);
-
 let page;
 let browser;
 
@@ -28,10 +24,19 @@ defineFeature(feature, test => {
       })
       .catch(() => {});
     
-    // Mockear el login del usuario 
-    mockAxios.onPost('http://localhost:8001/login').reply(200, {
-      username: 'wichat',
-      token: 'mockedAuthToken',
+    // Mock login dentro del navegador
+    await page.evaluate(() => {
+      const originalFetch = window.fetch;
+      window.fetch = async (url, options) => {
+        if (url.endsWith('/login') && options.method === 'POST') {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ username: 'wichat', token: 'mockedAuthToken' }),
+          });
+        }
+        return originalFetch(url, options);
+      };
     });
   });
 
