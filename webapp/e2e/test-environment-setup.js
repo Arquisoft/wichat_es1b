@@ -16,7 +16,7 @@ async function startServer() {
     authservice = await require("../../users/authservice/auth-service");
     llmservice = await require("../../llmservice/llm-service");
     gatewayservice = await require("../../gatewayservice/gateway-service");
-    sessionservice = await require("../../users/sessionservice/sessionService");
+    sessionservice = await require("../../users/sesionservice/sesionService");
 }
 
 startServer();
