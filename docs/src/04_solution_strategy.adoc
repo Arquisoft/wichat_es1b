@@ -15,19 +15,19 @@ ifndef::imagesdir[:imagesdir: ../images]
 * **Wikidata:** Base de datos libre, colaborativa y multilingüe que se usara para sacar información para las preguntas.
 * **Modelo largo de lenguaje (LLM):** modelo de inteligencia artificial basado en aprendizaje profundo, diseñado para procesar y generar texto en lenguaje natural.
 * **Docker:** se utiliza para hacer el despliegue de la aplicación.
-* **Maquina Virtual:** por decidir
+* **Máquina Virtual:** delegada a los servicios de Azure, donde se desplegará la aplicación.
 
 
 === Decisiones sobre cómo alcanzar los objetivos clave de calidad
 * **Rendimiento**: Se buscará minimizar los tiempos de procesamiento de datos y tareas, para así mejorar la experiencia del usuario.
 * **Testeabilidad**: El equipo testeará la aplicación manual y automáticamente mediante pruebas de cobertura (unitarias e integración), pruebas de aceptación (e2e) y pruebas de carga.
 * **Usabilidad**: La aplicación será clara, intuitiva y familiar para el usuario.   
-* **Mantenibilidad**: La aplicación será mantenible gracias al diseño por componentes, lo que nos permitirá tener un código con baja acoplamiento y alta mucha cohesión, ayudándonos a que realizar cambios sea más sencillo y rápido. La documentación se revisará para tenerla actualizada.
+* **Mantenibilidad**: La aplicación será mantenible gracias al diseño por componentes, lo que nos permitirá tener un código con baja acoplamiento y alta mucha cohesión, ayudándonos a que realizar cambios sea más sencillo y rápido. La documentación se revisará para tenerla actualizada. Además, se implementará y configurará un sistema de CI (Integración Continua) para que cada vez que se realice un cambio en el código, se lleven a cabo pruebas automáticas y se despliegue la aplicación en la nube, dadas ciertas precondiciones.
 
 
 === Decisiones organizativas relevantes
-* Los miembros del equipo mantenemos comunicación a través de WhatsApp y Discord para las dudas que surjan u otras decisiones que haya que tomar entre todos los miembros del equipo.
-* Se realizan reuniones semanales en las que se expone el trabajo realizado, si alguno ha tenido algún problema y se revisarán las tareas que tiene cada miembro del equipo.
-* Utilizamos un tablero Kanban dentro de GitHub para organizar las tareas que cada miembro del equipo tiene que realizar/está realizando.
+* Los miembros del equipo mantenemos comunicación a través de WhatsApp para las dudas que surjan u otras decisiones que haya que tomar entre todos los miembros del equipo.
+* Se realizan reuniones semanales en las que se expone el trabajo realizado y si alguno ha tenido algún problema. También se revisan las tareas que tiene cada miembro del equipo.
+* Utilizamos un tablero Kanban dentro de GitHub para organizar las tareas que cada miembro del equipo tiene que realizar/está realizando. Esto, junto con la asignación de las Github Issues, nos permite tener un control de las tareas que se están realizando y de las que quedan por hacer.
 
 
