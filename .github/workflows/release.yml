@@ -222,4 +222,3 @@ jobs:
             export LLM_API_KEY=${{ secrets.LLM_API_KEY }}
             docker-compose --profile prod down
             docker-compose --profile prod up -d --pull always
-            docker rmi $(docker images -aq)
