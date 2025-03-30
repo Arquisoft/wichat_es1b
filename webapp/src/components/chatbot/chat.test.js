@@ -4,7 +4,6 @@ global.crypto = {
     }
 };
 
-// Add AudioContext mock
 global.AudioContext = class MockAudioContext {
     constructor() {
         this.state = 'running';
@@ -20,7 +19,6 @@ global.AudioContext = class MockAudioContext {
             frequency: { value: 0 },
             type: 'sine'
         });
-        // Add the decodeAudioData method
         this.decodeAudioData = (arrayBuffer, successCallback, errorCallback) => {
             const audioBuffer = {
                 length: 100,
@@ -45,7 +43,7 @@ global.BaseAudioContext = global.AudioContext;
 jest.mock('./chat.png?react', () => 'chat_old.png', { virtual: true });
 
 import React from 'react';
-import {render, screen, fireEvent} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import axios from 'axios';
 import Chat from './chat';
 
@@ -57,8 +55,37 @@ describe('Chat Component', () => {
         axios.post.mockClear();
     });
 
-    it('renders Chat component and displays initial message', async () => {
+    const renderChatComponent = async () => {
         render(<Chat>Test description</Chat>);
+        await screen.findByText(/Estoy aquí para ayudarte!/i);
+    };
+
+    const openChatIfNecessary = async () => {
+        const chatButton = document.querySelector('.rcb-toggle-button.rcb-button-show');
+        if (chatButton) {
+            fireEvent.click(chatButton);
+            await new Promise(r => setTimeout(r, 300));
+        }
+    };
+
+    const sendMessage = async (message) => {
+        const inputField = document.querySelector('.rcb-chat-input-textarea');
+        expect(inputField).not.toBeNull();
+        inputField.value = message;
+
+        const enterEvent = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            keyCode: 13,
+            which: 13,
+            bubbles: true
+        });
+
+        fireEvent(inputField, enterEvent);
+    };
+
+    it('renders Chat component and displays initial message', async () => {
+        await renderChatComponent();
         const initialMessage = await screen.findByText(/Estoy aquí para ayudarte!/i);
         expect(initialMessage).toBeInTheDocument();
     });
@@ -72,34 +99,10 @@ describe('Chat Component', () => {
             }
         });
 
-        render(<Chat>Test description</Chat>);
+        await renderChatComponent();
+        await openChatIfNecessary();
+        await sendMessage('message');
 
-        // Wait for initial message
-        await screen.findByText(/Estoy aquí para ayudarte!/i);
-
-        // Open chat if necessary
-        const chatButton = document.querySelector('.rcb-toggle-button.rcb-button-show');
-        if (chatButton) {
-            fireEvent.click(chatButton);
-            await new Promise(r => setTimeout(r, 300));
-        }
-
-        // Get input field and send a message
-        const inputField = document.querySelector('.rcb-chat-input-textarea');
-        expect(inputField).not.toBeNull();
-        inputField.value = 'message';
-
-        const enterEvent = new KeyboardEvent('keydown', {
-            key: 'Enter',
-            code: 'Enter',
-            keyCode: 13,
-            which: 13,
-            bubbles: true
-        });
-
-        fireEvent(inputField, enterEvent);
-
-        // Wait for response
         const response = await screen.findByText(/llmanswer/i, {}, { timeout: 5000 });
         expect(response).toBeInTheDocument();
     });
@@ -113,33 +116,10 @@ describe('Chat Component', () => {
             }
         });
 
-        render(<Chat>Test description</Chat>);
+        await renderChatComponent();
+        await openChatIfNecessary();
+        await sendMessage('message');
 
-        // Wait for initial message
-        await screen.findByText(/Estoy aquí para ayudarte!/i);
-
-        const chatButton = document.querySelector('.rcb-toggle-button.rcb-button-show');
-        if (chatButton) {
-            fireEvent.click(chatButton);
-            await new Promise(r => setTimeout(r, 300));
-        }
-
-        // Get input field and send a message
-        const inputField = document.querySelector('.rcb-chat-input-textarea');
-        expect(inputField).not.toBeNull();
-        inputField.value = 'message';
-
-        const enterEvent = new KeyboardEvent('keydown', {
-            key: 'Enter',
-            code: 'Enter',
-            keyCode: 13,
-            which: 13,
-            bubbles: true
-        });
-
-        fireEvent(inputField, enterEvent);
-
-        // Wait for error response
         const response = await screen.findByText(/Error fetching message/i, {}, { timeout: 5000 });
         expect(response).toBeInTheDocument();
     });
