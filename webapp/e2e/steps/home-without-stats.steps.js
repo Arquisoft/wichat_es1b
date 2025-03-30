@@ -3,10 +3,6 @@ const { defineFeature, loadFeature } = require('jest-cucumber');
 const { setDefaultOptions } = require('expect-puppeteer');
 const feature = loadFeature('./features/home-without-stats.feature');
 
-const axios = require('axios');
-const MockAdapter = require('axios-mock-adapter');
-const mockAxios = new MockAdapter(axios);
-
 let page;
 let browser;
 
@@ -28,22 +24,29 @@ defineFeature(feature, test => {
       })
       .catch(() => {});
     
-    // Mockear el login del usuario 
-    mockAxios.onPost('http://localhost:8001/login').reply(200, {
-      username: 'wichat',
-      token: 'mockedAuthToken',
-    });
+    // Mock login y estadísticas vacías
+    await page.evaluate(() => {
+      localStorage.setItem('authToken', 'mockedAuthToken');
+      localStorage.setItem('username', 'wichat');
 
-    // Mockear la respuesta de estadísticas (simulando usuario sin partidas jugadas)
-    mockAxios.onGet('http://localhost:8005/user/statistics').reply(200, {
-      sessions: [], // Simulamos que no hay sesiones de juego
-    });
-
-    await page.setCookie({
-      name: 'authToken',
-      value: 'mockedAuthToken',
-      domain: 'localhost', // Esto puede cambiar según el dominio de tu aplicación
-      path: '/',
+      const originalFetch = window.fetch;
+      window.fetch = async (url, options) => {
+        if (url.endsWith('/login') && options.method === 'POST') {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ username: 'wichat', token: 'mockedAuthToken' }),
+          });
+        }
+        if (url.endsWith('/user/statistics') && options.method === 'GET') {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ sessions: [] }),
+          });
+        }
+        return originalFetch(url, options);
+      };
     });
 
     await page
@@ -70,7 +73,6 @@ defineFeature(feature, test => {
       await expect(page).toFill('input[name="password"]', password);
 
       await expect(page).toClick('button', { text: 'Iniciar sesión' });
-      //await page.waitForSelector('div', { visible: true, timeout: 20000 }); // Esperamos a que cargue la página Home
     });
 
     then('Deberia mostrarse un mensaje de "No hay datos de sesiones disponibles"', async () => {
