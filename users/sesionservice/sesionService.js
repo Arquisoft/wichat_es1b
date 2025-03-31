@@ -41,6 +41,23 @@ app.get('/health', (req, res) => {
 app.post('/save-session', async (req, res) => {
   const { userid, score, wrongAnswers, questions } = req.body; // Agregar 'questions'
 
+  // Sanitize userid input
+  if (!userid || typeof userid !== 'string') {
+    return res.status(400).json({ error: 'Invalid user ID format' });
+  }
+
+  // Trim whitespace and limit length
+  let useridTrim = userid.trim();
+  if (useridTrim.length === 0 || useridTrim.length > 50) {
+    return res.status(400).json({ error: 'User ID must be between 1 and 50 characters' });
+  }
+
+  // Only allow alphanumeric characters and some common symbols
+  const validUsernameRegex = /^[a-zA-Z0-9._-]+$/;
+  if (!validUsernameRegex.test(userid)) {
+    return res.status(400).json({ error: 'User ID contains invalid characters' });
+  }
+
   try {
     const user = await User.findOne({ username: userid });
 

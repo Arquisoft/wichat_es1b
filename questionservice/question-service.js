@@ -22,7 +22,7 @@ const nOptions = 4;
 // Variables
 let questions = [];
 let currentQuestionIndex = 0;
-var maxQuestions = 5;
+var maxQuestions = 200;
 
 var randomQuery;
 var queries = [];
@@ -130,7 +130,7 @@ var queriesAndQuestions = []; // almacena las queries y las preguntas
 
 
 var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué avión es este?", "¿Qué muestra esta imagen?"];
-var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "Aviones", "All"];
+var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "Aviones"];//, "All"];
 var questionObject = "";
 var correctAnswer = "";
 var answerOptions = [];
@@ -211,6 +211,7 @@ async function loadQuestions(category = "All") {
         }
 
         console.log(`Successfully loaded ${questions.length} questions for category: ${category || "All"}`);
+        return questions;
     }
     catch(error) {
         console.error("Error while loading questions:", error);
@@ -383,36 +384,22 @@ app.post('/configureGame', async (req, res) => {
 })
 
 
-app.post('/startGame', async (req, res) => {
-    try {
-        const category = req.body.category; // Get category from request
-        console.log("Category on question-service /startGame:", category);
-
-        await loadQuestions(category);
-
-        let quest = questions[0]
-        saveQuestions(questions)
-
-        res.status(200).json({
-            message: 'Game started',
-            category: category || 'All',
-            firstQuestion: quest
-        });
-    } catch (error) {
-        console.error("Error starting game:", error);
-        res.status(500).json({ error: 'Error starting game: ' + error.message });
-    }
+app.post('/startGame',  async (req, res) => {
+    const quest = await getQuestionsByCategory(req.body.category);
+    const category = req.body.category;
+    res.status(200).json({
+        message: 'Game started',
+        category: category || 'All',
+        firstQuestion: quest
+    });
 });
 
 
-app.get('/nextQuestion', (req, res) => {
-    if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        let quest = questions[currentQuestionIndex];
-        res.status(200).json(quest);
-    } else {
-        res.status(400).json({ error: 'No more questions' });
-    }
+
+
+app.get('/nextQuestion', async (req, res) => {
+    const question = await getQuestionsByCategory(req.query.category)
+    res.status(200).json(question);
 });
 
 
@@ -536,6 +523,19 @@ app.get('/generatedQuestion', async (req, res) => {
     }
 });
 
+app.put('/createQuestions',async (req,res) =>{
+
+    for (const category of categories) {
+        console.log(category);
+        let questions =  await loadQuestions(category);
+        await saveQuestions(questions);
+    }
+
+    console.log("Questions created");
+    res.status(200).send();
+
+})
+
 // Helper function to determine category from question text
 function getCategoryFromQuestion(questionText) {
     if (questionText.includes("lugar")) return "geografia";
@@ -544,6 +544,46 @@ function getCategoryFromQuestion(questionText) {
     if (questionText.includes("avión") || questionText.includes("avion")) return "aviones";
     if (questionText.includes("videojuego")) return "videojuegos";
     return "General";
+}
+
+async function getQuestionsByCategory(category) {
+    try {
+        // Create filter object - empty for "All" or filtered by category
+        if(!category) {
+            category = "All";
+        }
+
+        const filter = category !== "All" ? { category: category.toLowerCase() } : {};
+
+        // Count total matching questions
+        const count = await Question.countDocuments(filter);
+
+        if (count === 0) {
+            console.log(`No questions found for category: ${category}`);
+            return null;
+        }
+
+        // Generate random index
+        const random = Math.floor(Math.random() * count);
+
+        // Skip to random position and get one question
+        const randomQuestion = await Question.findOne(filter).skip(random);
+
+        return {
+            questionObject: randomQuestion.question,
+            questionImage: randomQuestion.image,
+            correctAnswer: randomQuestion.correctAnswer,
+            answerOptions: [
+                randomQuestion.correctAnswer,
+                randomQuestion.inc_answer_1,
+                randomQuestion.inc_answer_2,
+                randomQuestion.inc_answer_3
+            ].sort(() => Math.random() - 0.5)
+        };
+    } catch (error) {
+        console.error("Error fetching random question:", error);
+        throw error;
+    }
 }
 
 

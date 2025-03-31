@@ -40,7 +40,8 @@ const Game = () => {
   const getQuestion = async () => {
 
     try {
-      const response = await axios.get(apiEndpoint + '/nextQuestion');
+      const category = localStorage.getItem('gameCategory') || "All";
+      const response = await axios.get(`${apiEndpoint}/nextQuestion?category=${encodeURIComponent(category)}`);
       const { questionObject, questionImage, correctAnswer, answerOptions } = response.data;
       setQuestion(questionObject);
       setImage(questionImage);
@@ -68,6 +69,8 @@ const Game = () => {
   const handleNewGame = async (category) => {
     setLoading(true);
     try {
+
+      localStorage.setItem('gameCategory', category || "All");
 
       setLoading(true);
       setFinished(false);
