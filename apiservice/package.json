@@ -16,7 +16,7 @@
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "swagger-ui-express": "^5.0.1",
-    "yaml": "^2.7.0"
+    "yaml": "^2.7.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",

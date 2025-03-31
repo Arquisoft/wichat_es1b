@@ -14,13 +14,16 @@ ifndef::imagesdir[:imagesdir: ../images]
 | Seguridad | Si el sistema de registro y la API no están bien protegidos, podría haber riesgos de acceso no autorizado a datos sensibles de los usuarios. | Alta
 | Falta de pruebas | Si no se implementan las pruebas adecuadas entre el frontend, backend y la API externa, podrían surgir errores no detectados. | Media
 | Desactualización de datos | Si los datos de Wikidata no se actualizan regularmente, las preguntas podrían volverse confusas o imprecisas con el tiempo. | Baja
-| ... | ... | ...
+| Dependencia de Azure | Actualmente, dependemos totalmente de la infraestructura del servicio de Microsoft para acceder a la versión en producción de la aplicación. Cualquier incidencia que tengan en sus servidores, se verá reflejada en el funcionamiento de WiChat, pudiendo evitar el acceso de los clientes temporal o definitivamente a la aplicación. | Baja
 |===
 
 === Deuda Técnica
 
 [options="header",cols="2,2"]
 |===
-| Deuda Técnica | Descripción 
-| ... | ... 
+| Deuda Técnica | Descripción
+| Refactorización del código | Algunas partes del código no siguen las mejores prácticas y necesitan ser refactorizadas para mejorar la mantenibilidad y legibilidad.
+| Actualización de dependencias | Algunas dependencias del proyecto están desactualizadas y necesitan ser actualizadas para asegurar la compatibilidad y seguridad del sistema.
+| Máquina virtual delegada a Azure | Delegamos la gestión de la máquina virtual a Azure, lo que puede generar problemas de rendimiento y escalabilidad, además de futuros problemas si se quiere cambiar el despliegue a un servidor propio.
+| Falta de documentación | La documentación del proyecto no está completa o actualizada, lo que puede dificultar la comprensión y mantenimiento del código por parte de nuevos desarrolladores.
 |===

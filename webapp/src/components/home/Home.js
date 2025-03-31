@@ -899,7 +899,7 @@ const HomePage = () => {
                                         gap: 1,
                                     }}
                                 >
-                                    <AccessTimeIcon /> Últimas 5 sesiones de juego
+                                    <AccessTimeIcon /> Tus últimas 5 partidas
                                 </Typography>
                                 {!loading && sessionData.length > 0 && (
                                     <Chip
@@ -933,7 +933,7 @@ const HomePage = () => {
                                                         overflow: "hidden",
                                                         border: "1px solid rgba(0, 0, 0, 0.05)",
                                                         transition: "all 0.3s",
-                                                        cursor: "pointer", // Añadir cursor pointer para indicar que es clickeable
+                                                        cursor: "pointer", // Añadir cursor pointer para indicar que se puede pulsar
                                                         "&:hover": {
                                                             boxShadow: "0 8px 25px rgba(0, 0, 0, 0.05)",
                                                             transform: "translateY(-2px)",

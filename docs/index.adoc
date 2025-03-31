@@ -7,9 +7,8 @@
 include::src/config.adoc[]
 
 = image:logo.png[logo] image:arc42-logo.png[arc42] WiChat en español - Equipo 1-B
-:revnumber: 8.2 EN
-:revdate: February 2025
-:revremark: (based upon AsciiDoc version)
+:revnumber: 8.3 ES
+:revdate: 30 de marzo de 2025
 // toc-title definition MUST follow document title without blank line!
 :toc-title: Tabla de contenidos
 

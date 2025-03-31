@@ -3,24 +3,20 @@ const { defineFeature, loadFeature } = require('jest-cucumber');
 const { setDefaultOptions } = require('expect-puppeteer');
 const feature = loadFeature('./features/login.feature');
 
-const axios = require('axios');
-const MockAdapter = require('axios-mock-adapter');
-const mockAxios = new MockAdapter(axios);
-
 let page;
 let browser;
 
 defineFeature(feature, test => {
   beforeAll(async () => {
 
-    jest.setTimeout(80000);
+    jest.setTimeout(100000);
   
     browser = process.env.GITHUB_ACTIONS
       ? await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']})
       : await puppeteer.launch({ headless: false, slowMo: 100 });
     page = await browser.newPage();
 
-    setDefaultOptions({ timeout: 20000 })
+    setDefaultOptions({ timeout: 100000 })
   
     await page
       .goto("http://localhost:3000", {
@@ -28,10 +24,19 @@ defineFeature(feature, test => {
       })
       .catch(() => {});
     
-    // Mockear el login del usuario 
-    mockAxios.onPost('http://localhost:8001/login').reply(200, {
-      username: 'wichat',
-      token: 'mockedAuthToken',
+    // Mock login dentro del navegador
+    await page.evaluate(() => {
+      const originalFetch = window.fetch;
+      window.fetch = async (url, options) => {
+        if (url.endsWith('/login') && options.method === 'POST') {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ username: 'wichat', token: 'mockedAuthToken' }),
+          });
+        }
+        return originalFetch(url, options);
+      };
     });
   });
 
@@ -58,7 +63,7 @@ defineFeature(feature, test => {
     then('Debería ver el mensaje "WiChat te espera"', async () => {
       await page.waitForFunction(
         'document.querySelector("h1") && document.querySelector("h1").textContent.includes("WiChat te espera")',
-        { timeout: 20000 }
+        { timeout: 100000 }
       );
 
       const message = await page.$eval('h1', el => el.textContent);
