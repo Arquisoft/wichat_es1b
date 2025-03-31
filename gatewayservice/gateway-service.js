@@ -90,7 +90,8 @@ app.get('/generateQuestion', async (req, res) => {
 
 app.get('/nextQuestion', async (req, res) => {
   try {
-    const URL = questionsServiceUrl + '/nextQuestion';
+    const category = req.query.category;
+    const URL = questionsServiceUrl + '/nextQuestion' + (category ? `?category=${encodeURIComponent(category)}` : '');
     const response = await axios.get(URL);
     res.json(response.data);
   }
@@ -130,7 +131,7 @@ app.post('/configureGame', async (req, res) => {
 app.post('/startGame', async (req, res) => {
   try {
     const response = await axios.post(questionsServiceUrl + '/startGame', req.body);
-    res.json(response.data);
+    res.json(response);
   }
   catch(error) {
     // Check if error.response is defined before accessing its properties
@@ -152,6 +153,12 @@ app.get('/generatedQuestion', async (req, res) => {
     } catch (error) {
         res.status(error.response.status).json({ error: error.response.data.error });
     }
+})
+
+app.put('/createQuestions',async (req, res) => {
+  const response =  await axios.put(questionsServiceUrl + '/createQuestions');
+  console.log("end",response);
+  res.status(200).json({status:"OK"});
 })
 
 
