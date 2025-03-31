@@ -23,6 +23,7 @@ const nOptions = 4;
 let questions = [];
 let currentQuestionIndex = 0;
 var maxQuestions = 200;
+var usedIndices = new Set();
 
 var randomQuery;
 var queries = [];
@@ -43,7 +44,7 @@ imagesQueries["es"] = {
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
       }
-      LIMIT 30`, "¿Cuál es el lugar de la imagen?"]
+      LIMIT ` + maxQuestions, "¿Cuál es el lugar de la imagen?"]
         ],
 
     "Cultura":
@@ -58,7 +59,7 @@ imagesQueries["es"] = {
                   wdt:P18 ?imageLabel.                  
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT 30`, "¿Qué monumento es este?"]
+      LIMIT ` + maxQuestions, "¿Qué monumento es este?"]
         ],
 
     "Personajes":
@@ -85,7 +86,7 @@ imagesQueries["es"] = {
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
         }
-        LIMIT 30`, "¿Quién es esta persona famosa?"]
+        LIMIT ` + maxQuestions, "¿Quién es esta persona famosa?"]
         ],
 
 
@@ -100,7 +101,7 @@ imagesQueries["es"] = {
                 wdt:P18 ?imageLabel.  # Imagen del videojuego
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT 30`, "¿A qué videojuego pertenece esta imagen?"]
+      LIMIT ` + maxQuestions, "¿A qué videojuego pertenece esta imagen?"]
         ],
 
 
@@ -119,7 +120,7 @@ WHERE {
   FILTER NOT EXISTS { ?option wdt:P279 wd:Q1518049 }  # Exclude subclasses of Q1518049  
   FILTER EXISTS { ?option wdt:P18 ?imageLabel }
 }
-LIMIT 30`, "¿Qué avión es este?"]
+LIMIT ` + maxQuestions, "¿Qué avión es este?"]
         ]
 }
 
@@ -386,6 +387,7 @@ app.post('/configureGame', async (req, res) => {
 
 app.post('/startGame',  async (req, res) => {
     const quest = await getQuestionsByCategory(req.body.category);
+    usedIndices = new Set();
     const category = req.body.category;
     res.status(200).json({
         message: 'Game started',
@@ -564,7 +566,12 @@ async function getQuestionsByCategory(category) {
         }
 
         // Generate random index
-        const random = Math.floor(Math.random() * count);
+        let random;
+        do {
+            random = Math.floor(Math.random() * count);
+        } while (usedIndices.has(random) && usedIndices.size < count);
+
+        usedIndices.add(random);
 
         // Skip to random position and get one question
         const randomQuestion = await Question.findOne(filter).skip(random);

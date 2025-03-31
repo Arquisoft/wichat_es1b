@@ -408,6 +408,13 @@ const Game = () => {
                     Ir al perfil
                   </Button>
                 </Grid>
+
+                {/* Botón Reiniciar partida */}
+                <Grid item>
+                  <Button variant="contained" sx={{ marginTop: '20px', color: 'white' }} onClick={() => handleNewGame(location.state?.gameConfig?.category || "All")}>
+                    Jugar de nuevo
+                  </Button>
+                </Grid>
               </Grid>
             </Paper>
         )}
