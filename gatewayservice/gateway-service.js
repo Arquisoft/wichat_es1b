@@ -90,7 +90,8 @@ app.get('/generateQuestion', async (req, res) => {
 
 app.get('/nextQuestion', async (req, res) => {
   try {
-    const URL = questionsServiceUrl + '/nextQuestion';
+    const category = req.query.category;
+    const URL = questionsServiceUrl + '/nextQuestion' + (category ? `?category=${encodeURIComponent(category)}` : '');
     const response = await axios.get(URL);
     res.json(response.data);
   }
@@ -152,6 +153,12 @@ app.get('/generatedQuestion', async (req, res) => {
     } catch (error) {
         res.status(error.response.status).json({ error: error.response.data.error });
     }
+})
+
+app.put('/createQuestions',async (req, res) => {
+  const response =  await axios.put(questionsServiceUrl + '/createQuestions');
+  console.log("end",response);
+  res.status(200).json({status:"OK"});
 })
 
 
