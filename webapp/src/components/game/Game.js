@@ -41,9 +41,7 @@ const Game = () => {
 
     try {
       const category = localStorage.getItem('gameCategory') || "All";
-      const response = await axios.post(`${apiEndpoint}/nextQuestion`, {
-        category: category
-      });
+      const response = await axios.get(`${apiEndpoint}/nextQuestion?category=${encodeURIComponent(category)}`);
       const { questionObject, questionImage, correctAnswer, answerOptions } = response.data;
       setQuestion(questionObject);
       setImage(questionImage);
@@ -90,7 +88,6 @@ const Game = () => {
       const response = await axios.post(`${apiEndpoint}/startGame`, {
         category: category || null // Pass the category or null for all categories
       });
-      console.log(response);
 
       if (response.data.firstQuestion) {
         const question = response.data.firstQuestion;

@@ -131,7 +131,7 @@ app.post('/configureGame', async (req, res) => {
 app.post('/startGame', async (req, res) => {
   try {
     const response = await axios.post(questionsServiceUrl + '/startGame', req.body);
-    res.json(response);
+    res.json(response.data);
   }
   catch(error) {
     // Check if error.response is defined before accessing its properties

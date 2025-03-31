@@ -549,6 +549,10 @@ function getCategoryFromQuestion(questionText) {
 async function getQuestionsByCategory(category) {
     try {
         // Create filter object - empty for "All" or filtered by category
+        if(!category) {
+            category = "All";
+        }
+
         const filter = category !== "All" ? { category: category.toLowerCase() } : {};
 
         // Count total matching questions
@@ -565,8 +569,17 @@ async function getQuestionsByCategory(category) {
         // Skip to random position and get one question
         const randomQuestion = await Question.findOne(filter).skip(random);
 
-        console.log(`Found random question for category: ${category}`);
-        return randomQuestion;
+        return {
+            questionObject: randomQuestion.question,
+            questionImage: randomQuestion.image,
+            correctAnswer: randomQuestion.correctAnswer,
+            answerOptions: [
+                randomQuestion.correctAnswer,
+                randomQuestion.inc_answer_1,
+                randomQuestion.inc_answer_2,
+                randomQuestion.inc_answer_3
+            ].sort(() => Math.random() - 0.5)
+        };
     } catch (error) {
         console.error("Error fetching random question:", error);
         throw error;
