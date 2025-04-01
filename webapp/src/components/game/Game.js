@@ -40,7 +40,8 @@ const Game = () => {
   const getQuestion = async () => {
 
     try {
-      const response = await axios.get(apiEndpoint + '/nextQuestion');
+      const category = localStorage.getItem('gameCategory') || "All";
+      const response = await axios.get(`${apiEndpoint}/nextQuestion?category=${encodeURIComponent(category)}`);
       const { questionObject, questionImage, correctAnswer, answerOptions } = response.data;
       setQuestion(questionObject);
       setImage(questionImage);
@@ -68,6 +69,8 @@ const Game = () => {
   const handleNewGame = async (category) => {
     setLoading(true);
     try {
+
+      localStorage.setItem('gameCategory', category || "All");
 
       setLoading(true);
       setFinished(false);
@@ -403,6 +406,13 @@ const Game = () => {
                 <Grid item>
                   <Button onClick={handleGoToProfile} variant="contained" sx={{ marginTop: '20px', color: 'white' }}>
                     Ir al perfil
+                  </Button>
+                </Grid>
+
+                {/* Botón Reiniciar partida */}
+                <Grid item>
+                  <Button variant="contained" sx={{ marginTop: '20px', color: 'white' }} onClick={() => handleNewGame(location.state?.gameConfig?.category || "All")}>
+                    Jugar de nuevo
                   </Button>
                 </Grid>
               </Grid>
