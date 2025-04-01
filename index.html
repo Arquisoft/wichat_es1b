@@ -989,6 +989,10 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Wikidata</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">API que genera la información de las preguntas y la proporciona al sistema.</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LLM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modelo de lenguaje entrenado para proporcionar pistas a los usuarios.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1037,12 +1041,16 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Servicios que se encargan de las funcionalidades del sistema.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Base de Datos</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MongoDB</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Base de datos que almacena la información sobre los usuarios y las preguntas.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Wikidata</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">API que genera la información de las preguntas y la proporciona al sistema.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LLM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modelo de lenguaje entrenado para proporcionar pistas a los usuarios.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1092,28 +1100,40 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Servicios que se encargan de las funcionalidades del sistema.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AuthService</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona la autenticación de usuarios (inicio de sesión).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">GatewayService</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Actúa como una puerta de enlace que enruta solicitudes entre el resto de servicios.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">UserService</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona la creación de nuevos usuarios.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">HistoryService</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona el historial de los usuarios.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LLMService</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Interactua con el modelo de lenguaje de la apliación.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">QuestionService</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona la creación de las preguntas.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Base de Datos</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AuthService</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona el inicio de sesión de los usuarios.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UserService</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maneja la creación de nuevos usuarios.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SesionService</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona las sesiones de los usuarios.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MongoDB</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Base de datos que almacena la información sobre los usuarios y las preguntas.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Wikidata</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">API que genera la información de las preguntas y la proporciona al sistema.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LLM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Modelo de lenguaje entrenado para proporcionar pistas a los usuarios.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1549,7 +1569,7 @@ There you will find links and examples about ADR.</p>
 <div id="footer">
 <div id="footer-text">
 Version 8.3 ES<br>
-Last updated 2025-03-30 19:29:14 +0200
+Last updated 2025-03-31 14:20:46 +0200
 </div>
 </div>
 </body>
