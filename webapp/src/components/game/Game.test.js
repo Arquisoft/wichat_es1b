@@ -206,6 +206,92 @@ it('the user answers the first question correctly', async () => {
       expect(nextQuestion).toHaveTextContent('¿Cuál es la capital de España?');
     });
   });
-  
+
+
+  describe('Game Component - Difficulties and Categories', () => {
+    const mockFirstQuestion = {
+      questionObject: '¿Cuál es la capital de España?',
+      questionImage: 'https://example.com/madrid.jpg',
+      correctAnswer: 'Madrid',
+      answerOptions: ['Londres', 'Lisboa', 'Madrid', 'Roma']
+    };
+
+    beforeEach(() => {
+      mockAxios.reset();
+      jest.useFakeTimers();
+
+      // Reset the mock implementation before each test
+      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
+        state: {
+          gameConfig: {
+            numQuestions: 5,
+            timePerQuestion: 30,
+            difficulty: 'Normal' // Default
+          }
+        }
+      }));
+
+      mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
+        message: 'Game started',
+        category: 'All',
+        firstQuestion: mockFirstQuestion
+      });
+    });
+
+    it('sets the correct time limit for "Principiante" difficulty', async () => {
+      // Override mock for this specific test
+      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
+        state: {
+          gameConfig: {
+            numQuestions: 5,
+            timePerQuestion: 30,
+            difficulty: 'Principiante'
+          }
+        }
+      }));
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/Tiempo restante: 60s/i)).toBeInTheDocument();
+      });
+    });
+
+    it('sets the correct time limit for "Difícil" difficulty', async () => {
+      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
+        state: {
+          gameConfig: {
+            numQuestions: 5,
+            timePerQuestion: 30,
+            difficulty: 'Difícil'
+          }
+        }
+      }));
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/Tiempo restante: 15s/i)).toBeInTheDocument();
+      });
+    });
+
+    it('sets the correct time limit for "Experto" difficulty', async () => {
+      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
+        state: {
+          gameConfig: {
+            numQuestions: 5,
+            timePerQuestion: 30,
+            difficulty: 'Experto'
+          }
+        }
+      }));
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText(/Tiempo restante: 5s/i)).toBeInTheDocument();
+      });
+    });
+  });
   
 });
