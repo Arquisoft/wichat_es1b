@@ -42,6 +42,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Profile.css';
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -785,6 +786,19 @@ const Profile = () => {
                                               {session.difficulty}
                                           </Typography>
 
+                                          <Typography
+                                              variant="caption"
+                                              color="text.secondary"
+                                              sx={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: 0.5,
+                                              }}
+                                          >
+                                              <SportsEsportsIcon fontSize="inherit" />
+                                              {session.category}
+                                          </Typography>
+
                                       </Box>
                                     </Grid>
                                     <Grid item xs={6} sm={4}>
@@ -888,7 +902,7 @@ const Profile = () => {
                 }}
               >
                 <Typography variant="h6" component="div" fontWeight="bold">
-                  Detalles de la sesión del {formatDate(selectedSession.createdAt).split(" ")[0]}
+                    Detalles de la sesión del {formatDate(selectedSession.createdAt).split(" ")[0]} con dificultad {selectedSession.difficulty}
                 </Typography>
                 <IconButton edge="end" color="inherit" onClick={handleCloseSessionDialog} aria-label="close">
                   <CloseIcon />

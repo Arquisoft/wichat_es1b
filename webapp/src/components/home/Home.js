@@ -134,7 +134,8 @@ const HomePage = () => {
             state: {
                 gameConfig: {
                     numQuestions: numQuestions,
-                    difficulty: difficultyN
+                    difficulty: difficultyN,
+                    category: category,
                 },
             },
         })
@@ -1141,6 +1142,19 @@ const HomePage = () => {
                                                                                 {session.difficulty}
                                                                             </Typography>
 
+                                                                            <Typography
+                                                                                variant="caption"
+                                                                                color="text.secondary"
+                                                                                sx={{
+                                                                                    display: "flex",
+                                                                                    alignItems: "center",
+                                                                                    gap: 0.5,
+                                                                                }}
+                                                                            >
+                                                                                <SportsEsportsIcon fontSize="inherit" />
+                                                                                {session.category}
+                                                                            </Typography>
+
                                                                         </Box>
                                                                     </Grid>
                                                                     <Grid item xs={6} sm={4}>
@@ -1235,7 +1249,7 @@ const HomePage = () => {
                             }}
                         >
                             <Typography variant="h6" component="div" fontWeight="bold">
-                                Detalles de la sesión del {formatDate(selectedSession.createdAt).split(" ")[0]}
+                                Detalles de la sesión del {formatDate(selectedSession.createdAt).split(" ")[0]} con dificultad {selectedSession.difficulty}
                             </Typography>
                             <IconButton edge="end" color="inherit" onClick={handleCloseDialog} aria-label="close">
                                 <CloseIcon />

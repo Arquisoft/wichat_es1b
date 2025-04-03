@@ -192,6 +192,7 @@ const Game = () => {
         score: score,
         wrongAnswers: falladas,
         difficulty: difficulty,
+        category: localStorage.getItem('gameCategory') || "All",
       })
           .then(response => {
             console.log("Sesión guardada exitosamente:", response.data);
@@ -274,6 +275,8 @@ const Game = () => {
           question: question,
           correctAnswer: correctAnswer,
           userAnswer: "Tiempo agotado",
+          difficulty: location.state?.gameConfig?.difficulty || "Normal",
+          category: location.state?.gameConfig?.category || "All",
         }
       ]);
 

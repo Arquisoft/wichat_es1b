@@ -40,7 +40,8 @@ app.get('/questions/:username', async (req, res) => {
                 score: session.score || 0,
                 wrongAnswers: session.wrongAnswers || 0,
                 questions: questionsWithoutId,
-                difficulty: session.difficulty
+                difficulty: session.difficulty,
+                category: session.category
             };
         });
 

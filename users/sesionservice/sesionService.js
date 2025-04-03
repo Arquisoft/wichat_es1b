@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema({
         }],
       score: Number,
       wrongAnswers: Number,
+      difficulty: String,
+      category: String,
       createdAt: {
         type: Date,
         default: Date.now, 
@@ -39,7 +41,7 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/save-session', async (req, res) => {
-  const { userid, score, wrongAnswers, questions } = req.body; // Agregar 'questions'
+  const { userid, score, wrongAnswers, questions, difficulty, category } = req.body; // Agregar 'questions'
 
   // Sanitize userid input
   if (!userid || typeof userid !== 'string') {
@@ -65,7 +67,9 @@ app.post('/save-session', async (req, res) => {
       user.sessions.push({ 
         score, 
         wrongAnswers, 
-        questions // Guardar las preguntas en la sesión
+        questions,
+        difficulty,
+        category
       });
       await user.save();
       res.status(200).json({ message: 'Session saved successfully' });
