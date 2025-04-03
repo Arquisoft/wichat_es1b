@@ -11,7 +11,7 @@ let timeLimit = 30;
 const Game = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { gameConfig } = location.state || { gameConfig: { numQuestions: 5, timePerQuestion: 10, category: null } };
+  const { gameConfig } = location.state || { gameConfig: { numQuestions: 10, timePerQuestion: 30, category: null } };
 
   const [question, setQuestion] = useState('');
   const [image, setImage] = useState('');
@@ -37,6 +37,8 @@ const Game = () => {
   // Guardar las preguntas de la sesión
   const [sessionQuestions, setSessionQuestions] = useState([]);
 
+  const [difficulty, setDifficulty] = useState(gameConfig.difficulty || "Normal");
+
   const getQuestion = async () => {
 
     try {
@@ -51,8 +53,11 @@ const Game = () => {
       setIsCorrect(null);
 
       // Reiniciar temporizador y estado de tiempo agotado
-      timeLimit = gameConfig.timePerQuestion;
-      setTimeLeft(gameConfig.timePerQuestion);
+      //timeLimit = gameConfig.timePerQuestion;
+      //setTimeLeft(gameConfig.timePerQuestion);
+
+      setGameDifficulty(difficulty);
+      setTimeLeft(timeLimit);
       setIsTimeUp(false);
 
       // Restablecer la respuesta seleccionada y los colores de los botones
@@ -66,11 +71,12 @@ const Game = () => {
     }
   };
 
-  const handleNewGame = async (category) => {
+  const handleNewGame = async (category, difficulty) => {
     setLoading(true);
     try {
 
       localStorage.setItem('gameCategory', category || "All");
+      setGameDifficulty(difficulty);
 
       setLoading(true);
       setFinished(false);
@@ -105,6 +111,29 @@ const Game = () => {
       setLoading(false);
     }
   };
+
+  function setGameDifficulty(difficultyN) {
+    setDifficulty(difficultyN);
+    console.log("Setting game difficulty to: ", difficultyN);
+
+    switch (difficultyN) {
+      case "Principiante":
+        timeLimit = 60;
+        break;
+      case "Normal":
+        timeLimit = 30;
+        break;
+      case "Difícil":
+        timeLimit = 15;
+        break;
+      case "Experto":
+        timeLimit = 5;
+        break;
+      default:
+        timeLimit = 30; // Default value
+    }
+    setTimeLeft(timeLimit);
+  }
 
   const handleOptionClick = (option) => {
     //Primero, parar el temporizador
@@ -162,6 +191,7 @@ const Game = () => {
         userid: localStorage.getItem('username'),
         score: score,
         wrongAnswers: falladas,
+        difficulty: difficulty,
       })
           .then(response => {
             console.log("Sesión guardada exitosamente:", response.data);
@@ -194,21 +224,19 @@ const Game = () => {
     }
   }, [questionCounter]);
 
-  const handleShowGame = async (category = "All") => {
-    // Get category from URL params OR from navigation state
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlCategory = urlParams.get('category');
-    const stateCategory = location.state?.gameConfig?.category;
+  const handleShowGame = async (categoryN = "All", difficulty = "Normal") => {
+    console.log("Using category: ", categoryN);
+    console.log("Using difficulty: ", difficulty);
 
-    // Use category from either source
-    //const category = urlCategory || stateCategory || null;
-
-    console.log("Using category:", category);
-    await handleNewGame(category);
+    await handleNewGame(categoryN, difficulty);
   };
 
   useEffect(() => {
-    handleShowGame(location.state?.gameConfig?.category);
+    const { numQuestions, difficulty } = location.state?.gameConfig || {};
+
+    handleShowGame(location.state?.gameConfig?.category, difficulty);
+
+    //handleShowGame(location.state?.gameConfig?.category);
   }, []);
 
   const wrongAnswers = numberOfQuestions - score;
@@ -268,7 +296,7 @@ const Game = () => {
               <AppBar position="static" color="primary">
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Button color="inherit" onClick={handleHome}>Abandonar</Button>
-                  <Button color="inherit" onClick={() => handleNewGame(location.state?.gameConfig?.category || "All")}>Reiniciar partida</Button>
+                  <Button color="inherit" onClick={() => handleNewGame(location.state?.gameConfig?.category || "All", difficulty)}>Reiniciar partida</Button>
                 </Toolbar>
               </AppBar>
 
@@ -411,7 +439,7 @@ const Game = () => {
 
                 {/* Botón Reiniciar partida */}
                 <Grid item>
-                  <Button variant="contained" sx={{ marginTop: '20px', color: 'white' }} onClick={() => handleNewGame(location.state?.gameConfig?.category || "All")}>
+                  <Button variant="contained" sx={{ marginTop: '20px', color: 'white' }} onClick={() => handleNewGame(location.state?.gameConfig?.category || "All", difficulty)}>
                     Jugar de nuevo
                   </Button>
                 </Grid>

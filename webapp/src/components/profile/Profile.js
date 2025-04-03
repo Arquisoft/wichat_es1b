@@ -771,6 +771,20 @@ const Profile = () => {
                                           <AccessTimeIcon fontSize="inherit" />
                                           {formatDate(session.createdAt).split(" ")[1]}
                                         </Typography>
+
+                                          <Typography
+                                              variant="caption"
+                                              color="text.secondary"
+                                              sx={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: 0.5,
+                                              }}
+                                          >
+                                              <QuizIcon fontSize="inherit" />
+                                              {session.difficulty}
+                                          </Typography>
+
                                       </Box>
                                     </Grid>
                                     <Grid item xs={6} sm={4}>
