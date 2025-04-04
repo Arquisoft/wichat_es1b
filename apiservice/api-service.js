@@ -39,7 +39,9 @@ app.get('/questions/:username', async (req, res) => {
                 sessionDate: session.createdAt,
                 score: session.score || 0,
                 wrongAnswers: session.wrongAnswers || 0,
-                questions: questionsWithoutId
+                questions: questionsWithoutId,
+                difficulty: session.difficulty,
+                category: session.category
             };
         });
 
