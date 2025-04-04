@@ -62,9 +62,6 @@ const Game = () => {
 
   const [difficulty, setDifficulty] = useState(gameConfig.difficulty || "Normal")
 
-  // Colores para el gráfico circular
-  const COLORS = ["#4CAF50", "#FF5252"]
-
   // Gradientes para fondos
   const primaryGradient = "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)"
   const secondaryGradient = "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)"
@@ -152,6 +149,8 @@ const Game = () => {
       setSelectedAnswer(null)
       setIsCorrect(null)
 
+      console.log(correctAnswer)
+
       // Iniciar el temporizador para la nueva pregunta
       startTimer()
 
@@ -188,6 +187,7 @@ const Game = () => {
         setCorrectAnswer(question.correctAnswer)
         setOptions(question.answerOptions)
 
+        console.log(correctAnswer)
         // Iniciar el temporizador para la primera pregunta
         startTimer()
       } else {
@@ -306,9 +306,13 @@ const Game = () => {
   }
 
   useEffect(() => {
-    const { numQuestions, difficulty } = location.state?.gameConfig || {}
-    handleShowGame(location.state?.gameConfig?.category, difficulty)
-  }, [location.state])
+      const fetchGameData = async () => {
+          const { numQuestions, difficulty } = location.state?.gameConfig || {};
+          await handleShowGame(location.state?.gameConfig?.category, difficulty);
+      };
+  
+      fetchGameData();
+  }, [location.state]);
 
   const wrongAnswers = numberOfQuestions - score
 
