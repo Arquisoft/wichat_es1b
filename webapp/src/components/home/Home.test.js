@@ -101,6 +101,7 @@ describe('Home component', () => {
       { level: 'Intermedio', data: [{ score: 35, wrongAnswers: 20 }] }, // totalQuestions: 55
       { level: 'Avanzado', data: [{ score: 50, wrongAnswers: 45 }] },   // totalQuestions: 95
       { level: 'Experto', data: [{ score: 100, wrongAnswers: 10 }] },   // totalQuestions: 110
+      { level: 'Generalísimo', data: [{ score: 100, wrongAnswers: 200 }] },   // totalQuestions: 300+
     ];
 
     for (const { level, data } of niveles) {

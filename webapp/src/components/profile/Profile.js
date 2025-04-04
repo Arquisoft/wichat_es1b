@@ -136,11 +136,12 @@ const Profile = () => {
 
   // Determinar el nivel del jugador basado en preguntas respondidas
   const getPlayerLevel = () => {
-    if (stats.totalQuestions < 10) return { level: "Principiante", color: "#9E9E9E" }
-    if (stats.totalQuestions < 30) return { level: "Aprendiz", color: "#8BC34A" }
-    if (stats.totalQuestions < 60) return { level: "Intermedio", color: "#03A9F4" }
-    if (stats.totalQuestions < 100) return { level: "Avanzado", color: "#FF9800" }
-    return { level: "Experto", color: "#F44336" }
+      if (stats.totalQuestions < 10) return { level: "Principiante", color: "#9E9E9E" }
+      if (stats.totalQuestions < 30) return { level: "Aprendiz", color: "#8BC34A" }
+      if (stats.totalQuestions < 60) return { level: "Intermedio", color: "#03A9F4" }
+      if (stats.totalQuestions < 100) return { level: "Avanzado", color: "#FF9800" }
+      if (stats.totalQuestions < 200) return { level: "Experto", color: "#F44336" }
+      return { level: "Generalísimo", color: "#3c8841" }
   }
   const playerLevel = getPlayerLevel()
 
