@@ -34,7 +34,7 @@ const Game = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const theme = useTheme()
-  const { gameConfig } = location.state || { gameConfig: { numQuestions: 10, timePerQuestion: 30, difficultyN:"Normal", category: "All" } }
+  const { gameConfig } = location.state || { gameConfig: { numQuestions: 10, timePerQuestion: 30, difficulty:"Normal", category: "All" } }
 
   // Estado del juego
   const [question, setQuestion] = useState("")
@@ -100,11 +100,6 @@ const Game = () => {
     }
   }
 
-  const resetTimer = () => {
-    setTimeLeft(timeLimit)
-    startTimer()
-  }
-
   const handleTimeUp = () => {
     // Detener el temporizador
     stopTimer()
@@ -114,6 +109,7 @@ const Game = () => {
     setIsCorrect(false)
     setQuestionsToAnswer((q) => q - 1)
 
+    console.log(correctAnswer)
     // Guardar la pregunta en la sesión
     setSessionQuestions((prev) => [
       ...prev,
@@ -126,9 +122,9 @@ const Game = () => {
       },
     ])
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (questionCounter < numberOfQuestions) {
-        getQuestion()
+        await getQuestion()
       } else {
         handleEndGame()
       }
@@ -165,7 +161,7 @@ const Game = () => {
     }
   }
 
-  const handleNewGame = async (category, difficulty) => {
+  const handleNewGame = async (category) => {
     setLoading(true)
     try {
       localStorage.setItem("gameCategory", category || "All")
