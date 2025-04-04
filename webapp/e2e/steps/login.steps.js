@@ -1,7 +1,11 @@
 const puppeteer = require('puppeteer');
 const { defineFeature, loadFeature } = require('jest-cucumber');
 const { setDefaultOptions } = require('expect-puppeteer');
+const axios = require('axios');
 const feature = loadFeature('./features/login.feature');
+const MockAdapter = require('axios-mock-adapter');
+const login = require('./login.js');
+const addUser = require('./addData2DataBase.js');
 
 let page;
 let browser;
@@ -9,7 +13,7 @@ let browser;
 defineFeature(feature, test => {
   beforeAll(async () => {
 
-    jest.setTimeout(100000);
+    const mock = new MockAdapter(axios);
   
     browser = process.env.GITHUB_ACTIONS
       ? await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']})
@@ -23,21 +27,7 @@ defineFeature(feature, test => {
         waitUntil: "networkidle0",
       })
       .catch(() => {});
-    
-    // Mock login dentro del navegador
-    await page.evaluate(() => {
-      const originalFetch = window.fetch;
-      window.fetch = async (url, options) => {
-        if (url.endsWith('/login') && options.method === 'POST') {
-          return Promise.resolve({
-            ok: true,
-            status: 200,
-            json: async () => ({ username: 'wichat', token: 'mockedAuthToken' }),
-          });
-        }
-        return originalFetch(url, options);
-      };
-    });
+
   });
 
   test('El usuario inicia sesión correctamente', ({ given, when, then }) => {
@@ -48,16 +38,11 @@ defineFeature(feature, test => {
     given('Un usuario registrado con nombre "wichat" y contraseña "123456"', async () => {
       username = "wichat"
       password = "123456";
+      await addUser.addUserToDatabase(username, password);
     });
 
     when('Rellena el formulario de login y lo envía', async () => {
-      await page.waitForSelector('input[name="username"]', { visible: true });
-      await page.waitForSelector('input[name="password"]', { visible: true });
-      
-      await expect(page).toFill('input[name="username"]', username);
-      await expect(page).toFill('input[name="password"]', password);
-
-      await expect(page).toClick('button', { text: 'Iniciar sesión' });
+      await fillForm(username,password);
     });
 
     then('Debería ver el mensaje "WiChat te espera"', async () => {
@@ -71,6 +56,39 @@ defineFeature(feature, test => {
       expect(message).toMatch("WiChat te espera");
     }, 80000);
   });
+
+  test('El usuario introduce credenciales inválidas', ({ given, when, then }) => {
+
+    let username;
+    let wrongpassword;
+
+    given('Un usuario registrado con nombre "wichat" y contraseña "123456"', async () => {
+      username = "wichat";
+      wrongpassword = "aaaaaa";
+    });
+
+    when('Rellena el formulario de login con contraseña incorecta y lo envía', async () => {
+      await fillForm(username,wrongpassword);
+    });
+
+    then('Debería ver el mensaje "Credenciales inválidas"', async () => {
+      const loginHeadingExists = await page.evaluate(() => {
+        const heading = document.querySelector('h1.MuiTypography-h5');
+        return heading && heading.textContent.includes('Iniciar Sesión');
+      });
+      expect(loginHeadingExists).toBe(true);
+    });
+  }, 80000);
+
+  async function fillForm(username, password) {
+    await login.login(page,username, password);
+  }
+
+  afterEach(async () => {
+    await page.goto("http://localhost:3000", {
+      waitUntil: "networkidle0",
+    }).catch(() => {});
+  })
 
   afterAll(async () => {
     await browser.close();
