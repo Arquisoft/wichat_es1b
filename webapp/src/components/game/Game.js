@@ -38,6 +38,7 @@ const Game = () => {
 
   // Estado del juego
   const [question, setQuestion] = useState("")
+  const questionRef = useRef("");
   const [image, setImage] = useState("")
   const [options, setOptions] = useState([])
   const [selectedAnswer, setSelectedAnswer] = useState(null)
@@ -45,6 +46,7 @@ const Game = () => {
   const [score, setScore] = useState(0)
   const [isFinished, setFinished] = useState(false)
   const [correctAnswer, setCorrectAnswer] = useState("")
+  const correctAnswerRef = useRef("");
   const [questionCounter, setQuestionCounter] = useState(1)
   const [loading, setLoading] = useState(true)
 
@@ -106,13 +108,12 @@ const Game = () => {
     setIsCorrect(false)
     setQuestionsToAnswer((q) => q - 1)
 
-    console.log(correctAnswer)
     // Guardar la pregunta en la sesión
     setSessionQuestions((prev) => [
       ...prev,
       {
-        question: question,
-        correctAnswer: correctAnswer,
+        question: questionRef.current,
+        correctAnswer: correctAnswerRef.current,
         userAnswer: "Tiempo agotado",
         difficulty: difficulty,
         category: localStorage.getItem("gameCategory") || "All",
@@ -127,6 +128,14 @@ const Game = () => {
       }
     }, 2000)
   }
+
+  useEffect(() => {
+    correctAnswerRef.current = correctAnswer;
+  }, [correctAnswer]);
+  
+  useEffect(() => {
+    questionRef.current = question;
+  }, [question]);
 
   // Limpiar el temporizador cuando el componente se desmonte
   useEffect(() => {
@@ -149,8 +158,6 @@ const Game = () => {
       setSelectedAnswer(null)
       setIsCorrect(null)
 
-      console.log(correctAnswer)
-
       // Iniciar el temporizador para la nueva pregunta
       startTimer()
 
@@ -171,8 +178,6 @@ const Game = () => {
       setSelectedAnswer(null)
       setIsCorrect(null)
 
-      console.log("Starting game with category:", category)
-
       setSessionQuestions([])
 
       // Send the category to the backend
@@ -187,7 +192,6 @@ const Game = () => {
         setCorrectAnswer(question.correctAnswer)
         setOptions(question.answerOptions)
 
-        console.log(correctAnswer)
         // Iniciar el temporizador para la primera pregunta
         startTimer()
       } else {
@@ -277,7 +281,6 @@ const Game = () => {
   }, [isFinished, numberOfQuestions, score, sessionQuestions, difficulty])
 
   const handleGoToProfile = () => {
-    console.log("Ir al perfil")
     navigate("/Profile")
   }
 
@@ -299,9 +302,6 @@ const Game = () => {
   }, [questionCounter, numberOfQuestions, isFinished])
 
   const handleShowGame = async (categoryN = "All", difficulty = "Normal") => {
-    console.log("Using category: ", categoryN)
-    console.log("Using difficulty: ", difficulty)
-
     await handleNewGame(categoryN, difficulty)
   }
 
@@ -309,8 +309,7 @@ const Game = () => {
       const fetchGameData = async () => {
           const { numQuestions, difficulty } = location.state?.gameConfig || {};
           await handleShowGame(location.state?.gameConfig?.category, difficulty);
-      };
-  
+      };  
       fetchGameData();
   }, [location.state]);
 
