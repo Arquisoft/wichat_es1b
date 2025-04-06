@@ -12,8 +12,6 @@ on:
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
-    container:
-      options: --memory=4g
     steps:
       - uses: actions/checkout@v4
 
