@@ -37,6 +37,10 @@ jobs:
       - run: npm --prefix apiservice ci
       - run: npm --prefix webapp ci
 
+      - name: Set Node.js memory limit
+        run: echo "NODE_OPTIONS=--max-old-space-size=4096" >> $GITHUB_ENV
+
+
       - run: npm --prefix users/authservice test -- --coverage
       - run: npm --prefix users/userservice test -- --coverage
       - run: npm --prefix users/sesionservice test -- --coverage
