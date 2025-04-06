@@ -43,7 +43,7 @@ global.BaseAudioContext = global.AudioContext;
 jest.mock('./chat.png?react', () => 'chat_old.png', { virtual: true });
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import {render, screen, fireEvent, act} from '@testing-library/react';
 import axios from 'axios';
 import Chat from './chat';
 
@@ -63,8 +63,10 @@ describe('Chat Component', () => {
     const openChatIfNecessary = async () => {
         const chatButton = document.querySelector('.rcb-toggle-button.rcb-button-show');
         if (chatButton) {
-            fireEvent.click(chatButton);
-            await new Promise(r => setTimeout(r, 300));
+            await act(async () => {
+                fireEvent.click(chatButton);
+                await new Promise(r => setTimeout(r, 300));
+            });
         }
     };
 
@@ -81,7 +83,9 @@ describe('Chat Component', () => {
             bubbles: true
         });
 
-        fireEvent(inputField, enterEvent);
+        await act(async () => {
+            fireEvent(inputField, enterEvent);
+        });
     };
 
     it('renders Chat component and displays initial message', async () => {
