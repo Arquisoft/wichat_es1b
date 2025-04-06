@@ -1068,7 +1068,7 @@ const HomePage = () => {
                                         ))}
                                     </Box>
                                 ) : sessionData.length > 0 ? (
-                                    <Grid container spacing={2}>
+                                    <Grid container spacing={2} key={session._id}>
                                         {getLastFiveSessions().map((session, index) => (
                                             <Grid item xs={12} key={session._id}>
                                                 <Paper
