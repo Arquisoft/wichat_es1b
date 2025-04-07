@@ -69,7 +69,7 @@ const HomePage = () => {
     const theme = useTheme()
 
     // Configuración de la partida
-    const [numQuestions, setNumQuestions] = useState(5)
+    const [numQuestions, setNumQuestions] = useState(10)
     const [timePerQuestion, setTimePerQuestion] = useState(30)
     const [sessionData, setSessionData] = useState([])
     const [loading, setLoading] = useState(true)
@@ -80,6 +80,24 @@ const HomePage = () => {
     // Estado para el menú desplegable
     const [anchorEl, setAnchorEl] = useState(null)
     const openMenu = Boolean(anchorEl)
+
+    const [difficulty, setDifficulty] = useState("Normal");
+    const [anchorElDifficulty, setAnchorElDifficulty] = useState(null);
+    const openDifficultyMenu = Boolean(anchorElDifficulty);
+
+    const handleOpenDifficultyMenu = (event) => {
+        setAnchorElDifficulty(event.currentTarget);
+    };
+
+    const handleCloseDifficultyMenu = () => {
+        setAnchorElDifficulty(null);
+    };
+
+    const handleSelectDifficulty = (selectedDifficulty) => {
+        setDifficulty(selectedDifficulty);
+        setNewTimePerQuestion(selectedDifficulty);
+        handleCloseDifficultyMenu();
+    };
 
     // Colors for the pie chart - más vibrantes y con mejor contraste
     const COLORS = ["#4CAF50", "#FF5252"]
@@ -108,7 +126,7 @@ const HomePage = () => {
         }
     }, [username])
 
-    const handleShowGame = (category = "All") => {
+    const handleShowGame = (category = "All", difficultyN = "Normal") => {
         // Log the selected category before navigation
         console.log("Starting game with category:", category)
 
@@ -116,7 +134,7 @@ const HomePage = () => {
             state: {
                 gameConfig: {
                     numQuestions: numQuestions,
-                    timePerQuestion: timePerQuestion,
+                    difficulty: difficultyN,
                     category: category,
                 },
             },
@@ -211,7 +229,8 @@ const HomePage = () => {
         if (totalQuestions < 30) return { level: "Aprendiz", color: "#8BC34A" }
         if (totalQuestions < 60) return { level: "Intermedio", color: "#03A9F4" }
         if (totalQuestions < 100) return { level: "Avanzado", color: "#FF9800" }
-        return { level: "Experto", color: "#F44336" }
+        if (totalQuestions < 200) return { level: "Experto", color: "#F44336" }
+        return { level: "Generalísimo", color: "#3c8841" }
     }
 
     const playerLevel = getPlayerLevel()
@@ -245,6 +264,31 @@ const HomePage = () => {
   };
 
   const [showMessage, setShowMessage] = useState("");
+
+    /**
+     * This function is used only to adapt the label that informs about the time per question to the user
+     * @param difficulty Difficulty selected by the user
+     */
+  function setNewTimePerQuestion(difficulty) {
+    switch (difficulty) {
+      case "Principiante":
+        setTimePerQuestion(60);
+        break;
+      case "Normal":
+        setTimePerQuestion(30);
+        break;
+      case "Difícil":
+        setTimePerQuestion(15);
+        break;
+      case "Experto":
+        setTimePerQuestion(5);
+        break;
+      default:
+        setTimePerQuestion(30);
+    }
+  }
+
+
 
   return (
     <ConfigContext.Provider value={configValue}>
@@ -715,7 +759,109 @@ const HomePage = () => {
                                                 Jugar ahora
                                             </Typography>
 
-                                            {/* Botón principal con menú desplegable */}
+                                            <Box sx={{ mt: 0.5 }}></Box>
+
+                                            <Typography
+                                                variant="h6"
+                                                gutterBottom
+                                                align="center"
+                                                sx={{
+                                                    mb: 1,
+                                                    position: "relative",
+                                                    zIndex: 1,
+                                                }}
+                                            >
+                                                Seleccionar dificultad
+                                            </Typography>
+
+                                            <Button
+                                                variant="contained"
+                                                size="large"
+                                                onClick={handleOpenDifficultyMenu}
+                                                endIcon={<KeyboardArrowDownIcon />}
+                                                sx={{
+                                                    py: 1.5,
+                                                    px: 4,
+                                                    borderRadius: 8,
+                                                    fontWeight: "bold",
+                                                    textTransform: "none",
+                                                    fontSize: "1.1rem",
+                                                    bgcolor: "white",
+                                                    color: theme.palette.warning.dark,
+                                                    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+                                                    position: "relative",
+                                                    zIndex: 1,
+                                                    "&:hover": {
+                                                        bgcolor: "white",
+                                                        boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
+                                                        transform: "translateY(-3px)",
+                                                        transition: "all 0.3s",
+                                                    },
+                                                }}
+                                            >
+                                                {difficulty}
+                                            </Button>
+
+                                            <Menu
+                                                id="difficulty-menu"
+                                                anchorEl={anchorElDifficulty}
+                                                open={openDifficultyMenu}
+                                                onClose={handleCloseDifficultyMenu}
+                                                MenuListProps={{
+                                                    "aria-labelledby": "difficulty-button",
+                                                }}
+                                                PaperProps={{
+                                                    elevation: 3,
+                                                    sx: {
+                                                        mt: 1,
+                                                        borderRadius: 2,
+                                                        minWidth: 200,
+                                                        overflow: "visible",
+                                                        "&:before": {
+                                                            content: '""',
+                                                            display: "block",
+                                                            position: "absolute",
+                                                            top: 0,
+                                                            right: 14,
+                                                            width: 10,
+                                                            height: 10,
+                                                            bgcolor: "background.paper",
+                                                            transform: "translateY(-50%) rotate(45deg)",
+                                                            zIndex: 0,
+                                                        },
+                                                    },
+                                                }}
+                                                transformOrigin={{ horizontal: "right", vertical: "top" }}
+                                                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                                            >
+                                                <MenuItem onClick={() => handleSelectDifficulty("Principiante")}>
+                                                    <ListItemIcon>
+                                                        <SportsEsportsIcon fontSize="small" color="primary" />
+                                                    </ListItemIcon>
+                                                    <ListItemText>Principiante</ListItemText>
+                                                </MenuItem>
+                                                <MenuItem onClick={() => handleSelectDifficulty("Normal")}>
+                                                    <ListItemIcon>
+                                                        <SportsEsportsIcon fontSize="small" color="primary" />
+                                                    </ListItemIcon>
+                                                    <ListItemText>Normal</ListItemText>
+                                                </MenuItem>
+                                                <MenuItem onClick={() => handleSelectDifficulty("Difícil")}>
+                                                    <ListItemIcon>
+                                                        <SportsEsportsIcon fontSize="small" color="primary" />
+                                                    </ListItemIcon>
+                                                    <ListItemText>Difícil</ListItemText>
+                                                </MenuItem>
+                                                <MenuItem onClick={() => handleSelectDifficulty("Experto")}>
+                                                    <ListItemIcon>
+                                                        <SportsEsportsIcon fontSize="small" color="primary" />
+                                                    </ListItemIcon>
+                                                    <ListItemText>Experto</ListItemText>
+                                                </MenuItem>
+                                            </Menu>
+
+                                            <Box sx={{ mt: 2.5 }}></Box>
+
                                             <Button
                                                 variant="contained"
                                                 size="large"
@@ -749,8 +895,10 @@ const HomePage = () => {
                                                 Comenzar partida
                                             </Button>
 
+
                                             {/* Menú desplegable con opciones de juego */}
                                             <Menu
+                                                sx={{ mt: 2 }}
                                                 id="game-menu"
                                                 anchorEl={anchorEl}
                                                 open={openMenu}
@@ -782,38 +930,38 @@ const HomePage = () => {
                                                 transformOrigin={{ horizontal: "right", vertical: "top" }}
                                                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                                             >
-                                                <MenuItem onClick={() => handleShowGame("Geografia")} sx={{ py: 1.5 }}>
+                                                <MenuItem onClick={() => handleShowGame("Geografia", difficulty)} sx={{ py: 1.5 }}>
                                                     <ListItemIcon>
                                                         <PublicIcon fontSize="small" color="primary" />
                                                     </ListItemIcon>
                                                     <ListItemText>Geografía</ListItemText>
                                                 </MenuItem>
-                                                <MenuItem onClick={() => handleShowGame("Cultura")} sx={{ py: 1.5 }}>
+                                                <MenuItem onClick={() => handleShowGame("Cultura", difficulty)} sx={{ py: 1.5 }}>
                                                     <ListItemIcon>
                                                         <TheaterComedyIcon fontSize="small" color="primary" />
                                                     </ListItemIcon>
                                                     <ListItemText>Cultura</ListItemText>
                                                 </MenuItem>
-                                                <MenuItem onClick={() => handleShowGame("Personajes")} sx={{ py: 1.5 }}>
+                                                <MenuItem onClick={() => handleShowGame("Personajes", difficulty)} sx={{ py: 1.5 }}>
                                                     <ListItemIcon>
                                                         <PersonIcon fontSize="small" color="primary" />
                                                     </ListItemIcon>
                                                     <ListItemText>Personajes</ListItemText>
                                                 </MenuItem>
-                                                <MenuItem onClick={() => handleShowGame("Videojuegos")} sx={{ py: 1.5 }}>
+                                                <MenuItem onClick={() => handleShowGame("Videojuegos", difficulty)} sx={{ py: 1.5 }}>
                                                     <ListItemIcon>
                                                         <SportsEsportsIcon fontSize="small" color="primary" />
                                                     </ListItemIcon>
                                                     <ListItemText>Videojuegos</ListItemText>
                                                 </MenuItem>
-                                                <MenuItem onClick={() => handleShowGame("Aviones")} sx={{ py: 1.5 }}>
+                                                <MenuItem onClick={() => handleShowGame("Aviones", difficulty)} sx={{ py: 1.5 }}>
                                                     <ListItemIcon>
                                                         <FlightIcon fontSize="small" color="primary" />
                                                     </ListItemIcon>
                                                     <ListItemText>Aviones</ListItemText>
                                                 </MenuItem>
                                                 <Divider />
-                                                <MenuItem onClick={() => handleShowGame("All")} sx={{ py: 1.5 }}>
+                                                <MenuItem onClick={() => handleShowGame("All", difficulty)} sx={{ py: 1.5 }}>
                                                     <ListItemIcon>
                                                         <ShuffleIcon fontSize="small" color="primary" />
                                                     </ListItemIcon>
@@ -980,6 +1128,33 @@ const HomePage = () => {
                                                                                 <AccessTimeIcon fontSize="inherit" />
                                                                                 {formatDate(session.createdAt).split(" ")[1]}
                                                                             </Typography>
+
+                                                                            <Typography
+                                                                                variant="caption"
+                                                                                color="text.secondary"
+                                                                                sx={{
+                                                                                    display: "flex",
+                                                                                    alignItems: "center",
+                                                                                    gap: 0.5,
+                                                                                }}
+                                                                            >
+                                                                                <QuizIcon fontSize="inherit" />
+                                                                                {session.difficulty}
+                                                                            </Typography>
+
+                                                                            <Typography
+                                                                                variant="caption"
+                                                                                color="text.secondary"
+                                                                                sx={{
+                                                                                    display: "flex",
+                                                                                    alignItems: "center",
+                                                                                    gap: 0.5,
+                                                                                }}
+                                                                            >
+                                                                                <SportsEsportsIcon fontSize="inherit" />
+                                                                                {session.category}
+                                                                            </Typography>
+
                                                                         </Box>
                                                                     </Grid>
                                                                     <Grid item xs={6} sm={4}>
@@ -1074,7 +1249,7 @@ const HomePage = () => {
                             }}
                         >
                             <Typography variant="h6" component="div" fontWeight="bold">
-                                Detalles de la sesión del {formatDate(selectedSession.createdAt).split(" ")[0]}
+                                Detalles de la sesión del {formatDate(selectedSession.createdAt).split(" ")[0]} con dificultad {selectedSession.difficulty}
                             </Typography>
                             <IconButton edge="end" color="inherit" onClick={handleCloseDialog} aria-label="close">
                                 <CloseIcon />
