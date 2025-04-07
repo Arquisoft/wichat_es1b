@@ -43,7 +43,7 @@ global.BaseAudioContext = global.AudioContext;
 jest.mock('./chat.png?react', () => 'chat_old.png', { virtual: true });
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import {render, screen, fireEvent} from '@testing-library/react';
 import axios from 'axios';
 import Chat from './chat';
 

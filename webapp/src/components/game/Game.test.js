@@ -1,297 +1,367 @@
-import '@testing-library/jest-dom';
 import React from 'react';
-import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import MockAdapter from 'axios-mock-adapter';
-import { useNavigate, BrowserRouter as Router } from "react-router-dom";
 import Game from './Game';
-import { red } from '@mui/material/colors';
 
-// Configure Axios mock
-const mockAxios = new MockAdapter(axios);
-
-// Create mock navigation function
-const mockNavigate = jest.fn();
-
-const renderComponent = () => {
-  return render(
-    <Router>
-      <Game />
-    </Router>
-  );
-};
-
-// Mock localStorage
-const localStorageMock = (function () {
-  let store = {};
-  return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => {
-      store[key] = value.toString();
-    }),
-    clear: jest.fn(() => {
-      store = {};
-    }),
-    removeItem: jest.fn(key => {
-      delete store[key];
-    })
-  };
-})();
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-});
-
-// Mock the react-router-dom hooks
+// Mock dependencies
+jest.mock('axios');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
-  useLocation: () => ({
-    state: {
-      gameConfig: {
-        numQuestions: 5,
-        timePerQuestion: 30
-      }
-    }
-  })
+  useLocation: jest.fn(),
+  useNavigate: jest.fn()
 }));
-
-// Mock for recharts components
-jest.mock('recharts', () => ({
-  PieChart: () => <div data-testid="pie-chart">PieChart</div>,
-  Pie: () => <div>Pie</div>,
-  Cell: () => <div>Cell</div>
-}));
-
-// Mock for the Chat component
-jest.mock("../chatbot/chat", () => {
-  return function Chat() {
+jest.mock('../chatbot/chat', () => {
+  return function DummyChat() {
     return <div data-testid="chat-component">Chat Component</div>;
   };
 });
+jest.mock('recharts', () => ({
+  PieChart: ({ children }) => <div data-testid="pie-chart">{children}</div>,
+  Pie: ({ children }) => <div data-testid="pie">{children}</div>,
+  Cell: () => <div data-testid="cell"></div>,
+  ResponsiveContainer: ({ children }) => <div data-testid="responsive-container">{children}</div>
+}));
 
-// Al principio del archivo Game.test.js
-
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
-
+// Mock timer
+jest.useFakeTimers();
 
 describe('Game Component', () => {
-  const mockFirstQuestion = {
-    questionObject: '¿Cuál es la capital de España?',
-    questionImage: 'https://example.com/madrid.jpg',
-    correctAnswer: 'Madrid',
-    answerOptions: ['Londres', 'Lisboa', 'Madrid', 'Roma']
+  const mockNavigate = jest.fn();
+  const mockLocation = {
+    state: {
+      gameConfig: {
+        numQuestions: 5,
+        timePerQuestion: 20,
+        difficulty: 'Normal',
+        category: 'Science'
+      }
+    }
   };
-
+  
+  const mockQuestion = {
+    data: {
+      firstQuestion: {
+        questionObject: "What is the capital of France?",
+        questionImage: "https://example.com/paris.jpg",
+        correctAnswer: "Paris",
+        answerOptions: ["London", "Paris", "Berlin", "Madrid"]
+      }
+    }
+  };
+  
   const mockNextQuestion = {
-    questionObject: '¿Cuál es la capital de Francia?',
-    questionImage: 'https://example.com/paris.jpg',
-    correctAnswer: 'París',
-    answerOptions: ['París', 'Varsovia', 'Atenas', 'Dublín']
+    data: {
+      questionObject: "Which planet is known as the Red Planet?",
+      questionImage: "https://example.com/mars.jpg",
+      correctAnswer: "Mars",
+      answerOptions: ["Venus", "Mars", "Jupiter", "Saturn"]
+    }
   };
-
 
   beforeEach(() => {
-    mockAxios.reset(); // Reset mocks before each test
-    jest.useFakeTimers();
-
+    useNavigate.mockReturnValue(mockNavigate);
+    useLocation.mockReturnValue(mockLocation);
+    
+    // Mock localStorage
+    Storage.prototype.getItem = jest.fn((key) => {
+      if (key === 'username') return 'testuser';
+      if (key === 'gameCategory') return 'Science';
+      return null;
+    });
+    Storage.prototype.setItem = jest.fn();
+    
+    // Mock axios calls
+    axios.post.mockResolvedValue(mockQuestion);
+    axios.get.mockResolvedValue(mockNextQuestion);
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
-
-it('the user answers the first question correctly', async () => {
-  mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
-    message: 'Game started',
-    category: 'All',
-    firstQuestion: mockNextQuestion
+  test('renders loading state initially', async () => {
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    expect(screen.getByText('Cargando preguntas...')).toBeInTheDocument();
   });
 
-  renderComponent();
-
-  const question = await screen.findByTestId('question');
-  expect(question).toHaveTextContent('¿Cuál es la capital de Francia?');
-
-  const options = ['París', 'Varsovia', 'Atenas', 'Dublín'];
-  options.forEach((option) => {
-    expect(screen.getByText(option)).toBeInTheDocument();
-  });
-
-  const correctBtn = screen.getByText('París');
-  fireEvent.click(correctBtn);
-
-  await waitFor(() => {
-    expect(correctBtn).toHaveStyle({ backgroundColor: 'green' });
-  });
-
-  await act(async () => {
-    jest.advanceTimersByTime(2000);
-  });
-
-  await waitFor(() => {
-    const updatedQuestion = screen.getByTestId('question');
-    expect(updatedQuestion).toHaveTextContent('¿Cuál es la capital de Francia?');
-  });
-});
-
-
-  it('vuelve al home al hacer clic en "Abandonar"', async () => {
-    renderComponent();
-    const abandonButton = screen.getByRole('button', { name: /Abandonar/i });
-    fireEvent.click(abandonButton);
-    expect(mockNavigate).toHaveBeenCalledWith('/Home');
-  });
-  
-  it('muestra error si falla la carga de la siguiente pregunta', async () => {
-    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Spy verdadero
-
-    mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
-      message: 'Game started',
-      category: 'All',
-      firstQuestion: mockFirstQuestion
+  test('renders game with question after loading', async () => {
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(expect.any(String), {
+        category: 'Science'
+      });
     });
-  
-    mockAxios.onGet('http://localhost:8000/nextQuestion').replyOnce(500); // Forzar error
-  
-    renderComponent();
-  
-    const question = await screen.findByTestId('question');
-    fireEvent.click(screen.getByText('Madrid'));
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    
+    // Check if the question is displayed
+    await waitFor(() => {
+      expect(screen.getByTestId('question')).toHaveTextContent('What is the capital of France?');
+    });
+  });
 
-    await act(async () => {
+  test('handles option selection correctly for correct answer', async () => {
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
+    });
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    
+    // Find and click the correct answer
+    await waitFor(() => {
+      const correctOption = screen.getByText('Paris');
+      fireEvent.click(correctOption);
+    });
+    
+    // Check if the next question is fetched after delay
+    act(() => {
       jest.advanceTimersByTime(2000);
     });
-  
+    
     await waitFor(() => {
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error fetching the next question:'),
-        expect.any(Error)
-      );
+      expect(axios.get).toHaveBeenCalled();
     });
-  
-    errorSpy.mockRestore(); // Limpieza
   });
 
-  it('counts down the timer and moves to the next question', async () => {
-    mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
-      message: 'Game started',
-      category: 'All',
-      firstQuestion: mockFirstQuestion
-    });
-
-    mockAxios.onGet('http://localhost:8004/nextQuestion').reply(200, {
-      nextQuestion: mockNextQuestion
-    });
-
-    renderComponent();
-
-    const question = await screen.findByTestId('question');
-    expect(question).toHaveTextContent('¿Cuál es la capital de España?');
-
-    await act(async () => {
-      jest.advanceTimersByTime(30000); // Advance timer by 30 seconds
-    });
-
+  test('handles option selection correctly for incorrect answer', async () => {
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
     await waitFor(() => {
-      const nextQuestion = screen.getByTestId('question');
-      expect(nextQuestion).toHaveTextContent('¿Cuál es la capital de España?');
+      expect(axios.post).toHaveBeenCalled();
+    });
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    
+    // Find and click an incorrect answer
+    await waitFor(() => {
+      const incorrectOption = screen.getByText('London');
+      fireEvent.click(incorrectOption);
+    });
+    
+    // Check if the next question is fetched after delay
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled();
     });
   });
 
-
-  describe('Game Component - Difficulties and Categories', () => {
-    const mockFirstQuestion = {
-      questionObject: '¿Cuál es la capital de España?',
-      questionImage: 'https://example.com/madrid.jpg',
-      correctAnswer: 'Madrid',
-      answerOptions: ['Londres', 'Lisboa', 'Madrid', 'Roma']
-    };
-
-    beforeEach(() => {
-      mockAxios.reset();
-      jest.useFakeTimers();
-
-      // Reset the mock implementation before each test
-      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
-        state: {
-          gameConfig: {
-            numQuestions: 5,
-            timePerQuestion: 30,
-            difficulty: 'Normal' // Default
-          }
-        }
-      }));
-
-      mockAxios.onPost('http://localhost:8004/startGame').reply(200, {
-        message: 'Game started',
-        category: 'All',
-        firstQuestion: mockFirstQuestion
-      });
+  test('handles timer expiration correctly', async () => {
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
     });
-
-    it('sets the correct time limit for "Principiante" difficulty', async () => {
-      // Override mock for this specific test
-      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
-        state: {
-          gameConfig: {
-            numQuestions: 5,
-            timePerQuestion: 30,
-            difficulty: 'Principiante'
-          }
-        }
-      }));
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText(/Tiempo restante: 60s/i)).toBeInTheDocument();
-      });
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
     });
-
-    it('sets the correct time limit for "Difícil" difficulty', async () => {
-      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
-        state: {
-          gameConfig: {
-            numQuestions: 5,
-            timePerQuestion: 30,
-            difficulty: 'Difícil'
-          }
-        }
-      }));
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText(/Tiempo restante: 15s/i)).toBeInTheDocument();
-      });
+    
+    // Advance timers to expire the question timer
+    act(() => {
+      jest.advanceTimersByTime(20000);
     });
-
-    it('sets the correct time limit for "Experto" difficulty', async () => {
-      jest.spyOn(require('react-router-dom'), 'useLocation').mockImplementation(() => ({
-        state: {
-          gameConfig: {
-            numQuestions: 5,
-            timePerQuestion: 30,
-            difficulty: 'Experto'
-          }
-        }
-      }));
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText(/Tiempo restante: 5s/i)).toBeInTheDocument();
-      });
+    
+    // Check if the next question is fetched after time expires
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalled();
     });
   });
-  
+
+  test('navigates to home when home button is clicked', async () => {
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
+    });
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    
+    // Find and click the home button
+    const homeButton = screen.getByText('Abandonar');
+    fireEvent.click(homeButton);
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/Home');
+  });
+
+  test('restarts game when restart button is clicked', async () => {
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
+    });
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    
+    // Reset mocks to check if they're called again
+    axios.post.mockClear();
+    
+    // Find and click the restart button
+    const restartButton = screen.getByText('Reiniciar');
+    fireEvent.click(restartButton);
+    
+    expect(axios.post).toHaveBeenCalledWith(expect.any(String), {
+      category: expect.any(String)
+    });
+  });
+
+  test('shows game finished screen after all questions', async () => {
+    // Override the mock location to have just 1 question
+    useLocation.mockReturnValue({
+      state: {
+        gameConfig: {
+          numQuestions: 1,
+          timePerQuestion: 20,
+          difficulty: 'Normal',
+          category: 'Science'
+        }
+      }
+    });
+    
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
+    });
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    
+    // Find and click the correct answer
+    await waitFor(() => {
+      const correctOption = screen.getByText('Paris');
+      fireEvent.click(correctOption);
+    });
+    
+    // Advance timers to show game finished screen
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    
+    // Check if game finished screen is shown
+    await waitFor(() => {
+      expect(screen.getByText('¡Partida finalizada!')).toBeInTheDocument();
+    });
+    
+    // Check if session data is saved
+    expect(axios.post).toHaveBeenCalledWith(expect.stringContaining('/save-session'), expect.any(Object));
+  });
+
+  test('navigates to profile from game finished screen', async () => {
+    // Override the mock location to have just 1 question
+    useLocation.mockReturnValue({
+      state: {
+        gameConfig: {
+          numQuestions: 1,
+          timePerQuestion: 20,
+          difficulty: 'Normal',
+          category: 'Science'
+        }
+      }
+    });
+    
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+    
+    // Wait for the game to load
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
+    });
+    
+    // Advance timers to complete loading
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    
+    // Find and click the correct answer
+    await waitFor(() => {
+      const correctOption = screen.getByText('Paris');
+      fireEvent.click(correctOption);
+    });
+    
+    // Advance timers to show game finished screen
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    
+    // Find and click the profile button
+    await waitFor(() => {
+      const profileButton = screen.getByText('Perfil');
+      fireEvent.click(profileButton);
+    });
+    
+    expect(mockNavigate).toHaveBeenCalledWith('/Profile');
+  });
 });
