@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
-
+import React, { useState } from "react";
+import { getPlayerLevel } from '../../utils';
 import { createContext, useContext, useEffect } from "react"
 import {
   Container,
@@ -224,17 +224,8 @@ const HomePage = () => {
     // Calculate total questions answered
     const totalQuestions = sessionData.reduce((sum, session) => sum + session.score + session.wrongAnswers, 0)
 
-    // Determinar el nivel del jugador basado en preguntas respondidas
-    const getPlayerLevel = () => {
-        if (totalQuestions < 10) return { level: "Principiante", color: "#9E9E9E" }
-        if (totalQuestions < 30) return { level: "Aprendiz", color: "#8BC34A" }
-        if (totalQuestions < 60) return { level: "Intermedio", color: "#03A9F4" }
-        if (totalQuestions < 100) return { level: "Avanzado", color: "#FF9800" }
-        if (totalQuestions < 200) return { level: "Experto", color: "#F44336" }
-        return { level: "Generalísimo", color: "#3c8841" }
-    }
 
-    const playerLevel = getPlayerLevel()
+    const playerLevel = getPlayerLevel(totalQuestions)
     const successRate = getSuccessRate()
 
     const handleOpenSessionDetails = (session) => {
