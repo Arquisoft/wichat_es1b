@@ -6,7 +6,7 @@ ifndef::imagesdir[:imagesdir: ../images]
 == Vista de despliegue
 
 
-image::../images/07-DeploymentView.png[]
+image::../images/07-Diagrama_Despliegue.png[]
 
 Motivación::
 
@@ -20,7 +20,7 @@ Mapeo de los servicios a la infraestructura::
 
 Servicios API de terceros:::
 * *_WIKIDATA API_*: Servidor API externo que provee información gráfica para las preguntas.
-* LLM: Chat Bot que ofrece ayuda al usuario.
+* *_LLM_*: Chat Bot que ofrece ayuda al usuario.
 
 Servicios de la aplicación en servidor propio:::
 * *_Authentication Service_*: Valida que el usuario esté autenticado.

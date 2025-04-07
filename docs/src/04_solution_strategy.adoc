@@ -16,6 +16,7 @@ ifndef::imagesdir[:imagesdir: ../images]
 * **Modelo largo de lenguaje (LLM):** modelo de inteligencia artificial basado en aprendizaje profundo, diseñado para procesar y generar texto en lenguaje natural.
 * **Docker:** se utiliza para hacer el despliegue de la aplicación.
 * **Máquina Virtual:** delegada a los servicios de Azure, donde se desplegará la aplicación.
+* **Gatling:** Se usará este software para realizar pruebas de carga de la aplicación.
 
 
 === Decisiones sobre cómo alcanzar los objetivos clave de calidad
