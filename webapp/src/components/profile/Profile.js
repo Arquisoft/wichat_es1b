@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getPlayerLevel } from '../../utils';
 import {
   Box,
   Container,
@@ -134,15 +135,7 @@ const Profile = () => {
   };
   const stats = getTotalStats();
 
-  // Determinar el nivel del jugador basado en preguntas respondidas
-  const getPlayerLevel = () => {
-    if (stats.totalQuestions < 10) return { level: "Principiante", color: "#9E9E9E" }
-    if (stats.totalQuestions < 30) return { level: "Aprendiz", color: "#8BC34A" }
-    if (stats.totalQuestions < 60) return { level: "Intermedio", color: "#03A9F4" }
-    if (stats.totalQuestions < 100) return { level: "Avanzado", color: "#FF9800" }
-    return { level: "Experto", color: "#F44336" }
-  }
-  const playerLevel = getPlayerLevel()
+    const playerLevel = getPlayerLevel(stats.totalQuestions)
 
   // Formatear Fecha
   const formatDate = (dateString) => {
