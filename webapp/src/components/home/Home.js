@@ -168,9 +168,9 @@ const HomePage = () => {
     }
 
     // Get the last 5 sessions - Corregido para obtener las últimas 5 sesiones
-    const getLastFiveSessions = () => {
+    const getLastSessions = () => {
         // Ya están ordenadas por fecha en el useEffect, así que simplemente tomamos las primeras 5
-        return sessionData.slice(0, 5)
+        return sessionData.slice(0, 3)
     }
 
     // Calcular la tasa de acierto
@@ -1048,7 +1048,7 @@ const HomePage = () => {
                                         gap: 1,
                                     }}
                                 >
-                                    <AccessTimeIcon /> Tus últimas 5 partidas
+                                    <AccessTimeIcon /> Tus últimas partidas
                                 </Typography>
                                 {!loading && sessionData.length > 0 && (
                                     <Chip
@@ -1069,7 +1069,7 @@ const HomePage = () => {
                                     </Box>
                                 ) : sessionData.length > 0 ? (
                                     <Grid container spacing={2}>
-                                        {getLastFiveSessions().map((session, index) => (
+                                        {getLastSessions().map((session, index) => (
                                             <Grid item xs={12} key={session._id}>
                                                 <Paper
                                                     elevation={0}
