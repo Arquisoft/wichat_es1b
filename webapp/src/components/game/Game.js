@@ -301,14 +301,13 @@ const Game = () => {
     }
   }, [questionCounter, numberOfQuestions, isFinished])
 
-  const handleShowGame = async (categoryN = "All", difficulty = "Normal") => {
-    await handleNewGame(categoryN, difficulty)
+  const handleShowGame = async (categoryN = "All") => {
+    await handleNewGame(categoryN)
   }
 
   useEffect(() => {
       const fetchGameData = async () => {
-          const { numQuestions, difficulty } = location.state?.gameConfig || {};
-          await handleShowGame(location.state?.gameConfig?.category, difficulty);
+          await handleShowGame(location.state?.gameConfig?.category);
       };  
       fetchGameData();
   }, [location.state]);
@@ -355,7 +354,7 @@ const Game = () => {
                   </Typography>
                   <Button
                     color="inherit"
-                    onClick={() => handleNewGame(location.state?.gameConfig?.category || "All", difficulty)}
+                    onClick={() => handleNewGame(location.state?.gameConfig?.category || "All")}
                     startIcon={<RefreshIcon />}
                     sx={{ fontWeight: "bold" }}
                   >
@@ -830,7 +829,7 @@ const Game = () => {
                             <Button
                               fullWidth
                               variant="contained"
-                              onClick={() => handleNewGame(location.state?.gameConfig?.category || "All", difficulty)}
+                              onClick={() => handleNewGame(location.state?.gameConfig?.category || "All")}
                               startIcon={<RefreshIcon />}
                               sx={{
                                 p: 1.5,

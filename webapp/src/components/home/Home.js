@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
-
+import React, { useState } from "react";
+import { getPlayerLevel } from '../../utils';
 import { createContext, useContext, useEffect } from "react"
 import {
   Container,
@@ -168,9 +168,9 @@ const HomePage = () => {
     }
 
     // Get the last 5 sessions - Corregido para obtener las últimas 5 sesiones
-    const getLastFiveSessions = () => {
+    const getLastSessions = () => {
         // Ya están ordenadas por fecha en el useEffect, así que simplemente tomamos las primeras 5
-        return sessionData.slice(0, 5)
+        return sessionData.slice(0, 3)
     }
 
     // Calcular la tasa de acierto
@@ -224,17 +224,8 @@ const HomePage = () => {
     // Calculate total questions answered
     const totalQuestions = sessionData.reduce((sum, session) => sum + session.score + session.wrongAnswers, 0)
 
-    // Determinar el nivel del jugador basado en preguntas respondidas
-    const getPlayerLevel = () => {
-        if (totalQuestions < 10) return { level: "Principiante", color: "#9E9E9E" }
-        if (totalQuestions < 30) return { level: "Aprendiz", color: "#8BC34A" }
-        if (totalQuestions < 60) return { level: "Intermedio", color: "#03A9F4" }
-        if (totalQuestions < 100) return { level: "Avanzado", color: "#FF9800" }
-        if (totalQuestions < 200) return { level: "Experto", color: "#F44336" }
-        return { level: "Generalísimo", color: "#3c8841" }
-    }
 
-    const playerLevel = getPlayerLevel()
+    const playerLevel = getPlayerLevel(totalQuestions)
     const successRate = getSuccessRate()
 
     const handleOpenSessionDetails = (session) => {
@@ -1048,7 +1039,7 @@ const HomePage = () => {
                                         gap: 1,
                                     }}
                                 >
-                                    <AccessTimeIcon /> Tus últimas 5 partidas
+                                    <AccessTimeIcon /> Tus últimas partidas
                                 </Typography>
                                 {!loading && sessionData.length > 0 && (
                                     <Chip
@@ -1069,7 +1060,7 @@ const HomePage = () => {
                                     </Box>
                                 ) : sessionData.length > 0 ? (
                                     <Grid container spacing={2}>
-                                        {getLastFiveSessions().map((session, index) => (
+                                        {getLastSessions().map((session, index) => (
                                             <Grid item xs={12} key={session._id}>
                                                 <Paper
                                                     elevation={0}
