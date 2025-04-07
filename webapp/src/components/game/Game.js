@@ -301,14 +301,13 @@ const Game = () => {
     }
   }, [questionCounter, numberOfQuestions, isFinished])
 
-  const handleShowGame = async (categoryN = "All", difficulty = "Normal") => {
+  const handleShowGame = async (categoryN = "All") => {
     await handleNewGame(categoryN)
   }
 
   useEffect(() => {
       const fetchGameData = async () => {
-          const { numQuestions, difficulty } = location.state?.gameConfig || {};
-          await handleShowGame(location.state?.gameConfig?.category, difficulty);
+          await handleShowGame(location.state?.gameConfig?.category);
       };  
       fetchGameData();
   }, [location.state]);
