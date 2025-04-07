@@ -307,8 +307,7 @@ const Game = () => {
 
   useEffect(() => {
       const fetchGameData = async () => {
-          const { numQuestions, difficulty } = location.state?.gameConfig || {};
-          await handleShowGame(location.state?.gameConfig?.category, difficulty);
+          await handleShowGame(location.state?.gameConfig?.category);
       };  
       fetchGameData();
   }, [location.state]);
