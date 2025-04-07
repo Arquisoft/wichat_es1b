@@ -134,6 +134,7 @@ const HomePage = () => {
             state: {
                 gameConfig: {
                     numQuestions: numQuestions,
+                    timePerQuestion: timePerQuestion,
                     difficulty: difficultyN,
                     category: category,
                 },
