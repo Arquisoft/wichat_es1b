@@ -79,8 +79,8 @@ const Profile = () => {
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
-        const response = await axios.get(`${apiEndpoint}/get-sessions/${username}`);
-        let sortedSessions = response.data;
+        const response = await axios.get(`${apiEndpoint}/get-user-sessions/${username}`);
+        let sortedSessions = response.data.sessions;
 
         if (sortBy === 'date') {
           sortedSessions = sortedSessions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
