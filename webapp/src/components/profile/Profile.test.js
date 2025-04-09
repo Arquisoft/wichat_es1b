@@ -125,7 +125,7 @@ describe('Profile component', () => {
 
     expect(screen.getByText(/Ordenar por: Puntuación/i)).toBeInTheDocument();
   });
-
+  
   it('permite cerrar sesión y redirige al inicio', async () => {
     setupMockResponse({ sessions: [mockSession] });
   
