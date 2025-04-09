@@ -109,13 +109,9 @@ const HomePage = () => {
     const fetchSessionData = async () => {
       try {
         const response = await axios.get(`${apiEndpoint}/get-user-sessions/${username}`)
-
         const usuario = response.data
-        console.log(usuario + "\n usuario")
         setUserData(usuario)
-
         const sesiones = response.data.sessions
-        console.log(sesiones + "\n usuario")
         // Ordenar las sesiones por fecha (más reciente primero)
         const sortedSessions = sesiones.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         setSessionData(sortedSessions)
@@ -165,9 +161,6 @@ const HomePage = () => {
   }, [])
 
   const handleShowGame = (category = "All", difficultyN = "Normal") => {
-    // Log the selected category before navigation
-    console.log("Starting game with category:", category)
-
     navigate("/Game", {
       state: {
         gameConfig: {
@@ -287,12 +280,10 @@ const HomePage = () => {
   // Función para cerrar sesión y redirigir al login
   const handleLogout = () => {
     localStorage.removeItem("username")
-    console.log("Cerrar sesión")
     navigate("/")
   }
 
   const handleGoToProfile = () => {
-    console.log("Ir al perfil")
     navigate("/Profile")
   }
 
