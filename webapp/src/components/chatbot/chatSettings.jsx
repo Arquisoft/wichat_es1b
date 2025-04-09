@@ -24,7 +24,7 @@ const settings = {
         defaultToggledOn: false,
         language: "es-ES",
         voiceNames: ["Microsoft Laura - Spanish (Spain) (es-ES)","Microsoft Pablo - Spanish (Spain) (es-ES)", "Google español (es-ES)"],
-        rate: 5,
+        rate: 1,
         volume: 1
     },
     chatHistory: {
