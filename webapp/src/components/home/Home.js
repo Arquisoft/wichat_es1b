@@ -72,6 +72,7 @@ const HomePage = () => {
     const [numQuestions, setNumQuestions] = useState(10)
     const [timePerQuestion, setTimePerQuestion] = useState(30)
     const [sessionData, setSessionData] = useState([])
+    const [userData, setUserData] = useState({})
     const [loading, setLoading] = useState(true)
     const [selectedSession, setSelectedSession] = useState(null)
     const [openDialog, setOpenDialog] = useState(false)
@@ -110,9 +111,16 @@ const HomePage = () => {
     useEffect(() => {
         const fetchSessionData = async () => {
             try {
-                const response = await axios.get(`${apiEndpoint}/get-sessions/${username}`)
+                const response = await axios.get(`${apiEndpoint}/get-user-sessions/${username}`)
+                
+                const usuario = response.data
+                console.log(usuario+"\n usuario")
+                setUserData(usuario)
+
+                const sesiones = response.data.sessions
+                console.log(sesiones+"\n usuario")
                 // Ordenar las sesiones por fecha (más reciente primero)
-                const sortedSessions = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                const sortedSessions = sesiones.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 setSessionData(sortedSessions)
                 setLoading(false)
             } catch (error) {
@@ -156,31 +164,25 @@ const HomePage = () => {
 
     // Calculate total statistics across all sessions
     const getTotalStats = () => {
-        if (sessionData.length === 0) return []
-
-        const totalCorrect = sessionData.reduce((sum, session) => sum + session.score, 0)
-        const totalWrong = sessionData.reduce((sum, session) => sum + session.wrongAnswers, 0)
+        if (userData.length === 0) return []
 
         return [
-            { name: "Correctas", value: totalCorrect },
-            { name: "Incorrectas", value: totalWrong },
+            { name: "Correctas", value: userData.TotalWellAnswers },
+            { name: "Incorrectas", value: userData.TotalWrongAnswers },
         ]
     }
 
-    // Get the last 5 sessions - Corregido para obtener las últimas 5 sesiones
+    // Get the last 3 sessions - Corregido para obtener las últimas 5 sesiones
     const getLastSessions = () => {
         // Ya están ordenadas por fecha en el useEffect, así que simplemente tomamos las primeras 5
         return sessionData.slice(0, 3)
     }
 
-    // Calcular la tasa de acierto
+    // Obtener la tase de acierto
     const getSuccessRate = () => {
         if (sessionData.length === 0) return 0
 
-        const totalCorrect = sessionData.reduce((sum, session) => sum + session.score, 0)
-        const totalQuestions = sessionData.reduce((sum, session) => sum + session.score + session.wrongAnswers, 0)
-
-        return totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0
+        return userData.AccuracyRate
     }
 
     // Format date for display
