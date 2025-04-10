@@ -593,7 +593,7 @@ const HomePage = () => {
                                     </Typography>
                                     <Box sx={{ display: "flex", gap: 2 }}>
                                       <Typography variant="body2" color="text.secondary">
-                                        <strong>Precisión:</strong> {user.AccuracyRate}%
+                                          <strong>Precisión:</strong> {Math.round(user.AccuracyRate)}%
                                       </Typography>
                                       <Typography variant="body2" color="text.secondary">
                                         <strong>Correctas:</strong> {user.TotalWellAnswers}
@@ -627,7 +627,7 @@ const HomePage = () => {
                                               : "error.main",
                                       }}
                                     >
-                                      {user.AccuracyRate}%
+                                      {Math.round(user.AccuracyRate)}%
                                     </Typography>
                                   </Box>
                                 </Box>
