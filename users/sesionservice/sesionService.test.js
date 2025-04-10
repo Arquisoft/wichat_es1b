@@ -1,15 +1,10 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
 
-/**
- * Test suite for the session service (aka sesionService). Definitely too late for correcting that (or is it?).
- *
- */
 const routeHandlers = {
     get: {},
     post: {}
 };
-
 
 // Mock server
 const mockServer = {
@@ -22,12 +17,10 @@ const mockServer = {
     })
 };
 
-
-// Mock mongoose before requiring any module
+// Mock mongoose antes de requerir el servicio
 jest.mock('mongoose', () => {
     const originalModule = jest.requireActual('mongoose');
 
-    // Create a mock User model with a modifiable findOne function
     const mockUserModel = {
         findOne: jest.fn()
     };
@@ -42,7 +35,6 @@ jest.mock('mongoose', () => {
         }
     };
 });
-
 
 // Mock express
 jest.mock('express', () => {
@@ -63,15 +55,12 @@ jest.mock('express', () => {
     return express;
 });
 
-
-// Now require the service
+// Cargar servicio
 const server = require('./sesionService');
 
-// Restore original methods after tests
 afterAll(() => {
     jest.resetModules();
 });
-
 
 describe('Session Service', () => {
     let User;
@@ -82,8 +71,8 @@ describe('Session Service', () => {
         User.findOne.mockReset();
     });
 
-    describe('GET request to /health', () => {
-        it('should return OK status', async () => {
+    describe('GET /health', () => {
+        it('debería retornar status OK', () => {
             const req = {};
             const res = {
                 json: jest.fn()
@@ -94,11 +83,12 @@ describe('Session Service', () => {
         });
     });
 
-
-    describe('POST request to /save-session', () => {
-        it('should save a session for an existing user', async () => {
+    describe('POST /save-session', () => {
+        it('guarda una sesión para un usuario existente', async () => {
             const mockUser = {
                 sessions: [],
+                TotalWrongAnswers: 2,
+                TotalWellAnswers: 5,
                 save: jest.fn().mockResolvedValue({})
             };
 
@@ -109,8 +99,10 @@ describe('Session Service', () => {
                     userid: 'testuser',
                     score: 85,
                     wrongAnswers: 3,
+                    difficulty: 'easy',
+                    category: 'math',
                     questions: [
-                        { question: 'Test question?', correctAnswer: 'Correct', userAnswer: 'Correct' }
+                        { question: 'Test?', correctAnswer: 'Yes', userAnswer: 'Yes' }
                     ]
                 }
             };
@@ -129,12 +121,18 @@ describe('Session Service', () => {
             expect(mockUser.save).toHaveBeenCalled();
         });
 
-
-        it('should return 404 when user is not found', async () => {
+        it('retorna 404 si el usuario no existe', async () => {
             User.findOne.mockResolvedValue(null);
 
             const req = {
-                body: { userid: 'nonexistent', score: 75 }
+                body: {
+                    userid: 'nonexistent',
+                    score: 75,
+                    wrongAnswers: 2,
+                    difficulty: 'medium',
+                    category: 'science',
+                    questions: []
+                }
             };
 
             const res = {
@@ -148,12 +146,18 @@ describe('Session Service', () => {
             expect(res.json).toHaveBeenCalledWith({ message: 'User not found' });
         });
 
-
-        it('should handle all database errors', async () => {
+        it('maneja errores de base de datos', async () => {
             User.findOne.mockRejectedValue(new Error('Database error'));
 
             const req = {
-                body: { userid: 'testuser', score: 80 }
+                body: {
+                    userid: 'testuser',
+                    score: 80,
+                    wrongAnswers: 1,
+                    difficulty: 'hard',
+                    category: 'history',
+                    questions: []
+                }
             };
 
             const res = {
@@ -168,18 +172,17 @@ describe('Session Service', () => {
         });
     });
 
-
-    describe('GET request to /get-sessions/:username', () => {
-        it('should return sessions for an existing user', async () => {
-            const mockSessions = [
-                { score: 85, wrongAnswers: 2, questions: [] },
-                { score: 90, wrongAnswers: 1, questions: [] }
-            ];
-
-            User.findOne.mockResolvedValue({
+    describe('GET /get-user-sessions/:username', () => {
+        it('retorna sesiones de un usuario existente', async () => {
+            const mockUser = {
                 username: 'testuser',
-                sessions: mockSessions
-            });
+                sessions: [
+                    { score: 85, wrongAnswers: 2, questions: [] },
+                    { score: 90, wrongAnswers: 1, questions: [] }
+                ]
+            };
+
+            User.findOne.mockResolvedValue(mockUser);
 
             const req = {
                 params: { username: 'testuser' }
@@ -190,18 +193,17 @@ describe('Session Service', () => {
                 json: jest.fn()
             };
 
-            await routeHandlers.get['/get-sessions/:username'](req, res);
+            await routeHandlers.get['/get-user-sessions/:username'](req, res);
 
-            expect(res.json).toHaveBeenCalledWith(mockSessions);
+            expect(res.json).toHaveBeenCalledWith(mockUser);
             expect(User.findOne).toHaveBeenCalledWith({ username: 'testuser' });
         });
 
-
-        it('should return 404 when user is not found', async () => {
+        it('retorna 404 si no se encuentra el usuario', async () => {
             User.findOne.mockResolvedValue(null);
 
             const req = {
-                params: { username: 'nonexistent' }
+                params: { username: 'ghost' }
             };
 
             const res = {
@@ -209,14 +211,13 @@ describe('Session Service', () => {
                 json: jest.fn()
             };
 
-            await routeHandlers.get['/get-sessions/:username'](req, res);
+            await routeHandlers.get['/get-user-sessions/:username'](req, res);
 
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({ message: 'User not found' });
         });
 
-
-        it('should handle all database errors', async () => {
+        it('maneja errores de base de datos', async () => {
             User.findOne.mockRejectedValue(new Error('Database error'));
 
             const req = {
@@ -228,16 +229,15 @@ describe('Session Service', () => {
                 json: jest.fn()
             };
 
-            await routeHandlers.get['/get-sessions/:username'](req, res);
+            await routeHandlers.get['/get-user-sessions/:username'](req, res);
 
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({ error: 'Error getting sessions' });
         });
     });
 
-
-    describe('Server lifecycle', () => {
-        it('should close mongoose connection when the server closes', () => {
+    describe('Cierre del servidor', () => {
+        it('debería cerrar la conexión mongoose', () => {
             mockServer.closeCallback();
             expect(mongoose.connection.close).toHaveBeenCalled();
         });

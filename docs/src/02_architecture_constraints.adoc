@@ -15,6 +15,7 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.
 | Control de versiones | El control de versiones se realizará mediante Git y se alojará en GitHub.
 | Host | La aplicación será desplegada en un host de Docker.
 | API | Se utilizará una API de WikiData para obtener información a la hora de generar preguntas (distintas fotografías) y respuestas.
+| Pruebas de carga | Se usará Gatling para realizar las pruebas de carga de la aplicación.
 |===
 
 

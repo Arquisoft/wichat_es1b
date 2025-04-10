@@ -17,8 +17,8 @@ image::arbol_de_calidad.png[Árbol de calidad]
 | *Prioridad*
 
 | Rendimiento
-| Los tiempos de espera o respuesta de la aplicación sean reducidos, para que el usuario pueda disfrutar de una experiencia fluida y con las mínimas interrupciones posibles. Se buscará que los tiempos sean no superirores a 1 segundo.
-| Medio
+| Los tiempos de espera o respuesta de la aplicación sean reducidos, para que el usuario pueda disfrutar de una experiencia fluida y con las mínimas interrupciones posibles. Los tiempos de respuesta no serán superiores a 0.8 segundos.
+| Medio-Alto
 
 | Testeabilidad
 | Nuestra aplicación podrá ser testeable, es decir, estará sometida a una serie de pruebas que realizaremos para garantizar el correcto funcionamiento del sistema. El 80% del código tendrá cobertura con pruebas unitarias exitosas. También nos ayudará a identificar errores y solucionarlos. 

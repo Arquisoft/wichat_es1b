@@ -23,8 +23,8 @@ const settings = {
         disabled: false,
         defaultToggledOn: false,
         language: "es-ES",
-        voiceNames: ["Google español (es-ES)", "Microsoft Helena - Spanish (Spain)"],
-        rate: 5,
+        voiceNames: ["Microsoft Laura - Spanish (Spain) (es-ES)","Microsoft Pablo - Spanish (Spain) (es-ES)", "Google español (es-ES)"],
+        rate: 1,
         volume: 1
     },
     chatHistory: {
