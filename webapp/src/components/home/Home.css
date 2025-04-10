@@ -13,14 +13,18 @@
 @keyframes pulse {
   0% {
     transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
   }
-  50% {
-    transform: scale(1.05);
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
   }
   100% {
     transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
+
 
 /* Animación de pulso para el botón de nueva partida */
 @keyframes glow {
@@ -96,8 +100,8 @@ h6 {
 }
 
 .session-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
 }
 
 /* Efecto de pulso para el botón de nueva partida */

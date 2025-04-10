@@ -109,9 +109,18 @@ app.post('/save-session', async (req, res) => {
   }
 });
 
-app.get('/get-sessions/:username', async (req, res) => {
+app.get('/get-user-sessions/:username', async (req, res) => {
   try {
-    const response = await axios.get(sessionServiceUrl + '/get-sessions/' + req.params.username);
+    const response = await axios.get(sessionServiceUrl + '/get-user-sessions/' + req.params.username);
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
+  }
+});
+
+app.get('/get-users-totaldatas', async (req, res) => {
+  try {
+    const response = await axios.get(sessionServiceUrl + '/get-users-totaldatas');
     res.json(response.data);
   } catch (error) {
     res.status(error.response.status).json({ error: error.response.data.error });

@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String,
   createdAt: Date,
+  TotalWrongAnswers: Number,
+  TotalWellAnswers: Number,
+  AccuracyRate: Number,
   sessions: [
     {      
       questions: [
@@ -60,43 +63,59 @@ app.post('/save-session', async (req, res) => {
     return res.status(400).json({ error: 'User ID contains invalid characters' });
   }
 
-  try {
-    const user = await User.findOne({ username: userid });
-
-    if (user) {
-      user.sessions.push({ 
-        score, 
-        wrongAnswers, 
-        questions,
-        difficulty,
-        category
-      });
-      await user.save();
-      res.status(200).json({ message: 'Session saved successfully' });
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error saving session' });
-  }
-});
-
-
-app.get('/get-sessions/:username', async (req, res) => {
-    const { username } = req.params;
     try {
-      const user = await User.findOne({username:username});
+      const user = await User.findOne({ username: userid });
+  
       if (user) {
-        res.json(user.sessions);
+        // Actualizar los totales
+        user.TotalWrongAnswers = (user.TotalWrongAnswers || 0) + wrongAnswers;
+        user.TotalWellAnswers = (user.TotalWellAnswers || 0) + score;
+  
+        // Recalcular AccuracyRate
+        const totalAnswers = user.TotalWrongAnswers + user.TotalWellAnswers;
+        user.AccuracyRate = totalAnswers > 0 ? (user.TotalWellAnswers / totalAnswers) * 100 : 0;
+  
+        // Agregar la nueva sesión
+        user.sessions.push({ 
+          score, 
+          wrongAnswers, 
+          questions,
+          difficulty,
+          category
+        });
+  
+        await user.save();
+        res.status(200).json({ message: 'Session saved successfully' });
       } else {
         res.status(404).json({ message: 'User not found' });
       }
     } catch (error) {
-      res.status(500).json({ error: 'Error getting sessions' });
+      res.status(500).json({ error: 'Error saving session' });
     }
 });
 
+app.get('/get-user-sessions/:username', async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({username:username});
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Error getting sessions' });
+  }
+});
 
+app.get('/get-users-totaldatas', async (req, res) => {
+  try {
+    const users = await User.find({}, 'username TotalWrongAnswers TotalWellAnswers AccuracyRate');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Error getting users' });
+  }
+});
 
 // Start the server
 const server = app.listen(port, () => {

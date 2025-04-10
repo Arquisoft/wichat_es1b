@@ -42,6 +42,7 @@ import StarIcon from "@mui/icons-material/Star"
 import CloseIcon from "@mui/icons-material/Close"
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import './Profile.css';
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 
@@ -66,6 +67,9 @@ const Profile = () => {
   const [openSessionDialog, setOpenSessionDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
 
+  // Colors for the pie chart - más vibrantes y con mejor contraste
+  const COLORS = ["#4CAF50", "#FF5252"]
+
   // Constante para el control del menú
   const [anchorEl, setAnchorEl] = useState(null); 
 
@@ -79,8 +83,8 @@ const Profile = () => {
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
-        const response = await axios.get(`${apiEndpoint}/get-sessions/${username}`);
-        let sortedSessions = response.data;
+        const response = await axios.get(`${apiEndpoint}/get-user-sessions/${username}`);
+        let sortedSessions = response.data.sessions;
 
         if (sortBy === 'date') {
           sortedSessions = sortedSessions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -143,7 +147,43 @@ const Profile = () => {
     return date.toLocaleDateString() + " " + date.toLocaleTimeString()
   }
 
-  // Paginación de las sesiones
+    // Custom tooltip for the pie chart
+    const CustomTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            return (
+                <Box
+                    sx={{
+                        bgcolor: "background.paper",
+                        p: 2,
+                        border: "none",
+                        borderRadius: 2,
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+                        backdropFilter: "blur(10px)",
+                        animation: "fadeIn 0.3s ease-in-out",
+                    }}
+                >
+                    <Typography variant="body2" fontWeight="medium">
+                        {`${payload[0].name}: ${payload[0].value}`}
+                    </Typography>
+                </Box>
+            )
+        }
+        return null
+    }
+
+    // Calcular la tasa de acierto
+    const getSuccessRate = () => {
+        if (sessionData.length === 0) return 0
+
+        const totalCorrect = sessionData.reduce((sum, session) => sum + session.score, 0)
+        const totalQuestions = sessionData.reduce((sum, session) => sum + session.score + session.wrongAnswers, 0)
+
+        return totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0
+    }
+
+    const successRate = getSuccessRate();
+
+    // Paginación de las sesiones
   const indexOfLastSession = currentPage * sessionsPerPage;
   const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
   const currentSessions = sessionData.slice(indexOfFirstSession, indexOfLastSession);
@@ -196,6 +236,9 @@ const Profile = () => {
     setExpandedQuestion(expandedQuestion === sessionIndex ? null : sessionIndex);
   };
 
+  // Calculate total questions answered
+  const totalQuestions = sessionData.reduce((sum, session) => sum + session.score + session.wrongAnswers, 0)
+
   // Función para abrir detalles de la sesión
   const handleOpenSessionDetails = (session) => {
     setSelectedSession(session);
@@ -218,6 +261,14 @@ const Profile = () => {
         } else {
             return "¡Buenas noches";
         }
+    };
+
+    const getChartData = () => {
+        const stats = getTotalStats();
+        return [
+            { name: "Correctas", value: stats.totalCorrect },
+            { name: "Incorrectas", value: stats.totalWrong }
+        ];
     };
   
   return (
@@ -417,195 +468,247 @@ const Profile = () => {
                 </Typography>
               </Box>
 
-              {/* Mostrar estadisticas */}
-              <Box sx={{ p: 4 }}>
-                <Grid container spacing={4}>
-                  <Grid item xs={12}>
-                    {loading ? (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 3,
-                          height: 300,
-                          p: 3,
-                        }}
-                      >
-                        <Box sx={{ display: "flex", justifyContent: "center", gap: 3 }}>
-                          <Skeleton variant="rounded" width={120} height={80} />
-                          <Skeleton variant="rounded" width={120} height={80} />
-                        </Box>
-                        <Skeleton variant="rounded" width="100%" height={300} />
-                      </Box>
-                    ) : stats.totalGames > 0 ? (
-                      <Box>
-                        <Box
-                          sx={{
-                            p: 4,
-                            display: "flex",
-                            justifyContent: "center",
-                            flexWrap: 'wrap',
-                            mb: 3,
-                            gap: 4,
-                          }}
+
+                <Box
+                    sx={{
+                        p: 4,
+                        display: "flex", // Use flexbox for centering
+                        flexDirection: "column", // Stack children vertically
+                        alignItems: "center", // Center horizontally
+                        justifyContent: "center", // Center vertically
+                    }}
+                >
+                    <Grid container spacing={4} justifyContent="center" alignItems="center">
+                        {/* Chart - con diseño mejorado */}
+                        <Grid
+                            item
+                            xs={12}
+                            md={8}
+                            sx={{
+                                display: "flex", // Use flexbox for centering
+                                flexDirection: "column", // Stack children vertically
+                                alignItems: "center", // Center horizontally
+                                justifyContent: "center", // Center vertically
+                            }}
                         >
-                          {/* Preguntas Correctas */}
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              p: 2,
-                              borderRadius: 3,
-                              bgcolor: alpha("#4CAF50", 0.1),
-                              border: `1px solid ${alpha("#4CAF50", 0.2)}`,
-                              minWidth: 120,
-                              boxShadow: "0 4px 12px rgba(76, 175, 80, 0.1)",
-                            }}
-                          >
-                            <Typography variant="h4" color="success.main" fontWeight="bold">
-                              {stats.totalCorrect}
-                            </Typography>
-
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0.5,
-                                mt: 1,
-                              }}
-                            >
-                              <CheckCircleOutlineIcon fontSize="small" color="success" />
-                              Correctas
-                            </Typography>
-                          </Paper>
-
-                          {/* Preguntas Incorrectas */}
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              p: 2,
-                              borderRadius: 3,
-                              bgcolor: alpha("#FF5252", 0.1),
-                              border: `1px solid ${alpha("#FF5252", 0.2)}`,
-                              minWidth: 120,
-                              boxShadow: "0 4px 12px rgba(255, 82, 82, 0.1)",
-                            }}
-                          >
-                            <Typography variant="h4" color="error.main" fontWeight="bold">
-                              {stats.totalWrong}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0.5,
-                                mt: 1,
-                              }}
-                            >
-                              <CancelOutlinedIcon fontSize="small" color="error" />
-                              Incorrectas
-                            </Typography>
-                          </Paper>
-
-                          {/* Tasa de Acierto */}
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              p: 2,
-                              borderRadius: 3,
-                              bgcolor: alpha("#2196F3", 0.1),
-                              border: `1px solid ${alpha("#2196F3", 0.2)}`,
-                              minWidth: 120,
-                              boxShadow: "0 4px 12px rgba(33, 150, 243, 0.1)",
-                            }}
-                          >
-                            <Typography
-                              variant="h4"
-                              sx={{
-                                color:
-                                  stats.successRate >= 70
-                                    ? "success.main"
-                                    : stats.successRate >= 40
-                                      ? "warning.main"
-                                      : "error.main",
-                              }}
-                              fontWeight="bold"
-                            >
-                              {stats.successRate}%
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0.5,
-                                mt: 1,
-                              }}
-                            >
-                              <TrendingUpIcon fontSize="small" color="info" />
-                              Tasa de acierto
-                            </Typography>
-                          </Paper>
-                        </Box>
-
-                        {/* Total de preguntas respondidas */}
-                        <Box
-                            sx={{
-                              mt: 2,
-                              p: 2,
-                              borderRadius: 2,
-                              bgcolor: alpha(theme.palette.info.main, 0.05),
-                              border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 1,
-                              width: "100%",
-                            }}
-                          >
-                            <QuizIcon color="info" fontSize="small" />
-                            <Typography variant="body2" color="text.secondary">
-                              Total de preguntas respondidas: <strong>{getTotalStats().totalQuestions}</strong>
-                            </Typography>
-                          </Box>
-                      </Box>
-                    ) : (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: 300,
-                          p: 4,
-                          borderRadius: 3,
-                          bgcolor: alpha(theme.palette.info.main, 0.05),
-                          border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
-                        }}
-                      >
-                        <QuizIcon sx={{ fontSize: 60, color: alpha(theme.palette.info.main, 0.3), mb: 2 }} />
-                        <Typography>No hay datos de sesiones disponibles</Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                          Comienza tu primera partida para ver estadísticas
-                        </Typography>
-                      </Box>
-                    )}
-                  </Grid>
-                </Grid>
-              </Box>
+                            {loading ? (
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: 3,
+                                        height: 300,
+                                        p: 3,
+                                        alignItems: "center", // Center horizontally
+                                        justifyContent: "center", // Center vertically
+                                    }}
+                                >
+                                    <Box sx={{ display: "flex", justifyContent: "center", gap: 3 }}>
+                                        <Skeleton variant="rounded" width={120} height={80} />
+                                        <Skeleton variant="rounded" width={120} height={80} />
+                                    </Box>
+                                    <Skeleton variant="rounded" width="100%" height={300} />
+                                </Box>
+                            ) : sessionData.length > 0 ? (
+                                <Box>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            mb: 3,
+                                            gap: 3,
+                                        }}
+                                    >
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                alignItems: "center",
+                                                p: 2,
+                                                borderRadius: 3,
+                                                bgcolor: alpha("#4CAF50", 0.1),
+                                                border: `1px solid ${alpha("#4CAF50", 0.2)}`,
+                                                minWidth: 120,
+                                                boxShadow: "0 4px 12px rgba(76, 175, 80, 0.1)",
+                                            }}
+                                        >
+                                            <Typography variant="h4" color="success.main" fontWeight="bold">
+                                                {stats.totalCorrect}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 0.5,
+                                                    mt: 1,
+                                                }}
+                                            >
+                                                <CheckCircleOutlineIcon fontSize="small" color="success" />
+                                                Correctas
+                                            </Typography>
+                                        </Paper>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                alignItems: "center",
+                                                p: 2,
+                                                borderRadius: 3,
+                                                bgcolor: alpha("#FF5252", 0.1),
+                                                border: `1px solid ${alpha("#FF5252", 0.2)}`,
+                                                minWidth: 120,
+                                                boxShadow: "0 4px 12px rgba(255, 82, 82, 0.1)",
+                                            }}
+                                        >
+                                            <Typography variant="h4" color="error.main" fontWeight="bold">
+                                                {stats.totalWrong}
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 0.5,
+                                                    mt: 1,
+                                                }}
+                                            >
+                                                <CancelOutlinedIcon fontSize="small" color="error" />
+                                                Incorrectas
+                                            </Typography>
+                                        </Paper>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                alignItems: "center",
+                                                p: 2,
+                                                borderRadius: 3,
+                                                bgcolor: alpha("#2196F3", 0.1),
+                                                border: `1px solid ${alpha("#2196F3", 0.2)}`,
+                                                minWidth: 120,
+                                                boxShadow: "0 4px 12px rgba(33, 150, 243, 0.1)",
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="h4"
+                                                sx={{
+                                                    color:
+                                                        successRate >= 70
+                                                            ? "success.main"
+                                                            : successRate >= 40
+                                                                ? "warning.main"
+                                                                : "error.main",
+                                                }}
+                                                fontWeight="bold"
+                                            >
+                                                {successRate}%
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 0.5,
+                                                    mt: 1,
+                                                }}
+                                            >
+                                                <TrendingUpIcon fontSize="small" color="info" />
+                                                Tasa de acierto
+                                            </Typography>
+                                        </Paper>
+                                    </Box>
+                                    <Paper
+                                        elevation={0}
+                                        sx={{
+                                            p: 3,
+                                            borderRadius: 3,
+                                            bgcolor: "white",
+                                            border: "1px solid rgba(0, 0, 0, 0.05)",
+                                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                                        }}
+                                    >
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <PieChart>
+                                                <Pie
+                                                    data={getChartData()}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    labelLine={false}
+                                                    outerRadius={100}
+                                                    innerRadius={60} // Convertido a donut chart
+                                                    fill="#8884d8"
+                                                    dataKey="value"
+                                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                                    paddingAngle={5} // Añade espacio entre segmentos
+                                                >
+                                                    {getChartData().map((entry, index) => (
+                                                        <Cell
+                                                            key={`cell-${index}`}
+                                                            fill={COLORS[index % COLORS.length]}
+                                                            stroke="none"
+                                                        />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip content={<CustomTooltip />} />
+                                                <Legend
+                                                    verticalAlign="bottom"
+                                                    height={36}
+                                                    iconType="circle" // Cambia el tipo de icono
+                                                    iconSize={10} // Tamaño del icono
+                                                />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                        <Box
+                                            sx={{
+                                                mt: 2,
+                                                p: 2,
+                                                borderRadius: 2,
+                                                bgcolor: alpha(theme.palette.info.main, 0.05),
+                                                border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: 1,
+                                            }}
+                                        >
+                                            <QuizIcon color="info" fontSize="small" />
+                                            <Typography variant="body2" color="text.secondary">
+                                                Total de preguntas respondidas: <strong>{totalQuestions}</strong>
+                                            </Typography>
+                                        </Box>
+                                    </Paper>
+                                </Box>
+                            ) : (
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        height: 300,
+                                        p: 4,
+                                        borderRadius: 3,
+                                        bgcolor: alpha(theme.palette.info.main, 0.05),
+                                        border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                                    }}
+                                >
+                                    <QuizIcon sx={{ fontSize: 60, color: alpha(theme.palette.info.main, 0.3), mb: 2 }} />
+                                    <Typography>No hay datos de sesiones disponibles</Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                        Comienza tu primera partida para ver estadísticas
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Grid>
+                    </Grid>
+                </Box>
             </Paper>
           </Fade>
 

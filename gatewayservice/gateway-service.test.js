@@ -30,7 +30,7 @@ describe('Gateway Service', () => {
   const getEndpoints = [
     ['/generateQuestion', { question: '¿Capital?' }],
     ['/nextQuestion', { question: '¿Siguiente?' }],
-    ['/get-sessions/testuser', { sessions: [{ id: 1, score: 90 }] }],
+    ['/get-user-sessions/testuser', { sessions: [{ id: 1, score: 90 }] }],
     ['/health', { status: 'OK' }],
     ['/generatedQuestion', {
       question: "¿Cuál es el lugar de la imagen?",
