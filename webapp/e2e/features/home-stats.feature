@@ -8,5 +8,5 @@ Scenario: Usuario sin partidas ve estadísticas recientes
 Scenario: Usuario con partidas ve estadísticas recientes
   Given Un usuario con partidas jugadas
   When Accede al Home
-  Then Debera mostrarse unas estadísticas de preguntas correctas e incorrectas
+  Then Debera mostrarse unas estadísticas de preguntas correctas e incorrectas, y un raking de jugadores
 

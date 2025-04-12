@@ -28,9 +28,10 @@ import RefreshIcon from "@mui/icons-material/Refresh"
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 
-const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || "http://localhost:8004"
+const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || "http://localhost:8000"
 
 const Game = () => {
+  console.log(apiEndpoint);
   const navigate = useNavigate()
   const location = useLocation()
   const theme = useTheme()
