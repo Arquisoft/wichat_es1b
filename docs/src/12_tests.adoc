@@ -42,9 +42,9 @@ image::../images/12_load-tests_3usersper15seg_playnewgame3.png[]
 
 *Jugar una nueva partida usando el chatbot para obtener pistas*
 
-image::../images/12_load-tests_3usersper15seg_playnewgameusingllm.png[]
-image::../images/12_load-tests_3usersper15seg_playnewgameusingllm2.png[]
-image::../images/12_load-tests_3usersper15seg_playnewgameusingllm3.png[]
+image::../images/12_load-tests_3usersper15seg_playnewgamewithllm.png[]
+image::../images/12_load-tests_3usersper15seg_playnewgamewithllm2.png[]
+image::../images/12_load-tests_3usersper15seg_playnewgamewithllm3.png[]
 
 *Abandonar una partida ya iniciada*
 
