@@ -10,7 +10,7 @@ Se han realizado pruebas de carga a la aplicación. Estas pruebas se encargan de
 
 Para las primeras pruebas se ha establecido el escenario de *3 usuarios por segundo, de forma constante, durante 15 segundos*, un total de 45 usuarios.
 
-image::../images/12_load-tests-3usersper15seg.png[]
+image::../images/12_load-tests_3usersper15seg.png[]
 
 Para este escenario, se han obtenido los siguientes resultados en los diferentes flujos de la aplicación.
 
