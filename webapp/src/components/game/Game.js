@@ -517,6 +517,7 @@ const Game = () => {
                           border: "1px solid rgba(0, 0, 0, 0.05)",
                           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
                         }}
+                        onContextMenu={(e) => e.preventDefault()}
                       >
                         <img
                           src={image || "/placeholder.svg"}
@@ -525,6 +526,8 @@ const Game = () => {
                             maxWidth: "100%",
                             maxHeight: "300px",
                             objectFit: "contain",
+                            pointerEvents: "none",
+                            userSelect: "none",
                           }}
                         />
                       </Box>
