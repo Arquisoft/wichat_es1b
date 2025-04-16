@@ -42,6 +42,7 @@ jobs:
           node-version: 22
       - run: npm --prefix users/authservice install
       - run: npm --prefix users/userservice install
+      - run: npm --prefix users/sesionservice install
       - run: npm --prefix questionservice install
       - run: npm --prefix llmservice install
       - run: npm --prefix gatewayservice install
