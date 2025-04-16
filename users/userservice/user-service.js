@@ -24,11 +24,14 @@ async function validateRequiredFields(req, requiredFields) {
         }
     }
 
-    // Check if the user already exists
-    const sanitizedUsername = req.body.username.replace(/[^\w.-]/g, ''); // Remove any potentially harmful characters
-    const existingUser = await User.findOne({ username: sanitizedUsername });
+    // Check if the user already exists (after sanitizing the input)
+    const user = req.body.username;
+    if (!/^[\w.-]{3,30}$/.test(user)) {
+        throw new Error('Invalid username format');
+    }
+    const existingUser = await User.findOne({ user });
     if (existingUser) {
-        throw new Error('User already exists! Impossible to add: ' + sanitizedUsername);
+        throw new Error('Username already exists');
     }
 }
 
