@@ -17,24 +17,27 @@ mongoose.connect(mongoUri);
 
 
 // Function to validate required fields in the request body
-function validateRequiredFields(req, requiredFields) {
+async function validateRequiredFields(req, requiredFields) {
     for (const field of requiredFields) {
-      if (!(field in req.body)) {
-        throw new Error(`Missing required field: ${field}`);
-      }
+        if (!(field in req.body)) {
+            throw new Error(`Missing required field: ${field}`);
+        }
+    }
+
+    // Check if the user already exists
+    const sanitizedUsername = req.body.username.replace(/[^\w.-]/g, ''); // Remove any potentially harmful characters
+    const existingUser = await User.findOne({ username: sanitizedUsername });
+    if (existingUser) {
+        throw new Error('User already exists! Impossible to add: ' + sanitizedUsername);
     }
 }
 
 app.post('/adduser', async (req, res) => {
     try {
         // Check if required fields are present in the request body
-        validateRequiredFields(req, ['username', 'password']);
+        await validateRequiredFields(req, ['username', 'password']);
 
-        // Check if the user already exists
-        const existingUser = await User.findOne({ username: req.body.username });
-        if (existingUser) {
-            throw new Error('User already exists! Impossible to add: ' + req.body.username);
-        }
+
 
         // Encrypt the password before saving it
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
