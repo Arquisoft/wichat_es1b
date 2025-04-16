@@ -601,7 +601,7 @@ const Game = () => {
 
                   {/* Componente Chat */}
                   
-                  <Chat correctAnswer={correctAnswer} question={question} />
+                  <Chat correctAnswer={correctAnswer} question={question} username={localStorage.getItem("username")} />
                   
                 </Box>
               )}
