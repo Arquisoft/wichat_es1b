@@ -1,0 +1,105 @@
+ifndef::imagesdir[:imagesdir: ../images]
+
+[[section-tests]]
+
+== Tests
+
+=== Pruebas de carga (load tests)
+
+Se han realizado pruebas de carga a la aplicación. Estas pruebas se encargan de medir el rendimiento de la aplicación bajo condiciones específicas. En este caso, se han realizado pruebas de carga para medir el rendimiento de la aplicación en cuanto a la cantidad de usuarios concurrentes que pueden interactuar con ella al mismo tiempo.
+
+Para las primeras pruebas se ha establecido el escenario de *3 usuarios por segundo, de forma constante, durante 15 segundos*, un total de 45 usuarios.
+
+image::../images/12_load-tests_3usersper15seg.png[]
+
+Para este escenario, se han obtenido los siguientes resultados en las diferentes simulaciones de los flujos de la aplicación.
+
+*Cargar la aplicación*
+
+image::../images/12_load-tests_3usersper15seg_loadapp.png[]
+image::../images/12_load-tests_3usersper15seg_loadapp2.png[]
+
+*Navegar por la aplicación*
+
+image::../images/12_load-tests_3usersper15seg_navigate.png[]
+image::../images/12_load-tests_3usersper15seg_navigate2.png[]
+
+*Iniciar sesión en la aplicación*
+
+image::../images/12_load-tests_3usersper15seg_login.png[]
+image::../images/12_load-tests_3usersper15seg_login2.png[]
+
+*Registrarse como nuevo usuario en la aplicación*
+
+image::../images/12_load-tests_3usersper15seg_register.png[]
+image::../images/12_load-tests_3usersper15seg_register2.png[]
+
+*Jugar una nueva partida completa*
+
+image::../images/12_load-tests_3usersper15seg_playnewgame.png[]
+image::../images/12_load-tests_3usersper15seg_playnewgame2.png[]
+image::../images/12_load-tests_3usersper15seg_playnewgame3.png[]
+
+*Jugar una nueva partida usando el chatbot para obtener pistas*
+
+image::../images/12_load-tests_3usersper15seg_playnewgamewithllm.png[]
+image::../images/12_load-tests_3usersper15seg_playnewgamewithllm2.png[]
+image::../images/12_load-tests_3usersper15seg_playnewgamewithllm3.png[]
+
+*Abandonar una partida ya iniciada*
+
+image::../images/12_load-tests_3usersper15seg_notfinishedgame.png[]
+image::../images/12_load-tests_3usersper15seg_notfinishedgame2.png[]
+image::../images/12_load-tests_3usersper15seg_notfinishedgame3.png[]
+
+*Reiniciar una partida empezada, y una vez reiniciada, acabar la nueva partida*
+
+image::../images/12_load-tests_3usersper15seg_restartgame.png[]
+image::../images/12_load-tests_3usersper15seg_restartgame2.png[]
+image::../images/12_load-tests_3usersper15seg_restartgame3.png[]
+
+
+
+==== Pruebas de estrés
+También se han realizado pruebas de estrés a la aplicación. Estas pruebas se encargan de medir el rendimiento de la aplicación bajo condiciones extremas más allá de patrones normales. En este caso, se han realizado pruebas de estrés para medir el rendimiento de la aplicación en cuanto a la cantidad de usuarios concurrentes que pueden interactuar con ella al mismo tiempo. Para ello, se compararán los resultados obtenidos en cada uno de los escenarios con la simulación más compleja y que más cuesta al sistema realizar, qué es el *flujo de jugar una partida usando el chatbot para obtener pistas*. Así obtendremos una evolución de la carga del sistema en función de la cantidad de usuarios concurrentes que interactúan con él al mismo tiempo. Usaremos el gráfico general de rangos de timepo de respuesta.
+
+Para estas pruebas se han establecido los escenarios siguientes:
+* *Escenario 1:* 3 usuarios por segundo, de forma constante, durante 15 segundos. Escenario anterior. (45 usuarios totales)
+* *Escenario 2:* 75 usuarios totales, inyectados de forma progresiva durante 15 segundos.
+* *Escenario 3:* 10 usuarios por segundo, de forma constante, durante 15 segundos. (150 usuarios totales)
+* *Escenario 4:* 50 usuarios por segundo, de forma constante, durante 15 segundos. (750 usuarios totales)
+* *Escenario 5:* 100 usuarios por segundo, de forma constante, durante 15 segundos. (1500 usuarios totales)
+
+===== Escenario 1: 3 usuarios por segundo, de forma constante, durante 15 segundos. (45 usuarios totales)
+Este escenario es el mismo que el de las pruebas de carga. Se han obtenido los mismos resultados que en las pruebas de carga, por lo que no se repiten aquí.
+
+===== Escenario 2: 75 usuarios totales, inyectados de forma progresiva durante 15 segundos.
+
+image::../images/12_load-tests_escenario2.png[]
+
+image::../images/12_load-tests_escenario2_playgameusingllm.png[]
+
+
+===== Escenario 3: 10 usuarios por segundo, de forma constante, durante 15 segundos. (150 usuarios totales)
+
+image::../images/12_load-tests_escenario3.png[]
+
+image::../images/12_load-tests_escenario3_playgameusingllm.png[]
+
+
+===== Escenario 4: 50 usuarios por segundo, de forma constante, durante 15 segundos. (750 usuarios totales)
+
+image::../images/12_load-tests_escenario4.png[]
+
+image::../images/12_load-tests_escenario4_playgameusingllm.png[]
+
+
+===== Escenario 5: 100 usuarios por segundo, de forma constante, durante 15 segundos. (1500 usuarios totales)
+
+image::../images/12_load-tests_escenario5.png[]
+
+image::../images/12_load-tests_escenario5_playgameusingllm.png[]
+
+
+*Conclusiones de las pruebas de carga y estrés*
+Las pruebas de carga y estrés realizadas a la aplicación han demostrado que la aplicación es capaz de soportar una gran cantidad de usuarios concurrentes sin problemas de rendimiento. La aplicación ha demostrado ser capaz de manejar hasta 150 usuarios concurrentes con un 86% de las peticiones en un tiempo inferior a 800 ms, aunque a partir de 750 usuarios se empiezan a notar algunos problemas de rendimiento ya que baja al 62%. A partir de 1500 usuarios, la aplicación empieza a tener problemas de rendimiento y no es capaz de manejar todos los usuarios concurrentes.
