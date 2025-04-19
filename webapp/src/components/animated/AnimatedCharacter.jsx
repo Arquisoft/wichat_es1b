@@ -38,7 +38,7 @@ export default function AnimatedCharacter() {
         field.addEventListener("blur", handleBlur)
       })
 
-      console.log("Campos de contraseña detectados:", uniquePasswordFields.length)
+      //console.log("Campos de contraseña detectados:", uniquePasswordFields.length)
     }
 
     const handleFocus = () => setEyesClosed(true)

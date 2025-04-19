@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChatBot from "react-chatbotify";
 import settings from "./chatSettings"
 import axios from 'axios';
@@ -12,14 +12,20 @@ export default function Chat(props) {
 
     const correctAnswer = props.correctAnswer;
     const question = props.question;
-
-    configure("Eres un chatbot que debe dar pistas no muy largas al usuario sobre la pregunta " + question + ", y su respuesta correcta es " + correctAnswer + ". Debes contestar siempre en Español perfecto, y dar pistas CORTAS al usuario. " +
-        "Es extremadamente importante que bajo ningún concepto des al usuario la respuesta correcta en tu pista. Jamás debes escribir la respuesta correcta en la pista. Nunca puedes decir '" + correctAnswer + "'. " +
-        "No pongas contexto como 'aquí va la pista', o 'te voy a decir una pista', debes dar la pista directamente.");
+    const username = props.username;
 
     const themes = [
         {id: "robotic", version: "0.1.0"}
     ]
+
+    useEffect(() => {
+        configure("You are a chatbot that must give short hints to the user about the question '" + question + "', and its correct answer is '" + correctAnswer + "'. You must always respond in perfect Spanish of Spain and give SHORT hints to the user. " +
+            "It is extremely important that under no circumstances you give the user the correct answer in your messages. You must never write the correct answer in the hint. You can never say '" + correctAnswer + "'. " +
+            "Do not include context like 'here is the hint' or 'I will give you a hint', you must give the hint directly. Your messages should be short and concise, and always in Spanish without gramatical errors. " +
+            "Your name is Doraemon, and the user's name is '" + username + "'.");
+        console.log("Username in configreLLM: " + username);
+
+    }, [question, correctAnswer]);
 
     const [message, setMessage] = useState("¡Bienvenido! Soy Doraemon, el gato robot, y estoy aquí para ayudarte a descubrir qué representa la imagen que ves 🥳");
 
@@ -40,7 +46,9 @@ export default function Chat(props) {
     return (
         <ChatBot  settings={settings} flow={flow}/>
     );
+
 }
+
 
 async function getMessage(message) {
     try {
@@ -56,6 +64,7 @@ async function getMessage(message) {
 
 async function configure(message) {
     try {
+        console.log("Calling configure!!!");
         await axios.post(apiEndpoint+'/configureAssistant', {
             moderation: message,
         });

@@ -17,18 +17,40 @@ mongoose.connect(mongoUri);
 
 
 // Function to validate required fields in the request body
-function validateRequiredFields(req, requiredFields) {
+async function validateRequiredFields(req, requiredFields) {
+
     for (const field of requiredFields) {
-      if (!(field in req.body)) {
-        throw new Error(`Missing required field: ${field}`);
-      }
+        if (!(field in req.body)) {
+            throw new Error(`Missing required field: ${field}`);
+        }
+    }
+
+    const user = req.body.username;
+    if (!user || typeof user !== 'string') {
+        throw new Error('Invalid username format');
+    }
+
+    const userTrim = user.trim();
+
+    if (userTrim.length === 0 || userTrim.length > 50) {
+        throw new Error('Invalid username');
+    }
+
+    const validUsernameRegex = /^[a-zA-Z0-9._-]+$/;
+    if (!validUsernameRegex.test(userTrim)) {
+        throw new Error('Invalid username format');
+    }
+
+    const existingUser = await User.findOne({ username: userTrim });
+    if (existingUser) {
+        throw new Error('Username already exists');
     }
 }
 
 app.post('/adduser', async (req, res) => {
     try {
         // Check if required fields are present in the request body
-        validateRequiredFields(req, ['username', 'password']);
+        await validateRequiredFields(req, ['username', 'password']);
 
         // Encrypt the password before saving it
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
