@@ -23,7 +23,8 @@
     "react-simple-typewriter": "^5.0.1",
     "recharts": "^2.15.1",
     "web-vitals": "^3.5.1",
-    "wichat_es1b": "file:.."
+    "wichat_es1b": "file:..",
+    "ws": "^8.18.1"
   },
   "scripts": {
     "start": "react-scripts start",
