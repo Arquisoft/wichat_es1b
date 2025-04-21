@@ -22,6 +22,24 @@ const AddUser = () => {
       return;
     }
 
+    if(password && password.length < 6) {
+        setError('La contraseña debe tener al menos 6 caracteres');
+        setOpenSnackbar(true);
+        return;
+    }
+
+    if(username && (username.length < 3 || username.length > 20)) {
+        setError('El nombre de usuario debe tener al menos 3 y menos de 20 caracteres');
+        setOpenSnackbar(true);
+        return;
+    }
+
+    if(username && username.includes(' ')) {
+        setError('El nombre de usuario no puede contener espacios en blanco');
+        setOpenSnackbar(true);
+        return;
+    }
+
     try {
       await axios.post(`${apiEndpoint}/adduser`, { username, password });
       await axios.post(`${apiEndpoint}/login`, { username, password });
