@@ -1,6 +1,32 @@
 global:
-  scrape_interval: 5s
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    app: "WiChat"
+    environment: "production"
+
 scrape_configs:
-  - job_name: "example-nodejs-app"
+  - job_name: "wichat_metrics"
     static_configs:
       - targets: ["gatewayservice:8000"]
+        labels:
+          service: "wichat"
+          component: "metrics-server"
+          port: "8000"
+          team: "backend"
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          service: "prometheus"
+          component: "self-monitoring"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["localhost:9093"]
+
+rule_files:
+  - "rules/alerts.yml"  # Create this file for your alerting rules
+
