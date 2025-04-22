@@ -30,6 +30,7 @@ import {
 } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import QuizIcon from "@mui/icons-material/Quiz"
@@ -306,6 +307,15 @@ const Profile = () => {
               </Typography>
 
                 <Box sx={{ display: "flex", alignItems: "center", position: "relative" }}>
+                    <MenuItem
+                        onClick={() => navigate("/Home", { state: { scrollTo: "topPlayers" } })} //Not a typo, the anchor is the same for 'play'
+                        onMouseEnter={() => setShowMessage("Jugar")}
+                        onMouseLeave={() => setShowMessage("")}
+                        sx={{ display: "flex", alignItems: "center" }}
+                    >
+                        <PlayArrowIcon sx={{ mr: 1 }} />Jugar
+                    </MenuItem>
+
                     <MenuItem
                         onClick={() => document.getElementById("games").scrollIntoView({ behavior: "smooth" })}
                         onMouseEnter={() => setShowMessage("Ver historial completo")}

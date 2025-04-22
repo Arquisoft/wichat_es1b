@@ -2,8 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { BrowserRouter as Router } from 'react-router-dom';
+import {BrowserRouter, BrowserRouter as Router} from 'react-router-dom';
 import Profile from './Profile';
+import HomePage from "../home/Home";
 
 const mockAxios = new MockAdapter(axios);
 
@@ -127,12 +128,19 @@ describe('Profile component', () => {
   });
   
   it('permite cerrar sesión y redirige al inicio', async () => {
+    const { container } = render(
+        <BrowserRouter>
+          <HomePage />
+        </BrowserRouter>
+    );
+
     setupMockResponse({ sessions: [mockSession] });
   
     renderComponent();
-  
-    const menuItems = await screen.findAllByRole('menuitem');
-    const logoutBtn = menuItems.find(item => item.innerHTML.includes('ExitToAppIcon'));
+
+    const menuItems = container.querySelectorAll('[role="menuitem"]');
+
+    const logoutBtn = menuItems[4];
   
     fireEvent.click(logoutBtn);
   

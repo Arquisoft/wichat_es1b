@@ -170,7 +170,7 @@ describe('HomePage Component', () => {
       
       // Find the logout button (usually the second menu item)
       if (menuItems.length > 1) {
-        const logoutButton = menuItems[1];
+        const logoutButton = menuItems[4];
         fireEvent.click(logoutButton);
         
         // Check if localStorage was cleared and navigation happened
@@ -193,7 +193,7 @@ describe('HomePage Component', () => {
       expect(menuItems.length).toBeGreaterThan(0);
       
       // Find the profile button (usually the first menu item)
-      const profileButton = menuItems[0];
+      const profileButton = menuItems[3];
       fireEvent.click(profileButton);
       
       // Check if navigation happened
