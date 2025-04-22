@@ -21,7 +21,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-BlYlRd"
+            "mode": "continuous-purples"
           },
           "custom": {
             "axisCenteredZero": false,

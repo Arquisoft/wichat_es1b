@@ -27,7 +27,6 @@
         "content": "<div style=\"background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 10px; text-align:center\">\n<h1 style=\"color: white; text-shadow: 1px 1px 2px #333;\">WiChat Monitoring</h1>\n</div>",
         "mode": "html"
       },
-      "pluginVersion": "7.3.0",
       "type": "text"
     },
     {
@@ -35,9 +34,21 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-BlPu"
+            "mode": "palette-classic"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "ER"
+                },
+                "1": {
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -74,7 +85,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-BlYlRd"
           },
           "custom": {
             "fillOpacity": 70,
@@ -143,12 +154,34 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-spectrum"
+            "fixedColor": "#1E90FF",
+            "mode": "fixed"
           },
           "custom": {
-            "fillOpacity": 60,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 65,
             "gradientMode": "opacity",
-            "lineWidth": 2
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           }
         }
       },
@@ -166,7 +199,18 @@
           "expr": "sum by(route) (rate(http_request_duration_seconds_count[1m]))",
           "legendFormat": "{{route}}"
         }
-      ]
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
     }
   ],
   "refresh": "10s",
