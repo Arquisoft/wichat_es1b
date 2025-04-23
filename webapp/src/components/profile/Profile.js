@@ -30,6 +30,7 @@ import {
 } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import QuizIcon from "@mui/icons-material/Quiz"
@@ -45,6 +46,8 @@ import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import './Profile.css';
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import HistoryIcon from "@mui/icons-material/History";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -302,48 +305,75 @@ const Profile = () => {
               <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
                 WiChat - Perfil
               </Typography>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                <MenuItem
-                  onClick={handleHome}
-                  onMouseEnter={() => setShowMessage("Ir a la página Principal")}
-                  onMouseLeave={() => setShowMessage("")}
-                  sx={{ display: 'flex', alignItems: 'center' }}
-                >
-                  <HomeIcon sx={{ mr: 1 }} />
-                </MenuItem>
 
-                <MenuItem
-                  onClick={handleLogout}
-                  onMouseEnter={() => setShowMessage("Cerrar sesión")}
-                  onMouseLeave={() => setShowMessage("")}
-                  sx={{ display: 'flex', alignItems: 'center' }}
-                >
-                  <ExitToAppIcon sx={{ mr: 1 }} />
-                </MenuItem>
+                <Box sx={{ display: "flex", alignItems: "center", position: "relative" }}>
+                    <MenuItem
+                        onClick={() => navigate("/Home", { state: { scrollTo: "topPlayers" } })} //Not a typo, the anchor is the same for 'play'
+                        onMouseEnter={() => setShowMessage("Jugar")}
+                        onMouseLeave={() => setShowMessage("")}
+                        sx={{ display: "flex", alignItems: "center" }}
+                    >
+                        <PlayArrowIcon sx={{ mr: 1 }} />Jugar
+                    </MenuItem>
 
-                {showMessage && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: '90%',
-                      left: '0%',
-                      transform: 'translateX(10px)',
-                      bgcolor: 'rgba(25,118,210,0.7)',
-                      color: 'white',
-                      padding: '5px 10px',
-                      borderRadius: '5px',
-                      fontSize: '0.9rem',
-                      whiteSpace: 'nowrap',
-                      opacity: 1,
-                      pointerEvents: 'none',
-                      zIndex: 10,
-                    }}
-                  >
-                    {showMessage}
-                  </Box>
-                )}
-              </Box>
+                    <MenuItem
+                        onClick={() => document.getElementById("games").scrollIntoView({ behavior: "smooth" })}
+                        onMouseEnter={() => setShowMessage("Ver historial completo")}
+                        onMouseLeave={() => setShowMessage("")}
+                        sx={{ display: "flex", alignItems: "center" }}
+                    >
+                        <HistoryIcon sx={{ mr: 1 }} />Historial completo
+                    </MenuItem>
+
+                    <MenuItem
+                        onClick={() => navigate("/Home", { state: { scrollTo: "topPlayers" } })}
+                        onMouseEnter={() => setShowMessage("Ver ranking de jugadores")}
+                        onMouseLeave={() => setShowMessage("")}
+                        sx={{ display: "flex", alignItems: "center" }}
+                    >
+                        <ExitToAppIcon sx={{ mr: 1 }} />Ranking
+                    </MenuItem>
+
+                    <MenuItem
+                        onClick={handleHome}
+                        onMouseEnter={() => setShowMessage("Ir a la página Principal")}
+                        onMouseLeave={() => setShowMessage("")}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                    >
+                        <HomeIcon sx={{ mr: 1 }} />
+                    </MenuItem>
+
+                    <MenuItem
+                        onClick={handleLogout}
+                        onMouseEnter={() => setShowMessage("Cerrar sesión")}
+                        onMouseLeave={() => setShowMessage("")}
+                        sx={{ display: "flex", alignItems: "center" }}
+                    >
+                        <ExitToAppIcon sx={{ mr: 1 }} />
+                    </MenuItem>
+
+                    {showMessage && (
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                top: "100%",
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                bgcolor: "rgba(25,118,210,0.7)",
+                                color: "white",
+                                padding: "5px 10px",
+                                borderRadius: "5px",
+                                fontSize: "0.9rem",
+                                whiteSpace: "nowrap",
+                                opacity: 1,
+                                pointerEvents: "none",
+                                zIndex: 10,
+                            }}
+                        >
+                            {showMessage}
+                        </Box>
+                    )}
+                </Box>
             </Toolbar>
           </AppBar>
 
@@ -751,6 +781,7 @@ const Profile = () => {
                   /* Menú desplegable */
                   <Box sx={{ p: 4 }}>
                     <IconButton
+                      id = "games"
                       onClick={handleMenuClick}
                       sx={{
                       width: 190,

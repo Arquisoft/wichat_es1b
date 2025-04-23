@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { getPlayerLevel } from '../../utils';
 import { createContext, useContext, useEffect } from "react"
+import { useLocation } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -31,6 +32,7 @@ import {
   Toolbar,
 } from "@mui/material"
 import { useNavigate } from "react-router-dom"
+import HistoryIcon from "@mui/icons-material/History"
 import axios from "axios"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline"
@@ -273,9 +275,11 @@ const HomePage = () => {
     navigate("/")
   }
 
+
   const handleGoToProfile = () => {
-    navigate("/Profile")
+      navigate("/Profile")
   }
+
 
   const [showMessage, setShowMessage] = useState("")
 
@@ -301,6 +305,20 @@ const HomePage = () => {
         setTimePerQuestion(30)
     }
   }
+
+    /**
+     * Used to allow scrolling when coming from the Profile
+     * @type {Location}
+     */
+    const location = useLocation();
+    useEffect(() => {
+        if (location.state?.scrollTo) {
+            const element = document.getElementById(location.state.scrollTo);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    }, [location]);
 
   return (
     <ConfigContext.Provider value={configValue}>
@@ -334,9 +352,36 @@ const HomePage = () => {
                 WiChat - Home
               </Typography>
 
+              <MenuItem
+                  onClick={() => document.getElementById("topPlayers").scrollIntoView({ behavior: "smooth" })} //Not a typo, the anchor is the same for 'play'
+                  onMouseEnter={() => setShowMessage("Jugar")}
+                  onMouseLeave={() => setShowMessage("")}
+                  sx={{ display: "flex", alignItems: "center" }}
+              >
+                  <PlayArrowIcon sx={{ mr: 1 }} />Jugar
+              </MenuItem>
+
               <Box sx={{ display: "flex", alignItems: "center", position: "relative" }}>
                 <MenuItem
-                  onClick={handleGoToProfile}
+                    onClick={() => document.getElementById("recentGames").scrollIntoView({ behavior: "smooth" })}
+                    onMouseEnter={() => setShowMessage("Ver las partidas recientes")}
+                  onMouseLeave={() => setShowMessage("")}
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
+                    <HistoryIcon sx={{ mr: 1 }} />Historial
+                </MenuItem>
+
+                <MenuItem
+                    onClick={() => document.getElementById("topPlayers").scrollIntoView({ behavior: "smooth" })}
+                    onMouseEnter={() => setShowMessage("Ver ranking de jugadores")}
+                    onMouseLeave={() => setShowMessage("")}
+                    sx={{ display: "flex", alignItems: "center" }}
+                >
+                    <ExitToAppIcon sx={{ mr: 1 }} />Ranking
+                </MenuItem>
+
+                <MenuItem
+                  onClick = {handleGoToProfile}
                   onMouseEnter={() => setShowMessage("Ir al perfil")}
                   onMouseLeave={() => setShowMessage("")}
                   sx={{ display: "flex", alignItems: "center" }}
@@ -355,23 +400,23 @@ const HomePage = () => {
 
                 {showMessage && (
                   <Box
-                    sx={{
-                      position: "absolute",
-                      top: "90%",
-                      left: "0%",
-                      transform: "translateX(10px)",
-                      bgcolor: "rgba(25,118,210,0.7)",
-                      color: "white",
-                      padding: "5px 10px",
-                      borderRadius: "5px",
-                      fontSize: "0.9rem",
-                      whiteSpace: "nowrap",
-                      opacity: 1,
-                      pointerEvents: "none",
-                      zIndex: 10,
-                    }}
+                      sx={{
+                          position: "absolute",
+                          top: "100%",
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          bgcolor: "rgba(25,118,210,0.7)",
+                          color: "white",
+                          padding: "5px 10px",
+                          borderRadius: "5px",
+                          fontSize: "0.9rem",
+                          whiteSpace: "nowrap",
+                          opacity: 1,
+                          pointerEvents: "none",
+                          zIndex: 10,
+                      }}
                   >
-                    {showMessage}
+                      {showMessage}
                   </Box>
                 )}
               </Box>
@@ -482,6 +527,7 @@ const HomePage = () => {
                 }}
               >
                 <Typography
+                  id = "topPlayers"
                   variant="h5"
                   fontWeight="bold"
                   color="primary"
@@ -987,6 +1033,7 @@ const HomePage = () => {
                 }}
               >
                 <Typography
+                  id = "recentGames"
                   variant="h5"
                   fontWeight="bold"
                   color="primary"
