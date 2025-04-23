@@ -112,6 +112,49 @@ services:
     networks:
       - mynetwork
 
+
+  prometheus:
+    image: ghcr.io/arquisoft/wichat_es1b/prometheus:latest
+    container_name: prometheus-wichat_es1b
+    profiles: [ "dev", "prod" ]
+    networks:
+      - mynetwork
+    volumes:
+      - ./gatewayservice/monitoring/prometheus:/etc/prometheus
+      - ./gatewayservice/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - gatewayservice
+
+
+  grafana:
+    image: ghcr.io/arquisoft/wichat_es1b/grafana:latest
+    container_name: grafana-wichat_es1b
+    profiles: [ "dev", "prod" ]
+    networks:
+      - mynetwork
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./gatewayservice/monitoring/grafana/dashboards:/etc/grafana/dashboards
+      - ./gatewayservice/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./gatewayservice/monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SERVER_HTTP_PORT=9091
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_PATHS_DASHBOARDS=/etc/grafana/dashboards
+    ports:
+      - "9091:9091"
+    depends_on:
+      - prometheus
+
+
   webapp:
     container_name: webapp-wichat_es1b
     image: ghcr.io/arquisoft/wichat_es1b/webapp:latest
@@ -125,40 +168,8 @@ services:
     ports:
       - "3000:3000"
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus-wichat_es1b
-    profiles: ["dev"]
-    networks:
-      - mynetwork
-    volumes:
-      - ./gatewayservice/monitoring/prometheus:/etc/prometheus
-      - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
-    depends_on: 
-      - gatewayservice
       
-  grafana:
-    image: grafana/grafana
-    container_name: grafana-wichat_es1b
-    profiles: ["dev"]
-    networks:
-      - mynetwork
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./gatewayservice/monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - ./gatewayservice/monitoring/grafana/dashboards:/etc/grafana/dashboards
-      - ./gatewayservice/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
-    environment:
-      - GF_SERVER_HTTP_PORT=9091
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    ports:
-      - "9091:9091"
-    depends_on: 
-      - prometheus
+
 
 
 volumes:
