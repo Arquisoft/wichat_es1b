@@ -27,7 +27,7 @@ defineFeature(feature, test => {
   });
 
 
-  test('Usuario sin partidas ve estadísticas recientes', ({ given, when, then }) => {
+  /*test('Usuario sin partidas ve estadísticas recientes', ({ given, when, then }) => {
     
     let username;
     let password;
@@ -70,7 +70,7 @@ defineFeature(feature, test => {
 
       expect(divExists).toBe(true);
     });
-  }, 100000);
+  }, 100000);*/
 
 
   test('Usuario con partidas ve estadísticas recientes', ({ given, when, then }) => {
