@@ -352,16 +352,16 @@ const HomePage = () => {
                 WiChat - Home
               </Typography>
 
-              <MenuItem
-                  onClick={() => document.getElementById("topPlayers").scrollIntoView({ behavior: "smooth" })} //Not a typo, the anchor is the same for 'play'
-                  onMouseEnter={() => setShowMessage("Jugar")}
-                  onMouseLeave={() => setShowMessage("")}
-                  sx={{ display: "flex", alignItems: "center" }}
-              >
-                  <PlayArrowIcon sx={{ mr: 1 }} />Jugar
-              </MenuItem>
-
               <Box sx={{ display: "flex", alignItems: "center", position: "relative" }}>
+                <MenuItem
+                    onClick={() => document.getElementById("topPlayers").scrollIntoView({ behavior: "smooth" })} //Not a typo, the anchor is the same for 'play'
+                    onMouseEnter={() => setShowMessage("Jugar")}
+                    onMouseLeave={() => setShowMessage("")}
+                    sx={{ display: "flex", alignItems: "center" }}
+                >
+                    <PlayArrowIcon sx={{ mr: 1 }} />Jugar
+                </MenuItem>
+
                 <MenuItem
                     onClick={() => document.getElementById("recentGames").scrollIntoView({ behavior: "smooth" })}
                     onMouseEnter={() => setShowMessage("Ver las partidas recientes")}
