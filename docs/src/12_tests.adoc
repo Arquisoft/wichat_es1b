@@ -107,4 +107,5 @@ image::../images/12_load-tests_escenario5_playgameusingllm.png[]
 
 
 *Conclusiones de las pruebas de carga y estrés*
+
 Las pruebas de carga y estrés realizadas a la aplicación han demostrado que la aplicación es capaz de soportar una gran cantidad de usuarios concurrentes sin problemas de rendimiento. La aplicación ha demostrado ser capaz de manejar hasta 150 usuarios concurrentes con un 86% de las peticiones en un tiempo inferior a 800 ms, aunque a partir de 750 usuarios se empiezan a notar algunos problemas de rendimiento ya que baja al 62%. A partir de 1500 usuarios, la aplicación empieza a tener problemas de rendimiento y no es capaz de manejar todos los usuarios concurrentes.
