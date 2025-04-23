@@ -6,10 +6,9 @@
 // configure EN settings for asciidoc
 include::src/config.adoc[]
 
-= image:logo.png[logo] image:arc42-logo.png[arc42] Wichat en español - Equipo 1-B
-:revnumber: 8.2 EN
-:revdate: February 2025
-:revremark: (based upon AsciiDoc version)
+= image:logo.png[logo] image:arc42-logo.png[arc42] WiChat en español - Equipo 1-B
+:revnumber: 8.3 ES
+:revdate: 30 de marzo de 2025
 // toc-title definition MUST follow document title without blank line!
 :toc-title: Tabla de contenidos
 
@@ -94,7 +93,10 @@ include::src/10_quality_requirements.adoc[]
 include::src/11_technical_risks.adoc[]
 
 <<<<
-// 12. Glossary
-include::src/12_glossary.adoc[]
+// 12. Tests
+include::src/12_tests.adoc[]
 
 
+<<<<
+// 13. Glossary
+include::src/13_glossary.adoc[]

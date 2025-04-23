@@ -1,19 +1,17 @@
 const axios = require('axios');
 const express = require('express');
-const cors = require('cors');
 
 const app = express();
 const port = 8003;
 let moderation = "You are a helpful assistant.";
 
-app.use(cors());
 app.use(express.json()); // Middleware para parsear JSON
 
 const llmConfigs = {
   empathy: {
     url: () => 'https://empathyai.prod.empathy.co/v1/chat/completions',
     transformRequest: (question, moderation) => ({
-      model: "qwen/Qwen2.5-Coder-7B-Instruct",
+      model: "mistralai/Mistral-7B-Instruct-v0.3",
       stream: false, // No soporta stream=true con axios directamente
       messages: [
         { role: "system", content: moderation },
@@ -70,7 +68,7 @@ app.post('/configureAssistant', async (req, res) => {
 });
 
 // Ruta para enviar una pregunta
-app.post('/ask', async (req, res) => {
+app.post('/askllm', async (req, res) => {
   try {
     validateRequiredFields(req, ['question', 'apiKey']);
 

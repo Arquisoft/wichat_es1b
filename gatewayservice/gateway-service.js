@@ -11,6 +11,7 @@ const app = express();
 const port = 8000;
 
 //const originEndpoint = REACT_APP_API_ORIGIN_ENDPOINT || 'http://localhost:3000';
+const  sessionServiceUrl = process.env.SESSION_SERVICE_URL || 'http://localhost:8005';
 const llmServiceUrl = process.env.LLM_SERVICE_URL || 'http://localhost:8003';
 const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8002';
 const userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:8001';
@@ -57,12 +58,21 @@ app.post('/adduser', async (req, res) => {
 app.post('/askllm', async (req, res) => {
   try {
     // Forward the add user request to the user service
-    const llmResponse = await axios.post(llmServiceUrl+'/ask', req.body);
+    const llmResponse = await axios.post(llmServiceUrl+'/askllm', req.body);
     res.json(llmResponse.data);
   } catch (error) {
     res.status(error.response.status).json({ error: error.response.data.error });
   }
 });
+
+app.post('/configureAssistant', async (req, res) => {
+    try {
+        const response = await axios.post(llmServiceUrl+'/configureAssistant', req.body);
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response.status).json({ error: error.response.data.error });
+    }
+})
 
 
 app.get('/generateQuestion', async (req, res) => {
@@ -70,14 +80,50 @@ app.get('/generateQuestion', async (req, res) => {
     //Mandar al endpoint del servicio de preguntas para que gestione la petición, con los parámetros añadidos
     //const URL = questionsServiceUrl + 'generateQuestion?user=' + req.query.user + '&category=' + req.query.category;   //codigo completo
     const URL = questionsServiceUrl + '/generateQuestion'; // + '?category=' + req.query.category;     //codigo de prueba
-    //console.log("Category" + req.query.category);
     const response = await axios.get(URL);
-    console.log("URL: "+ URL);
     res.json(response.data);
-    console.log("Pregunta generada: "+ response.data.responseQuestion);
   }
   catch(error) {
     res.status(error.response.status).json({error: error.response.data.error});
+  }
+});
+
+app.get('/nextQuestion', async (req, res) => {
+  try {
+    const category = req.query.category;
+    const URL = questionsServiceUrl + '/nextQuestion' + (category ? `?category=${encodeURIComponent(category)}` : '');
+    const response = await axios.get(URL);
+    res.json(response.data);
+  }
+  catch(error) {
+    res.status(error.response.status).json({error: error.response.data.error});
+  }
+});
+
+app.post('/save-session', async (req, res) => {
+  try {
+    const response = await axios.post(sessionServiceUrl + '/save-session', req.body);   
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
+  }
+});
+
+app.get('/get-user-sessions/:username', async (req, res) => {
+  try {
+    const response = await axios.get(sessionServiceUrl + '/get-user-sessions/' + req.params.username);
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
+  }
+});
+
+app.get('/get-users-totaldatas', async (req, res) => {
+  try {
+    const response = await axios.get(sessionServiceUrl + '/get-users-totaldatas');
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response.status).json({ error: error.response.data.error });
   }
 });
 
@@ -91,7 +137,38 @@ app.post('/configureGame', async (req, res) => {
   }
 });
 
+app.post('/startGame', async (req, res) => {
+  try {
+    const response = await axios.post(questionsServiceUrl + '/startGame', req.body);
+    res.json(response.data);
+  }
+  catch(error) {
+    // Check if error.response is defined before accessing its properties
+    if (error.response) {
+      res.status(error.response.status).json({ error: error.response.data.error });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+  }
+});
 
+
+app.get('/generatedQuestion', async (req, res) => {
+    try {
+        const response = await axios.get(questionsServiceUrl + '/generatedQuestion', {
+          params: req.query
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response.status).json({ error: error.response.data.error });
+    }
+})
+
+app.put('/createQuestions',async (req, res) => {
+  const response =  await axios.put(questionsServiceUrl + '/createQuestions');
+  console.log("end",response);
+  res.status(200).json({status:"OK"});
+})
 
 
 
@@ -116,5 +193,9 @@ if (fs.existsSync(openapiPath)) {
 const server = app.listen(port, () => {
   console.log(`Gateway Service listening at http://localhost:${port}`);
 });
+
+app.close = () => {
+  server.close();
+};
 
 module.exports = server

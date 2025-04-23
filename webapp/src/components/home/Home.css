@@ -1,42 +1,127 @@
-div[title="main"] {
-    display: grid;
-    grid-template-columns: 1fr;
-    justify-items: center;
-    align-items: center;
-
+/* Animaciones y efectos visuales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-div[title="main-title"]>h1 {
-    margin-top: 1.5rem;
-    margin-bottom: -1rem;
-    color: #0f2080;
-    font-size: 3rem;
-    font-weight: 400;
-}
-
-div[title="main-title"]>h2 {
-    color: #0f2080;
-    font-size: 4rem;
-    font-weight: bold;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-}
-
-
-div[title="main"]>button:hover {
-    background-color: white;
-    color: #0f2080;
-}
-
-div[title="main"]>button {
-    background-color: #0f2080;
-    color: white;
-    font-weight: 600;
-    width: 90%;
-    height: auto;
-    font-size: 1em;
-    margin: 1rem;
-    padding: 1.25em 0.5em;
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
 }
 
 
+/* Animación de pulso para el botón de nueva partida */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 152, 0, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+  }
+}
 
+/* Añadir estos estilos para el diálogo de detalles de sesión */
+
+/* Animación para el diálogo */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilo para las preguntas expandibles */
+.question-item {
+  transition: background-color 0.3s ease;
+}
+
+.question-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Animación para el contenido expandible */
+.MuiCollapse-entered {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Animación para el menú desplegable */
+.MuiMenu-paper {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Estilos globales para mejorar la apariencia */
+body {
+  background-color: #f5f7fa;
+  color: #333;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+}
+
+/* Mejoras para los contenedores */
+.MuiPaper-root {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Mejoras para tipografía */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.5px;
+}
+
+/* Mejoras para las tarjetas de sesión */
+.session-card {
+  transition: all 0.3s ease;
+}
+
+.session-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Efecto de pulso para el botón de nueva partida */
+.pulse-button {
+  animation: glow 2s infinite;
+}
+
+/* Clases personalizadas para usar el color corporativo */
+.color-primary {
+  color: #1976d2 !important;
+}
+
+.bg-primary {
+  background-color: #1976d2 !important;
+}
+
+.border-primary {
+  border-color: #1976d2 !important;
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%) !important;
+}

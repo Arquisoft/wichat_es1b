@@ -1,6 +1,5 @@
 // Imports
 const Question = require('./question-model');
-const Game = require('./game-model');
 const mongoose = require('mongoose');
 const express = require('express');
 const axios = require('axios');
@@ -8,28 +7,35 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 global.fetch = require('node-fetch');
 
+const mongoUri = process.env.MONGODB_URI_QUESTIONS || 'mongodb://localhost:27017/questionsDb';
+mongoose.connect(mongoUri);
+
 
 // Constantes
-const {queries:imagesQueries} = require('./question-queries');
+//const {queries:imagesQueries} = require('./question-queries');
 const app = express();
-const generatorEndpoint = process.env.REACT_APP_API_ORIGIN_ENDPOINT  || "http://localhost:3000";
+const generatorEndpoint = process.env.REACT_APP_API_ORIGIN_ENDPOINT  || "http://localhost:8000";
 const port = 8004;
 const wikiURL = "https://query.wikidata.org/sparql";
 const nOptions = 4;
 
 // Variables
-var correct = "";
-var question = "";
-var image = "";
-var gameId = null;
-var options = [];
-var maxQuestions = 5;
-var questionToSave = null;
-var gameQuestions = [];
+let questions = [];
+let currentQuestionIndex = 0;
+var maxQuestions = 200;
+var usedIndices = new Set();
+
 var randomQuery;
-var randomIndexes = [];
-var queries = [
-    `SELECT DISTINCT ?option ?optionLabel ?imageLabel
+var queries = [];
+var shownQuestions = [];
+var imagesQueries = {};
+imagesQueries["es"] = {
+    "Geografia":
+        [
+            /* pregunta = imagen de un país, opción = nombre del país */
+            [
+                `
+      SELECT DISTINCT ?option ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P31 wd:Q6256;               
               rdfs:label ?optionLabel;          
@@ -37,61 +43,263 @@ var queries = [
         OPTIONAL { ?option wdt:P18 ?imageLabel. }    
         FILTER(lang(?optionLabel) = "es")       
         FILTER EXISTS { ?option wdt:P18 ?imageLabel }
-      } LIMIT 50`,
-    `SELECT ?option ?optionLabel ?imageLabel
+      }
+      LIMIT ` + maxQuestions, "¿Cuál es el lugar de la imagen?"]
+        ],
+
+    "Cultura":
+        [
+            /* pregunta = imagen monumento, opción = nombre del monumento */
+            [
+                `
+      SELECT ?option ?optionLabel ?imageLabel
       WHERE {
         ?option wdt:P31 wd:Q4989906; 
                   wdt:P17 wd:Q29;                
                   wdt:P18 ?imageLabel.                  
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT 50`,
-    `SELECT ?optionLabel ?imageLabel
+      LIMIT ` + maxQuestions, "¿Qué monumento es este?"]
+        ],
+
+    "Personajes":
+        [
+            /* pregunta = imagen de una persona famosa, opción = nombre de la persona */
+            [
+                `
+        SELECT DISTINCT ?option ?optionLabel ?imageLabel
+        WHERE {
+        ?option wdt:P31 wd:Q5;               # Instance of human
+                rdfs:label ?optionLabel;       # Get their label/name
+                wdt:P106 ?occupation.          # Has occupation
+  
+         # Famous occupations filter
+         VALUES ?occupation { 
+            wd:Q33999   # Actor
+            wd:Q177220  # Singer
+            wd:Q937857  # Football player
+            wd:Q82955   # Politician
+            wd:Q36180   # Writer
+         }
+  
+        OPTIONAL { ?option wdt:P18 ?imageLabel. }    
+        FILTER(lang(?optionLabel) = "es")       
+        FILTER EXISTS { ?option wdt:P18 ?imageLabel }
+        }
+        LIMIT ` + maxQuestions, "¿Quién es esta persona famosa?"]
+        ],
+
+
+    "Videojuegos":
+        [
+            /* pregunta = imagen de un videojuego, opción = nombre del videojuego */
+            [
+                `
+      SELECT ?option ?optionLabel ?imageLabel
       WHERE {
-        ?option wdt:P106 wd:Q937857;     
-                wdt:P569 ?birthdate.     
-        FILTER(YEAR(?birthdate) >= 1970)  
-        ?option wdt:P18 ?imageLabel.     
+        ?option wdt:P31 wd:Q7889;  # Instancia de videojuego
+                wdt:P18 ?imageLabel.  # Imagen del videojuego
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],es". }
       }
-      LIMIT 50`
-];
-var currentNumberOfQuestions = 2;
+      LIMIT ` + maxQuestions, "¿A qué videojuego pertenece esta imagen?"]
+        ],
+
+
+    "Aviones":
+        [
+            /* pregunta = imagen de avión, opción = nombre del avión */
+            [
+                `
+    SELECT DISTINCT ?option ?optionLabel ?imageLabel
+WHERE {
+  ?option wdt:P31 wd:Q15056993;        # Instance of commercial aircraft family or its subclasses
+          rdfs:label ?optionLabel.      # Get their label
+
+  OPTIONAL { ?option wdt:P18 ?imageLabel. }  
+  FILTER(lang(?optionLabel) IN ("en", "es"))   
+  FILTER NOT EXISTS { ?option wdt:P279 wd:Q1518049 }  # Exclude subclasses of Q1518049  
+  FILTER EXISTS { ?option wdt:P18 ?imageLabel }
+}
+LIMIT ` + maxQuestions, "¿Qué avión es este?"]
+        ]
+}
+
+
 var language = "es";
-var queriesAndQuestions = getQueriesAndQuestions(imagesQueries); // almacena las queries y las preguntas
+var queriesAndQuestions = []; // almacena las queries y las preguntas
 
 
 
-var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Cuál es el nombre de este futbolista?"];
-var categories = ["Geografia", "Cultura", "Personajes"];
+var possiblesQuestions = ["¿Cuál es el lugar de la imagen?", "¿Qué monumento es este?", "¿Quién es esta persona famosa?", "¿Qué videojuego es este?", "¿Qué avión es este?", "¿Qué muestra esta imagen?"];
+var categories = ["Geografia", "Cultura", "Personajes", "Videojuegos", "Aviones"];//, "All"];
 var questionObject = "";
 var correctAnswer = "";
 var answerOptions = [];
 var questionImage = "";
-var numberOfOptions = 4;
+
+
+/**
+ * Loads the specified number of questions at the beginning of the game.
+ * @returns {Promise<void>}
+ */
+async function loadQuestions(category = "All") {
+    questions = [];
+    shownQuestions = [];
+    currentQuestionIndex = 0;
+    queriesAndQuestions = getQueriesAndQuestions(imagesQueries);
+
+    try {
+        //let queryPool = queries;
+        let questionPrompt = "¿Qué muestra esta imagen?"; // Default question
+
+        await getQueriesByCategory(category);
+        let queryPool = queries;
+
+        // Set the question text based on the current category
+        const categoryIndex = categories.indexOf(category);
+
+        if (categoryIndex !== -1 && categoryIndex < possiblesQuestions.length) {
+            questionPrompt = possiblesQuestions[categoryIndex];
+        }
+
+        // Select a random query
+        const randomQueryIndex = crypto.randomInt(0, queryPool.length);
+        const query = queryPool[randomQueryIndex][0];
+        const url = wikiURL + "?query=" + encodeURIComponent(query) + "&format=json";
+
+        console.log("Fetching questions data for category:", category || "All", "with query type:", randomQueryIndex);
+
+        const response = await axios(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if(!response.data || !response.data.results || response.data.results.bindings.length === 0) {
+            console.error("WikiData query did not return any result.");
+            throw new Error("No data returned from WikiData");
+        }
+
+        const data = response.data.results.bindings;
+
+        // Generate all questions from this single dataset
+        console.log("Maxquestions: " + maxQuestions);
+        // Initialize a Set to track used images
+        const usedImages = new Set();
+        let attempts = 0;
+        const maxAttempts = Math.min(100, data.length * 2); // Prevent infinite loops
+
+        for (let i = 0; i < maxQuestions; i++) {
+            const question = generateQuestionFromData(data, randomQueryIndex);
+            question.questionObject = questionPrompt || "¿Qué muestra esta imagen?";
+
+            // Check if this image has already been used
+            if (!usedImages.has(question.questionImage)) {
+                usedImages.add(question.questionImage);
+                questions.push(question);
+                attempts = 0; // Reset attempts counter after success
+            } else {
+                // This is a duplicate, try again
+                i--;
+                attempts++;
+
+                // Break the loop if we're struggling to find unique questions
+                if (attempts >= maxAttempts) {
+                    console.log(`Warning: Could only generate ${questions.length} unique questions out of ${maxQuestions} requested`);
+                    break;
+                }
+            }
+        }
+
+        console.log(`Successfully loaded ${questions.length} questions for category: ${category || "All"}`);
+        return questions;
+    }
+    catch(error) {
+        console.error("Error while loading questions:", error);
+        throw error;
+    }
+}
+
+
+/**
+ * Generates a single question from the provided dataset
+ * @param {Array} data - The WikiData query results
+ * @param {Number} queryIndex - The index of the query type used
+ * @returns {Object} - A question object
+ */
+function generateQuestionFromData(data, queryIndex) {
+    const answerOptions = [];
+    const fourRows = [];
+    const nElems = data.length;
+    const usedIndices = new Set();
+
+    const usedOptions = new Set(); //Avoid duplicates
+
+    // Select unique items for options
+    while (fourRows.length < nOptions) {
+        let indexRow = crypto.randomInt(0, nElems);
+
+        // Skip if already used or if label is invalid
+        if (usedIndices.has(indexRow) ||
+            !data[indexRow].optionLabel ||
+            data[indexRow].optionLabel.value.startsWith('Q') ||
+            !data[indexRow].imageLabel) {
+            continue;
+        }
+
+        const answerValue = data[indexRow].optionLabel.value;
+
+        //Skip if the option as it is (not the index) has already been added
+        if(usedOptions.has(answerValue)) {
+            continue;
+        }
+
+        usedOptions.add(answerValue);
+
+        usedIndices.add(indexRow);
+        fourRows.push(data[indexRow]);
+        answerOptions.push(data[indexRow].optionLabel.value);
+    }
+
+    const indexQuestion = crypto.randomInt(0, nOptions);
+
+    return {
+        questionObject: possiblesQuestions[queryIndex] || "¿Qué muestra esta imagen?",
+        questionImage: fourRows[indexQuestion].imageLabel.value,
+        correctAnswer: fourRows[indexQuestion].optionLabel.value,
+        answerOptions: answerOptions
+    };
+}
+
+
+
+
+
+
+
 
 function getQuestionData(data) {
-    answerOptions = [];
-    var fourRows = [];
+    const answerOptions = [];
+    const fourRows = [];
     const nElems = data.length;
 
-    // Select 4 random rows of the data
-    for (let i = 0; i<numberOfOptions; i++){
+    for (let i = 0; i < nOptions; i++) {
         let indexRow = crypto.randomInt(0, nElems);
-        if(data[indexRow].optionLabel.value.startsWith('Q')){    // añadir mas comprobaciones
-            i = i - 1;
-        }else{
+        if (!data[indexRow].optionLabel || data[indexRow].optionLabel.value.startsWith('Q') || answerOptions.includes(data[indexRow].optionLabel.value)) {
+            i--;
+        } else {
             fourRows.push(data[indexRow]);
-            // Store the 4 posible answers
             answerOptions.push(data[indexRow].optionLabel.value);
         }
     }
 
-    var indexQuestion = crypto.randomInt(0,numberOfOptions);
-    // Store the country chosen and its capital
-    questionObject= possiblesQuestions[randomQuery];
-    questionImage = fourRows[indexQuestion].imageLabel.value;
-    correctAnswer = fourRows[indexQuestion].optionLabel.value;
+    const indexQuestion = crypto.randomInt(0, nOptions);
+    return {
+        questionObject: possiblesQuestions[randomQuery],
+        questionImage: fourRows[indexQuestion].imageLabel.value,
+        correctAnswer: fourRows[indexQuestion].optionLabel.value,
+        answerOptions: answerOptions
+    };
 
 }
 
@@ -177,34 +385,53 @@ app.post('/configureGame', async (req, res) => {
 })
 
 
+app.post('/startGame',  async (req, res) => {
+    const quest = await getQuestionsByCategory(req.body.category);
+    usedIndices = new Set();
+    const category = req.body.category;
+    res.status(200).json({
+        message: 'Game started',
+        category: category || 'All',
+        firstQuestion: quest
+    });
+});
+
+
+
+
+app.get('/nextQuestion', async (req, res) => {
+    const question = await getQuestionsByCategory(req.query.category)
+    res.status(200).json(question);
+});
 
 
 // Carga de las queries según la categoría
-async function getQueriesByCategory(category) {
-    if(category == "Geografia") {
-        changeQueriesAndQuestions("Geografia");
-    } else if(category == "Cultura") {
-        changeQueriesAndQuestions("Cultura");
-    } else if(category == "Personajes") {
-        changeQueriesAndQuestions("Personajes");
-    } else {
-        queries = getAllValues();
+async function getQueriesByCategory(category = "All") {
+    if (category === "All" || !category) {
+        queries = [];
+        for (let cat of categories) {
+            if (cat !== "All") {
+                queries = queries.concat(queriesAndQuestions["es"][cat]);
+            }
+        }
+
+        //let rand = crypto.randomInt(0, categories.length);
+        //changeQueriesAndQuestions(categories[rand]);
+    }
+    else {
+        if (categories.includes(category)) {
+            changeQueriesAndQuestions(category);
+            console.log(`Changed queries to category: ${category}, loaded ${queries.length} queries`);
+        } else {
+            console.warn(`Unknown category: ${category}, using all queries instead`);
+            let rand = crypto.randomInt(0, categories.length);
+            changeQueriesAndQuestions(categories[rand]);
+        }
     }
 }
 
 function changeQueriesAndQuestions(category) {
     queries = queriesAndQuestions["es"][category];
-}
-
-function getAllValues() {
-    var data = [];
-    for (var category in queriesAndQuestions) {
-        var categoryQueries = queriesAndQuestions[category];
-        if (categoryQueries[language]) {
-            data = data.concat(categoryQueries[language]);
-        }
-    }
-    return data;
 }
 
 
@@ -226,72 +453,154 @@ function getQueriesAndQuestions(images) {
     return data;
 }
 
-
-
-function processData(data) {
-
-    options = []; //Reset options
-    data = data.results.bindings;
-    randomIndexes = [];
-    var optionsSelected = [];
-
-    //Obtener cuatro índices aleatorios sin repeticiones
-    while (randomIndexes.length < nOptions) {
-        var i = crypto.randomInt(0, data.length);
-        var opt = data[i].optionLabel.value;
-        var quest = "";
-
-        // Se comprueba que la opción no esté repetida, y que no sea una entidad de Wikidata ni un enlace
-        if (!randomIndexes.includes(i) && (quest === "" || (!(opt.startsWith("Q") || opt.startsWith("http"))
-            && !(quest.startsWith("Q") || quest.startsWith("http")))) && !optionsSelected.includes(opt)) {
-            randomIndexes.push(i);
-            optionsSelected.push(opt);
-        }
-    }
-
-    // Seleccionar un índice aleatorio para la opción correcta
-    var correctIndex = crypto.randomInt(0, nOptions);
-    correct = data[randomIndexes[correctIndex]].optionLabel.value;
-
-    question = queries[0][1];
-    image = data[randomIndexes[correctIndex]].imageLabel.value;
-
-    // Mezclar opciones
-    for(var i = 0; i < nOptions; i++) {
-        var optionIndex = randomIndexes[i];
-        var option = data[optionIndex].optionLabel.value;
-        options.push(option);
+async function saveQuestions(questions) {
+    for (let question of questions) {
+        await saveQuestion(question);
     }
 }
 
-
-
-async function saveData() {
+async function saveQuestion(question) {
     try {
-        var falseOptions = options.filter(o => o !== correct);
+        // Properly await the query
+        const existingQuestion = await Question.findOne({ image: question.questionImage });
 
+        if (existingQuestion) {
+            console.log("Question with same image already exists:", question.questionImage);
+            return null;
+        }
+
+        // Get incorrect answers (excluding the correct one)
+        const incorrectAnswers = question.answerOptions.filter(
+            option => option !== question.correctAnswer
+        );
+
+        // Ensure we have exactly 3 incorrect answers
+        while (incorrectAnswers.length < 3) {
+            incorrectAnswers.push("No disponible");
+        }
+
+        // Determine category if not provided
+        const category = question.category || getCategoryFromQuestion(question.questionObject);
+
+        // Create new Question document
         const newQuestion = new Question({
-            question: question,
-            correctAnswer: correct,
-            inc_answer_1: falseOptions[0],
-            inc_answer_2: falseOptions[1],
-            inc_answer_3: falseOptions[2],
+            question: question.questionObject,
+            correctAnswer: question.correctAnswer,
+            inc_answer_1: incorrectAnswers[0],
+            inc_answer_2: incorrectAnswers[1],
+            inc_answer_3: incorrectAnswers[2],
+            category: category,
+            image: question.questionImage
         });
 
+        // Save and await the result
         await newQuestion.save();
-
-        questionToSave = newQuestion;
-
-        return newQuestion._id;
+        console.log("Question saved successfully:", question.questionObject);
+    } catch (error) {
+        console.error("Error saving question to database:", error);
+        return null;
     }
-    catch(error) {
-        console.error("Error while saving a new question: " + error);
+}
+
+app.get('/generatedQuestion', async (req, res) => {
+    try {
+        let category = req.query.category; // Get category from query parameter
+
+        category=category.toLowerCase();
+
+        // Create a filter object - empty if no category specified
+        const filter = category ? { category } : {};
+
+        // Query the database with the filter
+        const questions = await Question.find(filter);
+
+        if (questions.length === 0) {
+            return res.status(200).json({ message: 'No questions found for the specified criteria' });
+        }
+
+        res.status(200).json(questions);
+    } catch (error) {
+        console.error('Error retrieving questions:', error);
+        res.status(500).json({ error: 'Error retrieving questions from database' });
+    }
+});
+
+app.put('/createQuestions',async (req,res) =>{
+
+    for (const category of categories) {
+        console.log(category);
+        let questions =  await loadQuestions(category);
+        await saveQuestions(questions);
+    }
+
+    console.log("Questions created");
+    res.status(200).send();
+
+})
+
+// Helper function to determine category from question text
+function getCategoryFromQuestion(questionText) {
+    if (questionText.includes("lugar")) return "geografia";
+    if (questionText.includes("monumento")) return "cultura";
+    if (questionText.includes("famosa") || questionText.includes("personaje")) return "personajes";
+    if (questionText.includes("avión") || questionText.includes("avion")) return "aviones";
+    if (questionText.includes("videojuego")) return "videojuegos";
+    return "General";
+}
+
+async function getQuestionsByCategory(category) {
+    try {
+        // Create filter object - empty for "All" or filtered by category
+        if(!category) {
+            category = "All";
+        }
+
+        const filter = category !== "All" ? { category: category.toLowerCase() } : {};
+
+        // Count total matching questions
+        const count = await Question.countDocuments(filter);
+
+        if (count === 0) {
+            console.log(`No questions found for category: ${category}`);
+            return null;
+        }
+
+        // Generate random index
+        let random;
+        do {
+            random = Math.floor(Math.random() * count);
+        } while (usedIndices.has(random) && usedIndices.size < count);
+
+        usedIndices.add(random);
+
+        // Skip to random position and get one question
+        const randomQuestion = await Question.findOne(filter).skip(random);
+
+        return {
+            questionObject: randomQuestion.question,
+            questionImage: randomQuestion.image,
+            correctAnswer: randomQuestion.correctAnswer,
+            answerOptions: [
+                randomQuestion.correctAnswer,
+                randomQuestion.inc_answer_1,
+                randomQuestion.inc_answer_2,
+                randomQuestion.inc_answer_3
+            ].sort(() => Math.random() - 0.5)
+        };
+    } catch (error) {
+        console.error("Error fetching random question:", error);
+        throw error;
     }
 }
 
 
 const server = app.listen(port, () => {
     console.log(`Question generator service listening at http://localhost:${port}`);
+});
+
+server.on('close', () => {
+    // Close the Mongoose connection
+    mongoose.connection.close();
 });
 
 module.exports = server;
