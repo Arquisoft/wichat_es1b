@@ -114,9 +114,7 @@ services:
 
 
   prometheus:
-    build:
-      context: ./gatewayservice/monitoring/prometheus
-      dockerfile: Dockerfile
+    image: ghcr.io/arquisoft/wichat_es1b/prometheus:latest
     container_name: prometheus-wichat_es1b
     profiles: [ "dev", "prod" ]
     networks:
@@ -132,9 +130,7 @@ services:
 
 
   grafana:
-    build:
-      context: ./gatewayservice/monitoring/grafana
-      dockerfile: Dockerfile
+    image: ghcr.io/arquisoft/wichat_es1b/grafana:latest
     container_name: grafana-wichat_es1b
     profiles: [ "dev", "prod" ]
     networks:
