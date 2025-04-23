@@ -1,10 +1,10 @@
 # Dockerfile for Grafana
 FROM grafana/grafana:latest
 
+COPY ./grafana.ini /etc/grafana/grafana.ini
 # Copy Grafana configuration and provisioning files
-COPY ./gatewayservice/monitoring/grafana/provisioning /etc/grafana/provisioning
-COPY ./gatewayservice/monitoring/grafana/dashboards /etc/grafana/dashboards
-COPY ./gatewayservice/monitoring/grafana/grafana.ini /etc/grafana/grafana.ini
+COPY ./provisioning /etc/grafana/provisioning
+COPY ./dashboards /etc/grafana/dashboards
 
 # Expose Grafana port
 EXPOSE 9091

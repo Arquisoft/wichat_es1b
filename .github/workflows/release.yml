@@ -249,6 +249,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
+          context: ./gatewayservice/monitoring/grafana
           dockerfile: ./gatewayservice/monitoring/grafana/Dockerfile
 
   deploy:

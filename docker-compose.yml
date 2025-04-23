@@ -137,9 +137,9 @@ services:
       - mynetwork
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./gatewayservice/monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ./gatewayservice/monitoring/grafana/dashboards:/etc/grafana/dashboards
       - ./gatewayservice/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./gatewayservice/monitoring/grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_SERVER_HTTP_PORT=9091
       - GF_AUTH_DISABLE_LOGIN_FORM=true
