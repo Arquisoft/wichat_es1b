@@ -52,6 +52,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 import ExitToAppIcon from "@mui/icons-material/ExitToApp"
 import "./Home.css"
+import WaitingRoom from "../game/multiplayer/WaitingRoom"
 
 const ConfigContext = createContext()
 
@@ -85,6 +86,7 @@ const HomePage = () => {
 
   let [multiplayerService, setMultiplayerService] = useState(null)
   const [roomInfo, setRoomInfo] = useState(null)
+  const [showWaitingRoom, setShowWaitingRoom] = useState(false)
 
   const handleOpenDifficultyMenu = (event) => {
     setAnchorElDifficulty(event.currentTarget)
@@ -375,7 +377,9 @@ const HomePage = () => {
       .then((response) => {
         if (response && response.success) {
           console.log(`Sala creada y unido: ${roomId}`)
-          // You could navigate to a game room component here
+          // Mostrar la sala de espera
+          setRoomInfo({ roomId, roomName })
+          setShowWaitingRoom(true)
         }
       })
       .catch((err) => console.error("Error al crear sala:", err))
@@ -400,7 +404,9 @@ const HomePage = () => {
       .then((response) => {
         if (response.success) {
           console.log(`Unido a sala: ${roomId}`)
-          // You could navigate to a game room component
+          // Mostrar la sala de espera
+          setRoomInfo({ roomId, roomName: response.roomName || `Sala ${roomId}` })
+          setShowWaitingRoom(true)
         } else {
           alert(`Error al unirse: ${response.message || "Sala no encontrada"}`)
         }
@@ -1556,6 +1562,32 @@ const HomePage = () => {
           </>
         )}
       </Dialog>
+      {/* Sala de espera */}
+      {showWaitingRoom && roomInfo && (
+        <WaitingRoom
+          roomId={roomInfo.roomId}
+          roomName={roomInfo.roomName}
+          username={username || "Anónimo"}
+          multiplayerService={multiplayerService}
+          onClose={() => setShowWaitingRoom(false)}
+          onGameStart={() => {
+            setShowWaitingRoom(false)
+            // Aquí puedes navegar a la pantalla de juego o iniciar el juego
+            navigate("/Game", {
+              state: {
+                gameConfig: {
+                  numQuestions: numQuestions,
+                  timePerQuestion: timePerQuestion,
+                  difficulty: difficulty,
+                  category: "All",
+                  multiplayer: true,
+                  roomId: roomInfo.roomId
+                },
+              },
+            })
+          }}
+        />
+      )}
     </ConfigContext.Provider>
   )
 }
