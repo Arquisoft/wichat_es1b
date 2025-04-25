@@ -41,7 +41,7 @@ import QuizIcon from "@mui/icons-material/Quiz"
 import StarIcon from "@mui/icons-material/Star"
 import CloseIcon from "@mui/icons-material/Close"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
-import ExpandLessIcon from "@mui/icons-material/ExpandLess"
+import ExpandLessIcon from "@mui/icons-material/ExpandMore"
 import PublicIcon from "@mui/icons-material/Public"
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy"
 import PersonIcon from "@mui/icons-material/Person"
@@ -409,6 +409,7 @@ const HomePage = () => {
         }
     }
 
+    // Modificar la función crearSala para asegurar que se pasa correctamente el nombre de usuario
     function crearSala() {
         if (!multiplayerService) {
             multiplayerService = MultiplayerService.getInstance()
@@ -423,6 +424,7 @@ const HomePage = () => {
         // Generate a unique room ID
         const roomId = `room-${Date.now()}`
         const roomName = `Sala de ${username || "Anónimo"}`
+        const currentUsername = username || "Anónimo"
 
         // Mostrar la sala de espera inmediatamente con un mensaje de "Creando sala..."
         setRoomInfo({
@@ -436,7 +438,8 @@ const HomePage = () => {
             .createRoom(roomId, roomName)
             .then((data) => {
                 if (data.success) {
-                    return multiplayerService.joinRoom(roomId, username)
+                    console.log(`Intentando unirse a sala ${roomId} con usuario ${currentUsername}`)
+                    return multiplayerService.joinRoom(roomId, currentUsername)
                 }
                 // Si hay un error, ocultar la sala de espera y mostrar un mensaje
                 setShowWaitingRoom(false)
@@ -444,7 +447,7 @@ const HomePage = () => {
             })
             .then((response) => {
                 if (response && response.success) {
-                    console.log(`Sala creada y unido: ${roomId}`)
+                    console.log(`Sala creada y unido: ${roomId}`, response)
                     // Actualizar la información de la sala
                     setRoomInfo({
                         roomId,
@@ -463,6 +466,7 @@ const HomePage = () => {
             })
     }
 
+    // Modificar la función unirSala para asegurar que se pasa correctamente el nombre de usuario
     function unirSala() {
         const roomId = prompt("Introduce el ID de la sala:")
         if (!roomId) return
@@ -477,6 +481,8 @@ const HomePage = () => {
             multiplayerService.connect()
         }
 
+        const currentUsername = username || "Anónimo"
+
         // Mostrar la sala de espera inmediatamente con un mensaje de "Conectando..."
         setRoomInfo({
             roomId,
@@ -485,11 +491,12 @@ const HomePage = () => {
         setShowWaitingRoom(true)
 
         // Usar el método joinRoom del servicio
+        console.log(`Intentando unirse a sala ${roomId} con usuario ${currentUsername}`)
         multiplayerService
-            .joinRoom(roomId, username)
+            .joinRoom(roomId, currentUsername)
             .then((response) => {
                 if (response.success) {
-                    console.log(`Unido a sala: ${roomId}`)
+                    console.log(`Unido a sala: ${roomId}`, response)
                     // Actualizar la información de la sala
                     setRoomInfo({
                         roomId,
