@@ -5,6 +5,8 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
+const axios = require('axios');
+const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || "http://localhost:8000"
 
 class MultiplayerServer {
     constructor(port = 8085) {
@@ -33,6 +35,7 @@ class MultiplayerServer {
         // Almacenamiento de datos
         this.rooms = new Map(); // Mapa de salas: roomId -> datos de la sala
         this.players = new Map(); // Mapa de jugadores: socketId -> datos del jugador
+        this.questionsMap = new Map(); //Mapa de preguntas por sala
 
         // Configurar rutas HTTP
         this.setupRoutes();
@@ -83,6 +86,13 @@ class MultiplayerServer {
                 this.rooms.set(roomId, room);
 
                 console.log(`Sala creada: ${roomId} - ${roomName}`);
+
+                this.questionsMap.set(roomId, []);
+
+                for(let i = 0 ; i < 60; i++){
+                    this.createQuestions(roomId)
+                }
+
                 res.status(201).json({ success: true, roomId, roomName: room.name });
             } catch (error) {
                 console.error("Error al crear sala:", error);
@@ -134,6 +144,21 @@ class MultiplayerServer {
         });
     }
 
+    createQuestions(roomId){
+        axios.get(`${apiEndpoint}/nextQuestion`).then((response)=>{
+            const { questionObject, questionImage, correctAnswer, answerOptions } = response.data
+            const question = {
+                question: questionObject,
+                image: questionImage,
+                correctAnswer: correctAnswer,
+                options: answerOptions,
+            }
+            let array = this.questionsMap.get(roomId)
+            array.push(question);
+            this.questionsMap.set(roomId, array);
+        })
+    }
+
     /**
      * Configura los eventos de Socket.IO
      */
@@ -182,7 +207,85 @@ class MultiplayerServer {
             socket.on("getQuestions",(data)=>{
                 this.handleGetQuestions(socket,data);
             })
+
+            socket.on("sendCorrect", (data)=>{
+                this.handleSendCorrectQuestions(socket, data);
+            })
         });
+    }
+
+    /**
+     * Maneja el envío de resultados al finalizar el juego
+     * @param {Socket} socket - Socket del cliente
+     * @param {Object} data - Datos de los resultados
+     */
+    handleSendCorrectQuestions(socket, score) {
+        try {
+
+            // Verificar si el jugador está en la sala
+            const player = this.players.get(socket.id);
+            if (!player) {
+                return socket.emit("error", {message: "No estás en esta sala"});
+            }
+
+            console.log(`Recibidos resultados de (${socket.id})`);
+            console.log(`Puntuación: ${score})`);
+
+            // Almacenar los resultados en el objeto del jugador
+            player.gameResults = {
+                score
+            };
+
+            // Buscar el jugador en la sala y actualizar su puntuación
+            const roomPlayer = room.players.find(p => p.id === socket.id);
+            if (roomPlayer) {
+                roomPlayer.score = score;
+                roomPlayer.hasFinished = true;
+            }
+
+            // Comprobar si todos los jugadores han terminado
+            const allPlayersFinished = room.players.every(p => p.hasFinished);
+
+            // Notificar al jugador que sus resultados han sido recibidos
+            socket.emit("resultsReceived", {
+                success: true,
+                message: "Resultados recibidos correctamente"
+            });
+
+            // Notificar a los demás jugadores sobre la puntuación de este jugador
+            socket.to(roomId).emit("playerScoreUpdate", {
+                playerId: socket.id,
+                score: score
+            });
+
+            // Si todos los jugadores han terminado, notificar el final de la partida con los resultados
+            if (allPlayersFinished) {
+                const finalScores = {};
+                room.players.forEach(p => {
+                    finalScores[p.id] = p.score || 0;
+                });
+
+                this.io.to(roomId).emit("allPlayersFinished", {
+                    finalScores,
+                    players: room.players.map(p => ({
+                        id: p.id,
+                        username: p.username,
+                        score: p.score || 0
+                    })),
+                    gameStats: {
+                        roomId,
+                        duration: new Date() - room.gameStartedAt,
+                        totalPlayers: room.players.length
+                    }
+                });
+
+                // Opcional: guardar los resultados del juego en una base de datos
+                // this.saveGameResultsToDatabase(roomId, room);
+            }
+        } catch (error) {
+            console.error("Error al procesar resultados:", error);
+            socket.emit("error", {message: "Error al procesar los resultados"});
+        }
     }
 
     /**
@@ -211,7 +314,10 @@ class MultiplayerServer {
 
             // En una implementación real, aquí obtendrías preguntas de una base de datos
             // Pero para este ejemplo, crearemos algunas preguntas de muestra
-            const questions = this.getSampleQuestions(count, category);
+            const questions = this.questionsMap.get(roomId);
+            console.log(`Questions ${roomId} encontrados`);
+
+            console.log(questions)
 
             console.log(`Enviando ${questions.length} preguntas a ${socket.id}`);
 
@@ -222,89 +328,6 @@ class MultiplayerServer {
             console.error("Error al obtener preguntas:", error);
             socket.emit("error", { message: "Error al obtener preguntas" });
         }
-    }
-
-    /**
-     * Obtiene un conjunto de preguntas de muestra
-     * @param {number} count - Número de preguntas a obtener
-     * @param {string} category - Categoría de las preguntas (opcional)
-     * @returns {Array} - Array de preguntas
-     */
-    getSampleQuestions(count = 1, category = null) {
-        // Lista de preguntas de muestra
-        const sampleQuestions = [
-            {
-                question: "¿Cuál es el lugar de la imagen siria?",
-                correctAnswer: "Siria",
-                wrongAnswers: ["Kenia", "Vietnam", "Dinamarca"],
-                category: "geografia",
-                image: "http://commons.wikimedia.org/wiki/Special:FilePath/Damascus%2C%20Syria%2C%20Panoramic%20view%20of%20Damascus.jpg"
-            },
-            {
-                question: "¿Cuál es la capital de Francia?",
-                correctAnswer: "París",
-                wrongAnswers: ["Londres", "Madrid", "Roma"],
-                category: "geografia",
-                image: "https://upload.wikimedia.org/wikipedia/commons/4/4b/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques%2C_Paris_ao%C3%BBt_2014_%282%29.jpg"
-            },
-            {
-                question: "¿Quién pintó La Noche Estrellada?",
-                correctAnswer: "Vincent van Gogh",
-                wrongAnswers: ["Pablo Picasso", "Leonardo da Vinci", "Claude Monet"],
-                category: "arte",
-                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg"
-            },
-            {
-                question: "¿En qué año comenzó la Segunda Guerra Mundial?",
-                correctAnswer: "1939",
-                wrongAnswers: ["1914", "1945", "1941"],
-                category: "historia",
-                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/World_War_II_Casualties.svg/800px-World_War_II_Casualties.svg.png"
-            },
-            {
-                question: "¿Cuál es el elemento químico con símbolo Fe?",
-                correctAnswer: "Hierro",
-                wrongAnswers: ["Flúor", "Fósforo", "Fermio"],
-                category: "ciencia",
-                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Iron_electrolytic_and_1cm3_cube.jpg/800px-Iron_electrolytic_and_1cm3_cube.jpg"
-            }
-        ];
-
-        // Filtrar por categoría si se especifica
-        let filteredQuestions = sampleQuestions;
-        if (category && category !== "All") {
-            filteredQuestions = sampleQuestions.filter(q =>
-                q.category.toLowerCase() === category.toLowerCase()
-            );
-
-            // Si no hay suficientes preguntas de la categoría, añadir de otras categorías
-            if (filteredQuestions.length < count) {
-                const remaining = count - filteredQuestions.length;
-                const otherQuestions = sampleQuestions
-                    .filter(q => q.category.toLowerCase() !== category.toLowerCase())
-                    .slice(0, remaining);
-
-                filteredQuestions = [...filteredQuestions, ...otherQuestions];
-            }
-        }
-
-        // Limitar al número solicitado y mezclar
-        return this._shuffleArray(filteredQuestions).slice(0, count);
-    }
-
-    /**
-     * Mezcla un array (para mezclar preguntas)
-     * @private
-     * @param {Array} array - Array a mezclar
-     * @returns {Array} - Array mezclado
-     */
-    _shuffleArray(array) {
-        const newArray = [...array];
-        for (let i = newArray.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-        }
-        return newArray;
     }
 
     /**
@@ -368,8 +391,6 @@ class MultiplayerServer {
 
             // Unir el socket a la sala
             socket.join(roomId);
-
-            console.log(`Jugador ${username} (${socket.id}) unido a sala ${roomId}`);
 
             // Notificar al jugador que se ha unido
             socket.emit("roomJoined", {
@@ -490,8 +511,6 @@ class MultiplayerServer {
             // Marcar la sala como iniciada
             room.gameStarted = true;
             room.gameStartedAt = new Date();
-
-            console.log(`Juego iniciado en sala ${roomId}`);
 
             // Notificar a todos los jugadores
             this.io.to(roomId).emit("gameStart", {

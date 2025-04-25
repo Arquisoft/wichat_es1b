@@ -1,89 +1,583 @@
+"use client"
+
 import { useState, useEffect, useRef } from "react"
 import {
     Container,
     Paper,
     AppBar,
     Toolbar,
-    Button,
-    Grid,
     Typography,
     LinearProgress,
     Box,
     alpha,
     Fade,
     useTheme,
-    Avatar,
-    Chip,
-    Divider,
-    Card,
-    CardMedia,
+    Grid,
+    Button,
 } from "@mui/material"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import MultiplayerService from "./Multiplayer"
+
+// Iconos
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline"
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined"
+import AccessTimeIcon from "@mui/icons-material/AccessTime"
+import QuizIcon from "@mui/icons-material/Quiz"
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 
 const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || "http://localhost:8000"
 
 const GameMultiplayer = () => {
-
-    const navigate = useNavigate()
     const location = useLocation()
     const theme = useTheme()
-    const { gameConfig } = location.state
+    const { gameConfig } = location.state || { gameConfig: { questions: [] } }
     const multiplayerService = MultiplayerService.getInstance()
 
-    const [players, setPlayers] = useState(gameConfig?.players || [])
-    const [Questions, setQuestions] = useState(gameConfig?.questions || [])
+    // Estado del juego
+    const [questions, setQuestions] = useState(gameConfig?.questions || [])
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-    const [playerScores, setPlayerScores] = useState({})
-    const [allPlayersFinished, setAllPlayersFinished] = useState(false)
+    const [selectedAnswer, setSelectedAnswer] = useState(null)
+    const [isCorrect, setIsCorrect] = useState(null)
+    const [score, setScore] = useState(0)
+    const [isFinished, setIsFinished] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [answeredQuestions, setAnsweredQuestions] = useState([])
+    const [gameStartTime] = useState(Date.now())
 
-    const [timeLeft, setTimeLeft] = useState(60)
+    // Temporizador
+    const [timeLeft, setTimeLeft] = useState(60) // TEMPORIZADOR
     const timerRef = useRef(null)
 
-    const currentQuestion = Questions[currentQuestionIndex]
+    const currentQuestion = questions[currentQuestionIndex]
 
-    const handleNextQuestion = () => {
-        if (currentQuestionIndex < Questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1)
+    // Gradientes para fondos
+    const primaryGradient = "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)"
+    const secondaryGradient = "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)"
+
+    // Iniciar temporizador
+    useEffect(() => {
+        timerRef.current = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timerRef.current)
+                    handleEndGame()
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current)
+            }
+        }
+    }, [])
+
+    const handleOptionClick = (option) => {
+        setSelectedAnswer(option)
+        const isAnswerCorrect = option === currentQuestion.correctAnswer
+
+        if (isAnswerCorrect) {
+            setIsCorrect(true)
+            setScore(score + 1)
+        } else {
+            setIsCorrect(false)
+        }
+
+        // Guardar la pregunta respondida
+        setAnsweredQuestions(prev => [...prev, {
+            question: currentQuestion.question,
+            correctAnswer: currentQuestion.correctAnswer,
+            userAnswer: option,
+            isCorrect: isAnswerCorrect
+        }])
+
+        // Esperar 1 segundo antes de mostrar la siguiente pregunta
+        setTimeout(() => {
+            if (currentQuestionIndex < questions.length - 1) {
+                setCurrentQuestionIndex(currentQuestionIndex + 1)
+                setSelectedAnswer(null)
+                setIsCorrect(null)
+            } else {
+                handleEndGame()
+            }
+        }, 1000)
+    }
+
+    const handleEndGame = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current)
+        }
+        setIsFinished(true)
+        setTimeLeft(0)
+
+        // Enviar los resultados al servidor
+        if (multiplayerService && multiplayerService.socket && multiplayerService.socket.connected) {
+            multiplayerService.socket.emit("sendCorrect", score)
+
+            // Escuchar confirmación del servidor
+            multiplayerService.socket.once("resultsReceived", (response) => {
+                if (response.success) {
+                    console.log("Resultados enviados correctamente al servidor")
+                } else {
+                    console.error("Error al enviar resultados:", response.message)
+                }
+            })
+        } else {
+            console.error("No hay conexión con el servidor para enviar resultados")
         }
     }
-    console.log("Ha llegado a GameMultiplayer")
-    console.log(Questions)
 
     return (
-        <Container>
-            <Typography variant="h4" gutterBottom>
-                Pregunta {currentQuestionIndex + 1}
-            </Typography>
-
-            {currentQuestion ? (
-                <Card sx={{ p: 2, mb: 3 }}>
-                    <Typography variant="h6">{currentQuestion.question}</Typography>
-                    {/* Si hay opciones, las mostramos también */}
-                    {currentQuestion.answerOptions?.map((answer, index) => (
-                        <Button
-                            key={index}
-                            variant="outlined"
-                            fullWidth
-                            sx={{ mt: 1 }}
-                            onClick={() => console.log(`Seleccionó: ${answer}`)}
+        <Box
+            sx={{
+                minHeight: "100vh",
+                background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
+                pt: 4,
+                pb: 10,
+            }}
+        >
+            <Container maxWidth="lg">
+                {!isFinished && (
+                    <Fade in={true} timeout={800}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 0,
+                                borderRadius: 4,
+                                overflow: "hidden",
+                                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
+                                border: "1px solid rgba(0, 0, 0, 0.05)",
+                            }}
                         >
-                            {answer}
-                        </Button>
-                    ))}
-                </Card>
-            ) : (
-                <Typography>No hay más preguntas.</Typography>
-            )}
+                            {/* Barra de menú */}
+                            <AppBar
+                                position="static"
+                                sx={{
+                                    background: primaryGradient,
+                                    borderRadius: "4px 4px 0 0",
+                                    boxShadow: "none",
+                                }}
+                            >
+                                <Toolbar sx={{ display: "flex", justifyContent: "center" }}>
+                                    <Typography variant="h6" sx={{ color: "white", fontWeight: "bold" }}>
+                                        WiChat - Juego Multijugador
+                                    </Typography>
+                                </Toolbar>
+                            </AppBar>
 
-            <Button
-                variant="contained"
-                onClick={handleNextQuestion}
-                disabled={currentQuestionIndex >= Questions.length - 1}
-            >
-                Siguiente
-            </Button>
-        </Container>
+                            {loading ? (
+                                <Box
+                                    sx={{
+                                        padding: "3rem",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        minHeight: "300px",
+                                    }}
+                                >
+                                    <img
+                                        src="https://i.gifer.com/origin/34/34338d26023e5515f6cc8969aa027bca_w200.gif"
+                                        alt="Cargando preguntas..."
+                                        style={{ width: "150px", marginBottom: "1.5rem" }}
+                                    />
+                                    <Typography variant="h6" color="primary">
+                                        Cargando preguntas...
+                                    </Typography>
+                                </Box>
+                            ) : (
+                                <Box sx={{ p: 4 }}>
+                                    {/* Tarjetas de información del juego */}
+                                    <Grid container spacing={3} sx={{ mb: 4 }}>
+                                        <Grid item xs={12} md={4}>
+                                            <Paper
+                                                elevation={0}
+                                                sx={{
+                                                    p: 3,
+                                                    borderRadius: 3,
+                                                    background: alpha(theme.palette.primary.main, 0.05),
+                                                    border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 2,
+                                                }}
+                                            >
+                                                <QuizIcon color="primary" sx={{ fontSize: 28 }} />
+                                                <Box>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Preguntas restantes
+                                                    </Typography>
+                                                    <Typography variant="h5" color="primary" fontWeight="bold">
+                                                        {questions.length - currentQuestionIndex - 1}
+                                                    </Typography>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={12} md={4}>
+                                            <Paper
+                                                elevation={0}
+                                                sx={{
+                                                    p: 3,
+                                                    borderRadius: 3,
+                                                    background: alpha(theme.palette.success.main, 0.05),
+                                                    border: `1px solid ${alpha(theme.palette.success.main, 0.1)}`,
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 2,
+                                                }}
+                                            >
+                                                <EmojiEventsIcon color="success" sx={{ fontSize: 28 }} />
+                                                <Box>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Puntuación
+                                                    </Typography>
+                                                    <Typography variant="h5" color="success.main" fontWeight="bold">
+                                                        {score}
+                                                    </Typography>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+                                        <Grid item xs={12} md={4}>
+                                            <Paper
+                                                elevation={0}
+                                                sx={{
+                                                    p: 3,
+                                                    borderRadius: 3,
+                                                    background: alpha(theme.palette.warning.main, 0.05),
+                                                    border: `1px solid ${alpha(theme.palette.warning.main, 0.1)}`,
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 2,
+                                                }}
+                                            >
+                                                <AccessTimeIcon color={timeLeft <= 5 ? "error" : "warning"} sx={{ fontSize: 28 }} />
+                                                <Box>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Tiempo restante
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="h5"
+                                                        color={timeLeft <= 5 ? "error.main" : "warning.main"}
+                                                        fontWeight="bold"
+                                                    >
+                                                        {timeLeft}s
+                                                    </Typography>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+                                    </Grid>
+
+                                    {/* Barra de progreso del temporizador */}
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={(timeLeft / 60) * 100}
+                                        sx={{
+                                            height: 10,
+                                            borderRadius: 5,
+                                            mb: 4,
+                                            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                            "& .MuiLinearProgress-bar": {
+                                                backgroundColor: timeLeft <= 5 ? theme.palette.error.main : theme.palette.primary.main,
+                                                borderRadius: 5,
+                                            },
+                                        }}
+                                    />
+
+                                    {/* Tarjeta de pregunta */}
+                                    <Paper
+                                        elevation={0}
+                                        sx={{
+                                            p: 4,
+                                            borderRadius: 3,
+                                            mb: 4,
+                                            background: "white",
+                                            border: "1px solid rgba(0, 0, 0, 0.05)",
+                                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                                            textAlign: "center",
+                                        }}
+                                    >
+                                        <Typography variant="h5" fontWeight="medium" color="primary.dark" sx={{ mb: 3 }}>
+                                            {currentQuestion?.question}
+                                        </Typography>
+
+                                        {/* Imagen de la pregunta */}
+                                        {currentQuestion?.image && (
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    mb: 3,
+                                                    borderRadius: 3,
+                                                    overflow: "hidden",
+                                                    border: "1px solid rgba(0, 0, 0, 0.05)",
+                                                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                                                }}
+                                                onContextMenu={(e) => e.preventDefault()}
+                                            >
+                                                <img
+                                                    src={currentQuestion.image || "/placeholder.svg"}
+                                                    alt="Imagen de la pregunta"
+                                                    style={{
+                                                        maxWidth: "100%",
+                                                        maxHeight: "300px",
+                                                        objectFit: "contain",
+                                                        pointerEvents: "none",
+                                                        userSelect: "none",
+                                                    }}
+                                                />
+                                            </Box>
+                                        )}
+
+                                        {/* Opciones de respuesta */}
+                                        <Grid container spacing={2}>
+                                            {currentQuestion?.options?.map((option, index) => (
+                                                <Grid item xs={12} sm={6} key={index}>
+                                                    <Button
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        size="large"
+                                                        onClick={() => handleOptionClick(option)}
+                                                        sx={{
+                                                            p: 2,
+                                                            borderRadius: 3,
+                                                            borderWidth: 2,
+                                                            fontSize: "1rem",
+                                                            fontWeight: "medium",
+                                                            textTransform: "none",
+                                                            height: "100%",
+                                                            justifyContent: "flex-start",
+                                                            backgroundColor: selectedAnswer
+                                                                ? selectedAnswer === option
+                                                                    ? isCorrect
+                                                                        ? alpha(theme.palette.success.main, 0.1)
+                                                                        : alpha(theme.palette.error.main, 0.1)
+                                                                    : option === currentQuestion.correctAnswer && selectedAnswer !== null
+                                                                        ? alpha(theme.palette.success.main, 0.1)
+                                                                        : "transparent"
+                                                                : "transparent",
+                                                            borderColor: selectedAnswer
+                                                                ? selectedAnswer === option
+                                                                    ? isCorrect
+                                                                        ? theme.palette.success.main
+                                                                        : theme.palette.error.main
+                                                                    : option === currentQuestion.correctAnswer && selectedAnswer !== null
+                                                                        ? theme.palette.success.main
+                                                                        : theme.palette.divider
+                                                                : theme.palette.divider,
+                                                            color: selectedAnswer
+                                                                ? selectedAnswer === option
+                                                                    ? isCorrect
+                                                                        ? theme.palette.success.main
+                                                                        : theme.palette.error.main
+                                                                    : option === currentQuestion.correctAnswer && selectedAnswer !== null
+                                                                        ? theme.palette.success.main
+                                                                        : theme.palette.text.primary
+                                                                : theme.palette.text.primary,
+                                                            "&:hover": {
+                                                                backgroundColor: selectedAnswer ? "inherit" : alpha(theme.palette.primary.main, 0.05),
+                                                                borderColor: selectedAnswer ? "inherit" : theme.palette.primary.main,
+                                                            },
+                                                            transition: "all 0.3s ease",
+                                                        }}
+                                                        disabled={selectedAnswer !== null}
+                                                    >
+                                                        {option}
+                                                        {selectedAnswer === option && isCorrect && (
+                                                            <CheckCircleOutlineIcon color="success" sx={{ ml: "auto" }} />
+                                                        )}
+                                                        {selectedAnswer === option && isCorrect === false && (
+                                                            <CancelOutlinedIcon color="error" sx={{ ml: "auto" }} />
+                                                        )}
+                                                        {option === currentQuestion.correctAnswer &&
+                                                            selectedAnswer !== null &&
+                                                            selectedAnswer !== option && (
+                                                                <CheckCircleOutlineIcon color="success" sx={{ ml: "auto" }} />
+                                                            )}
+                                                    </Button>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+                                    </Paper>
+                                </Box>
+                            )}
+                        </Paper>
+                    </Fade>
+                )}
+
+                {isFinished && (
+                    <Fade in={true} timeout={800}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 0,
+                                borderRadius: 4,
+                                overflow: "hidden",
+                                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
+                                border: "1px solid rgba(0, 0, 0, 0.05)",
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    p: 3,
+                                    background: primaryGradient,
+                                    color: "white",
+                                    textAlign: "center",
+                                }}
+                            >
+                                <Typography variant="h4" fontWeight="bold" gutterBottom>
+                                    ¡Partida finalizada!
+                                </Typography>
+                                <Typography variant="h6">Gracias por jugar</Typography>
+                            </Box>
+
+                            <Box sx={{ p: 4 }}>
+                                <Grid container spacing={4} sx={{ mb: 3 }}>
+                                    {/* Gráfico de resultados */}
+                                    <Grid item xs={12} md={6}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                p: 3,
+                                                borderRadius: 3,
+                                                bgcolor: "white",
+                                                border: "1px solid rgba(0, 0, 0, 0.05)",
+                                                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                                                height: "100%",
+                                                display: "flex",
+                                                flexDirection: "column",
+                                            }}
+                                        >
+                                            <Typography variant="h6" color="primary" fontWeight="bold" sx={{ mb: 2, textAlign: "center" }}>
+                                                Resultados
+                                            </Typography>
+
+                                            <Box sx={{ height: 300 }}>
+                                                {score > 0 || questions.length - score > 0 ? (
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <PieChart>
+                                                            <Pie
+                                                                data={[
+                                                                    { name: "Correctas", value: score || 0 },
+                                                                    { name: "Incorrectas", value: questions.length - score || 0 },
+                                                                ]}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                labelLine={false}
+                                                                outerRadius={100}
+                                                                innerRadius={60}
+                                                                fill="#8884d8"
+                                                                dataKey="value"
+                                                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                                                paddingAngle={5}
+                                                            >
+                                                                <Cell fill="#4CAF50" stroke="none" />
+                                                                <Cell fill="#F44336" stroke="none" />
+                                                            </Pie>
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                ) : (
+                                                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", mt: 5 }}>
+                                                        No hay datos disponibles
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        </Paper>
+                                    </Grid>
+
+                                    {/* Detalles de puntuación */}
+                                    <Grid item xs={12} md={6}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                p: 3,
+                                                borderRadius: 3,
+                                                bgcolor: "white",
+                                                border: "1px solid rgba(0, 0, 0, 0.05)",
+                                                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                                                height: "100%",
+                                                display: "flex",
+                                                flexDirection: "column",
+                                            }}
+                                        >
+                                            <Typography variant="h6" color="primary" fontWeight="bold" sx={{ mb: 3, textAlign: "center" }}>
+                                                Detalles
+                                            </Typography>
+
+                                            <Box sx={{ mb: 3 }}>
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        p: 2,
+                                                        borderRadius: 2,
+                                                        bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                        mb: 2,
+                                                    }}
+                                                >
+                                                    <CheckCircleOutlineIcon color="success" sx={{ mr: 2, fontSize: 28 }} />
+                                                    <Box>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Respuestas correctas
+                                                        </Typography>
+                                                        <Typography variant="h5" color="success.main" fontWeight="bold">
+                                                            {score}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        p: 2,
+                                                        borderRadius: 2,
+                                                        bgcolor: alpha(theme.palette.error.main, 0.1),
+                                                        mb: 2,
+                                                    }}
+                                                >
+                                                    <CancelOutlinedIcon color="error" sx={{ mr: 2, fontSize: 28 }} />
+                                                    <Box>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Respuestas incorrectas
+                                                        </Typography>
+                                                        <Typography variant="h5" color="error.main" fontWeight="bold">
+                                                            {questions.length - score}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        p: 2,
+                                                        borderRadius: 2,
+                                                        bgcolor: alpha(theme.palette.info.main, 0.1),
+                                                    }}
+                                                >
+                                                    <QuizIcon color="info" sx={{ mr: 2, fontSize: 28 }} />
+                                                    <Box>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Total de preguntas
+                                                        </Typography>
+                                                        <Typography variant="h5" color="info.main" fontWeight="bold">
+                                                            {questions.length}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+                                        </Paper>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        </Paper>
+                    </Fade>
+                )}
+            </Container>
+        </Box>
     )
 }
 

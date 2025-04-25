@@ -39,7 +39,10 @@ class MultiplayerService {
             onError: [],
             onReconnecting: [],
             onReconnectFailed: [],
-            onHostChanged: []
+            onHostChanged: [],
+            onResultsSent: [], // Añadir este evento
+            onPlayerScoreUpdate: [], // Útil para actualizar puntuaciones en tiempo real
+            onAllPlayersFinished: [] // Para cuando todos terminan
         }
 
         this.serverUrl = "http://localhost:8085" // Cambia esto a la URL de tu servidor
@@ -171,7 +174,7 @@ class MultiplayerService {
      * @param {string} category - Categoría de preguntas (opcional)
      * @returns {Promise} - Promesa que se resuelve con las preguntas recibidas
      */
-    requestQuestions(roomId, count = 10, category = null) {
+    requestQuestions(roomId, count = 60, category = "All") {
         return new Promise((resolve, reject) => {
             if (!this.socket || !this.socket.connected) {
                 return reject(new Error("No estás conectado al servidor"));
@@ -187,15 +190,7 @@ class MultiplayerService {
 
             // Configurar manejador para recibir las preguntas
             this.socket.once("questions", (data) => {
-                clearTimeout(timeout);
-
-                // Convertir el formato de las preguntas recibidas al formato que espera el cliente
-                const formattedQuestions = this._formatQuestionsForClient(data);
-
-                console.log(`Recibidas ${formattedQuestions.length} preguntas`);
-                this._triggerEvent("onQuestionsReceived", { questions: formattedQuestions });
-
-                resolve(formattedQuestions);
+                resolve(this._shuffleQuestions(data));
             });
 
             // Enviar solicitud al servidor
@@ -208,66 +203,17 @@ class MultiplayerService {
     }
 
     /**
-     * Formatea las preguntas recibidas del servidor al formato que espera el cliente
+     * Mezcla las opciones de Preguntas
      * @private
-     * @param {Array|Object} data - Datos recibidos del servidor
-     * @returns {Array} - Preguntas formateadas
+     * @param {Array} answers - Array con las Preguntas
+     * @returns {Array} - Array mezclado de Preguntas
      */
-    _formatQuestionsForClient(data) {
-        // Si es un array, procesamos cada elemento
-        if (Array.isArray(data)) {
-            return data.map(question => this._formatSingleQuestion(question));
-        }
-
-        // Si es una sola pregunta
-        return [this._formatSingleQuestion(data)];
-    }
-
-    /**
-     * Formatea una sola pregunta al formato que espera el cliente
-     * @private
-     * @param {Object} questionData - Datos de una pregunta
-     * @returns {Object} - Pregunta formateada
-     */
-    _formatSingleQuestion(questionData) {
-        // Conversión de formato del servidor al formato del cliente
-        return {
-            question: questionData.question,
-            correctAnswer: questionData.correctAnswer,
-            // Convertir el array de respuestas incorrectas a propiedades individuales
-            inc_answer_1: questionData.wrongAnswers && questionData.wrongAnswers[0] || "",
-            inc_answer_2: questionData.wrongAnswers && questionData.wrongAnswers[1] || "",
-            inc_answer_3: questionData.wrongAnswers && questionData.wrongAnswers[2] || "",
-            category: questionData.category || "general",
-            image: questionData.image || "",
-            // Crear el array de opciones mezcladas para el juego
-            questionObject: questionData.question || "",
-            questionImage: questionData.image || "",
-            answerOptions: this._shuffleAnswers([
-                questionData.correctAnswer,
-                ...(questionData.wrongAnswers || [])
-            ]),
-            __v: 0
-        };
-    }
-
-    /**
-     * Mezcla las opciones de respuesta
-     * @private
-     * @param {Array} answers - Array con la respuesta correcta y las incorrectas
-     * @returns {Array} - Array mezclado de respuestas
-     */
-    _shuffleAnswers(answers) {
-        // Filtrar respuestas vacías
-        const filteredAnswers = answers.filter(answer => answer && answer.trim() !== '');
-
-        // Mezclar las respuestas
-        for (let i = filteredAnswers.length - 1; i > 0; i--) {
+    _shuffleQuestions(questions) {
+        for (let i = questions.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [filteredAnswers[i], filteredAnswers[j]] = [filteredAnswers[j], filteredAnswers[i]];
+            [questions[i], questions[j]] = [questions[j], questions[i]]; // Intercambia elementos
         }
-
-        return filteredAnswers;
+        return questions;
     }
 
     /**
@@ -279,19 +225,24 @@ class MultiplayerService {
 
         this.socket.on("questions", (data) => {
             console.log("Preguntas recibidas:", data);
-            const formattedQuestions = this._formatQuestionsForClient(data);
-
-            // Almacenar las preguntas para uso posterior
-            this.gameQuestions = formattedQuestions;
 
             this._triggerEvent("onQuestionsReceived", {
-                questions: formattedQuestions
+                questions: this._shuffleQuestions(data)
             });
+        });
+
+        this.socket.on("playerScoreUpdate", (data) => {
+            console.log("Actualización de puntuación de jugador:", data);
+            this._triggerEvent("onPlayerScoreUpdate", data);
+        });
+
+        this.socket.on("allPlayersFinished", (data) => {
+            console.log("Todos los jugadores han terminado el juego:", data);
+            this._triggerEvent("onAllPlayersFinished", data);
         });
 
         // Eventos específicos del juego
         this.socket.on("roomJoined", (data) => {
-            console.log("Unido a sala (datos originales):", data)
             // Asegurarnos de que tenemos una estructura de datos consistente
             const roomData = {
                 roomId: data.roomId,
@@ -306,7 +257,6 @@ class MultiplayerService {
         })
 
         this.socket.on("playerJoined", (data) => {
-            console.log("Jugador unido (datos originales):", data)
             // Asegurarnos de que tenemos una estructura de datos consistente
             const playerData = {
                 playerId: data.playerId || data.id,
@@ -329,13 +279,11 @@ class MultiplayerService {
         })
 
         this.socket.on("playerReady", (data) => {
-            console.log("Jugador listo (datos originales):", data)
             // Asegurarnos de que tenemos una estructura de datos consistente
             const playerData = {
                 playerId: data.playerId || data.id,
                 username: data.username || "Jugador",
             }
-            console.log("Jugador listo (datos procesados):", playerData)
             this._triggerEvent("onPlayerReady", playerData)
         })
 
@@ -490,7 +438,6 @@ class MultiplayerService {
             return false
         }
 
-        console.log(`Iniciando juego en sala ${targetRoom}`)
         this.socket.emit("startGame", { roomId: targetRoom })
         return true
     }
@@ -520,6 +467,57 @@ class MultiplayerService {
         }
 
         return true
+    }
+
+    /**
+     * Envía los resultados del juego al servidor
+     * @param {string} roomId - ID de la sala
+     * @param {Array} correctQuestions - Array de preguntas contestadas correctamente
+     * @param {Array} wrongAnswers - Array de preguntas contestadas incorrectamente
+     * @param {number} score - Puntuación final
+     * @param {number} gameTime - Tiempo total de juego en segundos
+     * @returns {Promise} - Promesa que se resuelve cuando los resultados son procesados
+     */
+    sendGameResults(roomId, correctQuestions, wrongAnswers, score, gameTime) {
+        return new Promise((resolve, reject) => {
+            if (!this.socket || !this.socket.connected) {
+                return reject(new Error("No estás conectado al servidor"));
+            }
+
+            if (!roomId) {
+                return reject(new Error("Se requiere un ID de sala"));
+            }
+
+            const resultsData = {
+                roomId,
+                userId: localStorage.getItem("userId"), // Si tienes ID de usuario guardado
+                username: localStorage.getItem("username") || "Anónimo",
+                score,
+                correctQuestions,
+                wrongAnswers,
+                totalQuestions: correctQuestions.length + wrongAnswers.length,
+                gameTime
+            };
+
+            console.log("Enviando resultados de juego:", resultsData);
+
+            // Configurar manejador para la confirmación
+            this.socket.once("resultsReceived", (response) => {
+                if (response.success) {
+                    console.log("Resultados enviados correctamente");
+                    this._triggerEvent("onResultsSent", response);
+                    resolve(response);
+                } else {
+                    const error = new Error(response.message || "Error al enviar resultados");
+                    console.error(error);
+                    this._triggerEvent("onError", { message: error.message });
+                    reject(error);
+                }
+            });
+
+            // Enviar los resultados
+            this.socket.emit("sendCorrect", resultsData);
+        });
     }
 
     /**

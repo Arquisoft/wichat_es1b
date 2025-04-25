@@ -333,10 +333,9 @@ const HomePage = () => {
         // Configurar los eventos
         service
             .on("onConnect", () => {
-                console.log("Conectado al servidor multijugador")
+                console.log("Conectado al servidor ")
             })
             .on("onRoomJoined", (data) => {
-                console.log(`Unido a sala: ${data.roomId}`)
                 setRoomInfo({
                     roomId: data.roomId,
                     roomName: data.roomName || `Sala ${data.roomId}`,
@@ -351,7 +350,6 @@ const HomePage = () => {
                 console.log(`Jugador listo: ${data.playerId}`)
             })
             .on("onGameStart", (data) => {
-                console.log("Juego iniciado")
                 setShowWaitingRoom(false)
                 // Navegar a la pantalla de juego
                 navigate("/Game", {
@@ -398,7 +396,6 @@ const HomePage = () => {
 
         if (!multiplayerService.startGame) {
             multiplayerService.startGame = function (roomId) {
-                console.log(`Iniciando juego en sala ${roomId}`)
                 // Implementar según tu API
                 return this.socket.emit("start_game", { roomId })
             }
@@ -442,7 +439,6 @@ const HomePage = () => {
             .createRoom(roomId, roomName)
             .then((data) => {
                 if (data.success) {
-                    console.log(`Intentando unirse a sala ${roomId} con usuario ${currentUsername}`)
                     return multiplayerService.joinRoom(roomId, currentUsername)
                 }
                 // Si hay un error, ocultar la sala de espera y mostrar un mensaje
@@ -495,12 +491,10 @@ const HomePage = () => {
         setShowWaitingRoom(true)
 
         // Usar el método joinRoom del servicio
-        console.log(`Intentando unirse a sala ${roomId} con usuario ${currentUsername}`)
         multiplayerService
             .joinRoom(roomId, currentUsername)
             .then((response) => {
                 if (response.success) {
-                    console.log(`Unido a sala: ${roomId}`, response)
                     // Actualizar la información de la sala
                     setRoomInfo({
                         roomId,
@@ -800,9 +794,14 @@ const HomePage = () => {
                                                                         </Box>
 
                                                                         {/* Nombre del jugador */}
-                                                                        <Typography variant="h6" fontWeight="bold">
-                                                                            {user.username}
-                                                                        </Typography>
+                                                                        <Box sx={{ flexGrow: 1 }}>
+                                                                            <Typography variant="h6" fontWeight="bold">
+                                                                                {user.username}
+                                                                            </Typography>
+                                                                            <Typography variant="body2" color="text.secondary">
+                                                                                 <strong>Precisión:</strong> {Math.round(user.AccuracyRate)}%
+                                                                            </Typography>
+                                                                        </Box>
                                                                     </Box>
 
                                                                     {/* Círculo con porcentaje de precisión */}
@@ -1678,11 +1677,11 @@ const HomePage = () => {
                         setShowWaitingRoom(false)
                     }}
                     onGameStart={() => {
-                        setNavigatingToGame(true)
-
+                        setNavigatingToGame(true) // 👈 evita leaveRoom
+                        setShowWaitingRoom(false)
                         multiplayerService.requestQuestions(
                             roomInfo.roomId,
-                            10,
+                            60, //Numero de preguntas multijugador
                             "All"
                         ).then((data) => {
                             navigate("/GameMultiplayer", {
@@ -1694,7 +1693,7 @@ const HomePage = () => {
                                     }
                                 }
                             })
-                            setShowWaitingRoom(false) // ahora sí, sin activar leaveRoom
+                            //setShowWaitingRoom(false) // ahora sí, sin activar leaveRoom
                         })
                     }}
                 />

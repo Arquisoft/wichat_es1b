@@ -109,7 +109,6 @@ export default function WaitingRoom({ roomId, roomName, username, multiplayerSer
                 setPlayers((prev) => prev.filter((p) => p.id !== playerId))
             })
             .on("onPlayerReady", (data) => {
-                console.log("Jugador listo:", data)
                 const playerId = data.playerId || data.id
                 setPlayers((prev) => prev.map((p) => (p.id === playerId ? { ...p, isReady: true } : p)))
 
@@ -119,11 +118,9 @@ export default function WaitingRoom({ roomId, roomName, username, multiplayerSer
                 }
             })
             .on("onAllPlayersReady", () => {
-                console.log("Todos los jugadores están listos")
                 setAllReady(true)
             })
             .on("onGameStart", (data) => {
-                console.log("Juego iniciado:", data)
                 onGameStart()
             })
             .on("onError", (data) => {
