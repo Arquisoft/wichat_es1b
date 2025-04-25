@@ -273,7 +273,7 @@ class MultiplayerService {
             console.log("Resultado de crear sala:", result)
 
             if (result.success) {
-                // No establecer currentRoomId aquí, se hará cuando nos unamos a la sala
+                //this.sendReady(roomId);
             }
 
             return result

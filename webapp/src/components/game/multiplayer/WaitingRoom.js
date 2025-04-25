@@ -65,7 +65,7 @@ export default function WaitingRoom({ roomId, roomName, username, multiplayerSer
                     const currentPlayer = data.players.find((p) => p.username === username)
                     if (currentPlayer) {
                         setIsHost(currentPlayer.isHost || currentPlayer.id === data.hostId)
-                        setIsReady(currentPlayer.isReady || false)
+                        setIsReady(currentPlayer.isReady || currentPlayer.isHost || false)
                     }
                 } else {
                     // Fallback si no hay datos de jugadores
@@ -73,7 +73,7 @@ export default function WaitingRoom({ roomId, roomName, username, multiplayerSer
                     const currentPlayer = {
                         id: "user-" + Date.now(),
                         username: username || "Anónimo",
-                        isReady: false,
+                        isReady: data.isHost || false,
                         isHost: data.isHost || false,
                     }
                     setPlayers([currentPlayer])
@@ -97,7 +97,7 @@ export default function WaitingRoom({ roomId, roomName, username, multiplayerSer
                         {
                             id: playerId,
                             username: data.username || "Jugador",
-                            isReady: false,
+                            isReady: data.isHost || false,
                             isHost: data.isHost || false,
                         },
                     ]

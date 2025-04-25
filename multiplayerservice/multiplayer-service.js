@@ -253,7 +253,7 @@ class MultiplayerServer {
                 players: room.players.map((p) => ({
                     id: p.id,
                     username: p.username,
-                    isReady: p.isReady,
+                    isReady: p.id === room.hostId || p.isReady,
                     isHost: p.id === room.hostId,
                 })),
             });
