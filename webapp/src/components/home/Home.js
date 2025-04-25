@@ -65,6 +65,9 @@ const HomePage = () => {
     const username = localStorage.getItem("username")
     const theme = useTheme()
 
+    const [navigatingToGame, setNavigatingToGame] = useState(false)
+
+
     // Configuración de la partida
     const [numQuestions, setNumQuestions] = useState(10)
     const [timePerQuestion, setTimePerQuestion] = useState(30)
@@ -374,11 +377,12 @@ const HomePage = () => {
         setMultiplayerService(service)
 
         // Cleanup on unmount
+        /*
         return () => {
             if (service) {
                 service.disconnect()
             }
-        }
+        }*/
     }, [])
 
     // Implementar los métodos que necesita el componente WaitingRoom
@@ -1668,24 +1672,29 @@ const HomePage = () => {
                     username={username || "Anónimo"}
                     multiplayerService={multiplayerService}
                     onClose={() => {
-                        setShowWaitingRoom(false)
-                        if (multiplayerService && roomInfo) {
+                        if (!navigatingToGame && multiplayerService && roomInfo) {
                             multiplayerService.leaveRoom(roomInfo.roomId)
                         }
+                        setShowWaitingRoom(false)
                     }}
                     onGameStart={() => {
-                        setShowWaitingRoom(false)
-                        navigate("/Game", {
-                            state: {
-                                gameConfig: {
-                                    numQuestions: numQuestions,
-                                    timePerQuestion: timePerQuestion,
-                                    difficulty: difficulty,
-                                    category: "All",
-                                    multiplayer: true,
-                                    roomId: roomInfo.roomId,
-                                },
-                            },
+                        setNavigatingToGame(true)
+
+                        multiplayerService.requestQuestions(
+                            roomInfo.roomId,
+                            10,
+                            "All"
+                        ).then((data) => {
+                            navigate("/GameMultiplayer", {
+                                state: {
+                                    gameConfig: {
+                                        roomId: roomInfo.roomId,
+                                        players: roomInfo.players,
+                                        questions: data
+                                    }
+                                }
+                            })
+                            setShowWaitingRoom(false) // ahora sí, sin activar leaveRoom
                         })
                     }}
                 />

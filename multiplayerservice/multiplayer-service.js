@@ -178,7 +178,133 @@ class MultiplayerServer {
             socket.on("disconnect", () => {
                 this.handleDisconnect(socket);
             });
+
+            socket.on("getQuestions",(data)=>{
+                this.handleGetQuestions(socket,data);
+            })
         });
+    }
+
+    /**
+     * Maneja la solicitud de preguntas
+     * @param {Socket} socket - Socket del cliente
+     * @param {Object} data - Datos de la solicitud (roomId, count, category)
+     */
+    handleGetQuestions(socket, data = {}) {
+        try {
+            const { roomId, count = 1, category = null } = data;
+
+            // Verificar si se especificó una sala
+            if (roomId) {
+                // Verificar si la sala existe
+                const room = this.rooms.get(roomId);
+                if (!room) {
+                    return socket.emit("error", { message: "La sala no existe" });
+                }
+
+                // Verificar si el jugador está en la sala
+                const player = this.players.get(socket.id);
+                if (!player || player.roomId !== roomId) {
+                    return socket.emit("error", { message: "No estás en esta sala" });
+                }
+            }
+
+            // En una implementación real, aquí obtendrías preguntas de una base de datos
+            // Pero para este ejemplo, crearemos algunas preguntas de muestra
+            const questions = this.getSampleQuestions(count, category);
+
+            console.log(`Enviando ${questions.length} preguntas a ${socket.id}`);
+
+            // Enviar las preguntas solo al cliente que las solicitó
+            socket.emit("questions", questions);
+
+        } catch (error) {
+            console.error("Error al obtener preguntas:", error);
+            socket.emit("error", { message: "Error al obtener preguntas" });
+        }
+    }
+
+    /**
+     * Obtiene un conjunto de preguntas de muestra
+     * @param {number} count - Número de preguntas a obtener
+     * @param {string} category - Categoría de las preguntas (opcional)
+     * @returns {Array} - Array de preguntas
+     */
+    getSampleQuestions(count = 1, category = null) {
+        // Lista de preguntas de muestra
+        const sampleQuestions = [
+            {
+                question: "¿Cuál es el lugar de la imagen siria?",
+                correctAnswer: "Siria",
+                wrongAnswers: ["Kenia", "Vietnam", "Dinamarca"],
+                category: "geografia",
+                image: "http://commons.wikimedia.org/wiki/Special:FilePath/Damascus%2C%20Syria%2C%20Panoramic%20view%20of%20Damascus.jpg"
+            },
+            {
+                question: "¿Cuál es la capital de Francia?",
+                correctAnswer: "París",
+                wrongAnswers: ["Londres", "Madrid", "Roma"],
+                category: "geografia",
+                image: "https://upload.wikimedia.org/wikipedia/commons/4/4b/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques%2C_Paris_ao%C3%BBt_2014_%282%29.jpg"
+            },
+            {
+                question: "¿Quién pintó La Noche Estrellada?",
+                correctAnswer: "Vincent van Gogh",
+                wrongAnswers: ["Pablo Picasso", "Leonardo da Vinci", "Claude Monet"],
+                category: "arte",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg"
+            },
+            {
+                question: "¿En qué año comenzó la Segunda Guerra Mundial?",
+                correctAnswer: "1939",
+                wrongAnswers: ["1914", "1945", "1941"],
+                category: "historia",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/World_War_II_Casualties.svg/800px-World_War_II_Casualties.svg.png"
+            },
+            {
+                question: "¿Cuál es el elemento químico con símbolo Fe?",
+                correctAnswer: "Hierro",
+                wrongAnswers: ["Flúor", "Fósforo", "Fermio"],
+                category: "ciencia",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Iron_electrolytic_and_1cm3_cube.jpg/800px-Iron_electrolytic_and_1cm3_cube.jpg"
+            }
+        ];
+
+        // Filtrar por categoría si se especifica
+        let filteredQuestions = sampleQuestions;
+        if (category && category !== "All") {
+            filteredQuestions = sampleQuestions.filter(q =>
+                q.category.toLowerCase() === category.toLowerCase()
+            );
+
+            // Si no hay suficientes preguntas de la categoría, añadir de otras categorías
+            if (filteredQuestions.length < count) {
+                const remaining = count - filteredQuestions.length;
+                const otherQuestions = sampleQuestions
+                    .filter(q => q.category.toLowerCase() !== category.toLowerCase())
+                    .slice(0, remaining);
+
+                filteredQuestions = [...filteredQuestions, ...otherQuestions];
+            }
+        }
+
+        // Limitar al número solicitado y mezclar
+        return this._shuffleArray(filteredQuestions).slice(0, count);
+    }
+
+    /**
+     * Mezcla un array (para mezclar preguntas)
+     * @private
+     * @param {Array} array - Array a mezclar
+     * @returns {Array} - Array mezclado
+     */
+    _shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
     }
 
     /**
@@ -226,13 +352,14 @@ class MultiplayerServer {
             const isHost = room.players.length === 0;
             if (isHost) {
                 room.hostId = socket.id;
+                player.isReady = true;
             }
 
             // Añadir jugador a la sala
             const playerData = {
                 id: socket.id,
                 username: username,
-                isReady: false,
+                isReady: player.isReady,
                 isHost: isHost,
                 joinedAt: new Date(),
             };

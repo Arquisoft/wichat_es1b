@@ -165,11 +165,129 @@ class MultiplayerService {
     }
 
     /**
+     * Solicita preguntas al servidor para una sala específica
+     * @param {string} roomId - ID de la sala
+     * @param {number} count - Número de preguntas a solicitar (opcional)
+     * @param {string} category - Categoría de preguntas (opcional)
+     * @returns {Promise} - Promesa que se resuelve con las preguntas recibidas
+     */
+    requestQuestions(roomId, count = 10, category = null) {
+        return new Promise((resolve, reject) => {
+            if (!this.socket || !this.socket.connected) {
+                return reject(new Error("No estás conectado al servidor"));
+            }
+
+            console.log(`Solicitando ${count} preguntas para sala ${roomId}${category ? ` de categoría ${category}` : ''}`);
+
+            // Timeout para la solicitud
+            const timeout = setTimeout(() => {
+                this.socket.off("questions");
+                reject(new Error("Tiempo de espera agotado al solicitar preguntas"));
+            }, 10000); // 10 segundos de timeout
+
+            // Configurar manejador para recibir las preguntas
+            this.socket.once("questions", (data) => {
+                clearTimeout(timeout);
+
+                // Convertir el formato de las preguntas recibidas al formato que espera el cliente
+                const formattedQuestions = this._formatQuestionsForClient(data);
+
+                console.log(`Recibidas ${formattedQuestions.length} preguntas`);
+                this._triggerEvent("onQuestionsReceived", { questions: formattedQuestions });
+
+                resolve(formattedQuestions);
+            });
+
+            // Enviar solicitud al servidor
+            this.socket.emit("getQuestions", {
+                roomId: roomId,
+                count: count,
+                category: category
+            });
+        });
+    }
+
+    /**
+     * Formatea las preguntas recibidas del servidor al formato que espera el cliente
+     * @private
+     * @param {Array|Object} data - Datos recibidos del servidor
+     * @returns {Array} - Preguntas formateadas
+     */
+    _formatQuestionsForClient(data) {
+        // Si es un array, procesamos cada elemento
+        if (Array.isArray(data)) {
+            return data.map(question => this._formatSingleQuestion(question));
+        }
+
+        // Si es una sola pregunta
+        return [this._formatSingleQuestion(data)];
+    }
+
+    /**
+     * Formatea una sola pregunta al formato que espera el cliente
+     * @private
+     * @param {Object} questionData - Datos de una pregunta
+     * @returns {Object} - Pregunta formateada
+     */
+    _formatSingleQuestion(questionData) {
+        // Conversión de formato del servidor al formato del cliente
+        return {
+            question: questionData.question,
+            correctAnswer: questionData.correctAnswer,
+            // Convertir el array de respuestas incorrectas a propiedades individuales
+            inc_answer_1: questionData.wrongAnswers && questionData.wrongAnswers[0] || "",
+            inc_answer_2: questionData.wrongAnswers && questionData.wrongAnswers[1] || "",
+            inc_answer_3: questionData.wrongAnswers && questionData.wrongAnswers[2] || "",
+            category: questionData.category || "general",
+            image: questionData.image || "",
+            // Crear el array de opciones mezcladas para el juego
+            questionObject: questionData.question || "",
+            questionImage: questionData.image || "",
+            answerOptions: this._shuffleAnswers([
+                questionData.correctAnswer,
+                ...(questionData.wrongAnswers || [])
+            ]),
+            __v: 0
+        };
+    }
+
+    /**
+     * Mezcla las opciones de respuesta
+     * @private
+     * @param {Array} answers - Array con la respuesta correcta y las incorrectas
+     * @returns {Array} - Array mezclado de respuestas
+     */
+    _shuffleAnswers(answers) {
+        // Filtrar respuestas vacías
+        const filteredAnswers = answers.filter(answer => answer && answer.trim() !== '');
+
+        // Mezclar las respuestas
+        for (let i = filteredAnswers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [filteredAnswers[i], filteredAnswers[j]] = [filteredAnswers[j], filteredAnswers[i]];
+        }
+
+        return filteredAnswers;
+    }
+
+    /**
      * Configura los eventos específicos del juego
      * @private
      */
     _setupGameEvents() {
         if (!this.socket) return
+
+        this.socket.on("questions", (data) => {
+            console.log("Preguntas recibidas:", data);
+            const formattedQuestions = this._formatQuestionsForClient(data);
+
+            // Almacenar las preguntas para uso posterior
+            this.gameQuestions = formattedQuestions;
+
+            this._triggerEvent("onQuestionsReceived", {
+                questions: formattedQuestions
+            });
+        });
 
         // Eventos específicos del juego
         this.socket.on("roomJoined", (data) => {
