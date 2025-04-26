@@ -45,6 +45,14 @@ const GameMultiplayer = () => {
     const [answeredQuestions, setAnsweredQuestions] = useState([])
     const [gameStartTime] = useState(Date.now())
 
+    // Add a ref to track the current score value
+    const currentScoreRef = useRef(0)
+
+    // Update the ref whenever score changes
+    useEffect(() => {
+        currentScoreRef.current = score
+    }, [score])
+
     // Temporizador
     const [timeLeft, setTimeLeft] = useState(60) // TEMPORIZADOR
     const timerRef = useRef(null)
@@ -79,14 +87,17 @@ const GameMultiplayer = () => {
         setSelectedAnswer(option)
         const isAnswerCorrect = option === currentQuestion.correctAnswer
 
+        // Calculate new score
+        const newScore = isAnswerCorrect ? score + 1 : score
+
         if (isAnswerCorrect) {
             setIsCorrect(true)
-            setScore(score + 1)
+            setScore(newScore)  // Update state with new score
         } else {
             setIsCorrect(false)
         }
 
-        // Guardar la pregunta respondida
+        // Store current question data
         setAnsweredQuestions(prev => [...prev, {
             question: currentQuestion.question,
             correctAnswer: currentQuestion.correctAnswer,
@@ -101,7 +112,8 @@ const GameMultiplayer = () => {
                 setSelectedAnswer(null)
                 setIsCorrect(null)
             } else {
-                handleEndGame()
+                // Pass the updated score explicitly
+                handleEndGame(newScore)
             }
         }, 1000)
     }
@@ -113,11 +125,12 @@ const GameMultiplayer = () => {
         setIsFinished(true)
         setTimeLeft(0)
 
-        // Enviar los resultados al servidor
-        if (multiplayerService && multiplayerService.socket && multiplayerService.socket.connected) {
-            multiplayerService.socket.emit("sendCorrect", score)
+        // Always use the ref value which is synchronized with the latest score
+        console.log("Sending score:", currentScoreRef.current)
 
-            // Escuchar confirmación del servidor
+        if (multiplayerService && multiplayerService.socket) {
+            multiplayerService.socket.emit("sendCorrect", currentScoreRef.current)
+
             multiplayerService.socket.once("resultsReceived", (response) => {
                 if (response.success) {
                     console.log("Resultados enviados correctamente al servidor")

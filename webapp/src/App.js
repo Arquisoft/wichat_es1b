@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import AddUser from "./components/register/AddUser"
 import Login from "./components/login/Login"

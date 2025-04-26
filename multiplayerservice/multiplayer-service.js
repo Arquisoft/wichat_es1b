@@ -217,15 +217,22 @@ class MultiplayerServer {
     /**
      * Maneja el envío de resultados al finalizar el juego
      * @param {Socket} socket - Socket del cliente
-     * @param {Object} data - Datos de los resultados
+     * @param score
      */
     handleSendCorrectQuestions(socket, score) {
         try {
-
             // Verificar si el jugador está en la sala
             const player = this.players.get(socket.id);
             if (!player) {
                 return socket.emit("error", {message: "No estás en esta sala"});
+            }
+
+            const roomId = player.roomId;
+
+            // Verificar si la sala existe
+            const room = this.rooms.get(roomId);
+            if (!room) {
+                return socket.emit("error", {message: "La sala no existe"});
             }
 
             console.log(`Recibidos resultados de (${socket.id})`);
@@ -278,9 +285,6 @@ class MultiplayerServer {
                         totalPlayers: room.players.length
                     }
                 });
-
-                // Opcional: guardar los resultados del juego en una base de datos
-                // this.saveGameResultsToDatabase(roomId, room);
             }
         } catch (error) {
             console.error("Error al procesar resultados:", error);
