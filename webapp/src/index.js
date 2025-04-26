@@ -6,6 +6,7 @@ import App from './App';
 import HomePage from './components/home/Home';
 import Game from './components/game/Game';
 import GameMultiplayer from "./components/game/multiplayer/GameMultiplayer";
+import MultiplayerResults from "./components/game/multiplayer/MultiplayerResults";
 import Profile from './components/profile/Profile';
 import reportWebVitals from './reportWebVitals';
 
@@ -18,7 +19,8 @@ root.render(
         <Route path="/home" element={<HomePage />}> </Route>
         <Route path="/game" element={<Game />}> </Route>
         <Route path="/profile" element={<Profile />}> </Route>
-          <Route path="/gameMultiplayer" element={<GameMultiplayer/>}> </Route>
+        <Route path="/gameMultiplayer" element={<GameMultiplayer/>}> </Route>
+        <Route path="/resultsMultiplayer" element={<MultiplayerResults />} />
       </Routes>
     </Router>
   </React.StrictMode>

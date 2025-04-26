@@ -8,6 +8,7 @@ const { Server } = require('socket.io');
 const axios = require('axios');
 const apiEndpoint = process.env.REACT_APP_API_ENDPOINT || "http://localhost:8000"
 
+
 class MultiplayerServer {
     constructor(port = 8085) {
         // Configuración del servidor
@@ -267,7 +268,22 @@ class MultiplayerServer {
 
             // Si todos los jugadores han terminado, notificar el final de la partida con los resultados
             if (allPlayersFinished) {
-                const finalScores = {};
+                const sorted = [...room.players].sort((a, b) => (b.score || 0) - (a.score || 0));
+                const winner = sorted[0]?.username || "";
+
+                // Prepare results array
+                const results = room.players.map(p => ({
+                    username: p.username,
+                    score: p.score || 0
+                }));
+
+                // Emit only winner and results
+                this.io.to(roomId).emit("allPlayersFinished", {
+                    winner,
+                    results
+                });
+
+                /*const finalScores = {};
                 room.players.forEach(p => {
                     finalScores[p.id] = p.score || 0;
                 });
@@ -284,7 +300,7 @@ class MultiplayerServer {
                         duration: new Date() - room.gameStartedAt,
                         totalPlayers: room.players.length
                     }
-                });
+                });*/
             }
         } catch (error) {
             console.error("Error al procesar resultados:", error);
