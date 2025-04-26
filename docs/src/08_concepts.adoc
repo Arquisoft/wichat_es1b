@@ -21,6 +21,3 @@ El proyecto sigue una arquitectura de microservicios, que es un patrón arquitec
 === _Libreria ChatBotify_
 Librería encargada de la gestión del chatbot, se encargará de la gestión de las peticiones del usuario y respuestas del chatbot.
 
-=== _Modelo de dominio_
-
-_Se desarrollara segun la aplicación avance_
