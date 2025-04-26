@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import { getPlayerLevel } from '../../utils';
+import MultiplayerService from "../game/multiplayer/Multiplayer"
 import { createContext, useContext, useEffect } from "react"
 import { useLocation } from "react-router-dom";
 import {
@@ -54,6 +55,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 import ExitToAppIcon from "@mui/icons-material/ExitToApp"
 import "./Home.css"
+import WaitingRoom from "../game/multiplayer/WaitingRoom"
 
 const ConfigContext = createContext()
 
@@ -66,16 +68,19 @@ const HomePage = () => {
   const username = localStorage.getItem("username")
   const theme = useTheme()
 
-  // Configuración de la partida
-  const [numQuestions, setNumQuestions] = useState(10)
-  const [timePerQuestion, setTimePerQuestion] = useState(30)
-  const [sessionData, setSessionData] = useState([])
-  const [userData, setUserData] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [selectedSession, setSelectedSession] = useState(null)
-  const [openDialog, setOpenDialog] = useState(false)
-  const [expandedQuestion, setExpandedQuestion] = useState(null)
-  const [leaderboardData, setLeaderboardData] = useState([])
+    const [navigatingToGame, setNavigatingToGame] = useState(false)
+
+
+    // Configuración de la partida
+    const [numQuestions, setNumQuestions] = useState(10)
+    const [timePerQuestion, setTimePerQuestion] = useState(30)
+    const [sessionData, setSessionData] = useState([])
+    const [userData, setUserData] = useState({})
+    const [loading, setLoading] = useState(true)
+    const [selectedSession, setSelectedSession] = useState(null)
+    const [openDialog, setOpenDialog] = useState(false)
+    const [expandedQuestion, setExpandedQuestion] = useState(null)
+    const [leaderboardData, setLeaderboardData] = useState([])
 
   // Estado para el menú desplegable
   const [anchorEl, setAnchorEl] = useState(null)
@@ -85,9 +90,13 @@ const HomePage = () => {
   const [anchorElDifficulty, setAnchorElDifficulty] = useState(null)
   const openDifficultyMenu = Boolean(anchorElDifficulty)
 
-  const handleOpenDifficultyMenu = (event) => {
-    setAnchorElDifficulty(event.currentTarget)
-  }
+    let [multiplayerService, setMultiplayerService] = useState(null)
+    const [roomInfo, setRoomInfo] = useState(null)
+    const [showWaitingRoom, setShowWaitingRoom] = useState(false)
+
+    const handleOpenDifficultyMenu = (event) => {
+        setAnchorElDifficulty(event.currentTarget)
+    }
 
   const handleCloseDifficultyMenu = () => {
     setAnchorElDifficulty(null)
@@ -102,9 +111,10 @@ const HomePage = () => {
   // Colors for the pie chart - más vibrantes y con mejor contraste
   const COLORS = ["#4CAF50", "#FF5252"]
 
-  // Gradientes para fondos
-  const primaryGradient = "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)"
-  const secondaryGradient = "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)"
+    // Gradientes para fondos
+    const primaryGradient = "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)"
+    const secondaryGradient = "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)"
+    const multiplayerGradient = "linear-gradient(135deg, #81c784 0%, #388e3c 100%)"
 
   // Fetch session data on component mount
   useEffect(() => {
@@ -275,11 +285,9 @@ const HomePage = () => {
     navigate("/")
   }
 
-
   const handleGoToProfile = () => {
       navigate("/Profile")
   }
-
 
   const [showMessage, setShowMessage] = useState("")
 
@@ -320,37 +328,229 @@ const HomePage = () => {
         }
     }, [location]);
 
-  return (
-    <ConfigContext.Provider value={configValue}>
-      <Box
-        sx={{
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
-          pt: 4,
-          pb: 10,
-        }}
-      >
-        <Container maxWidth="lg">
-          {/* Menú Superior */}
-          <AppBar
-            position="sticky"
-            sx={{
-              background: "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)",
-              marginBottom: "20px",
-              borderRadius: 4,
-              boxShadow: "none",
-            }}
-          >
-            <Toolbar
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
+    useEffect(() => {
+        // Create a singleton instance of MultiplayerService
+        const service = MultiplayerService.getInstance()
+
+        // Conectar el servicio si no está conectado
+        if (!service.socket || !service.socket.connected) {
+            service.connect()
+        }
+
+        // Configurar los eventos
+        service
+            .on("onConnect", () => {
+                console.log("Conectado al servidor ")
+            })
+            .on("onRoomJoined", (data) => {
+                setRoomInfo({
+                    roomId: data.roomId,
+                    roomName: data.roomName || `Sala ${data.roomId}`,
+                })
+                // Asegurarse de que la sala de espera se muestre
+                setShowWaitingRoom(true)
+            })
+            .on("onPlayerJoined", (data) => {
+                console.log(`Jugador unido: ${data.username}`)
+            })
+            .on("onPlayerReady", (data) => {
+                console.log(`Jugador listo: ${data.playerId}`)
+            })
+            .on("onGameStart", (data) => {
+                setShowWaitingRoom(false)
+                // Navegar a la pantalla de juego
+                navigate("/Game", {
+                    state: {
+                        gameConfig: {
+                            numQuestions: numQuestions,
+                            timePerQuestion: timePerQuestion,
+                            difficulty: difficulty,
+                            category: "All",
+                            multiplayer: true,
+                            roomId: data.roomId,
+                            players: data.players,
+                        },
+                    },
+                })
+            })
+            .on("onError", (data) => {
+                console.error("Error:", data.message)
+                alert(`Error: ${data.message}`)
+            })
+
+        // Save instance to state
+        setMultiplayerService(service)
+
+        // Cleanup on unmount
+        /*
+        return () => {
+            if (service) {
+                service.disconnect()
+            }
+        }*/
+    }, [])
+
+    // Implementar los métodos que necesita el componente WaitingRoom
+    if (multiplayerService) {
+        // Añadir métodos si no existen
+        if (!multiplayerService.sendReady) {
+            multiplayerService.sendReady = function (roomId) {
+                console.log(`Enviando ready para sala ${roomId}`)
+                // Implementar según tu API
+                return this.socket.emit("player_ready", { roomId, userId: this.userId })
+            }
+        }
+
+        if (!multiplayerService.startGame) {
+            multiplayerService.startGame = function (roomId) {
+                // Implementar según tu API
+                return this.socket.emit("start_game", { roomId })
+            }
+        }
+
+        if (!multiplayerService.leaveRoom) {
+            multiplayerService.leaveRoom = function (roomId) {
+                console.log(`Abandonando sala ${roomId}`)
+                // Implementar según tu API
+                return this.socket.emit("leave_room", { roomId, userId: this.userId })
+            }
+        }
+    }
+
+    // Modificar la función crearSala para asegurar que se pasa correctamente el nombre de usuario
+    function crearSala() {
+        if (!multiplayerService) {
+            multiplayerService = MultiplayerService.getInstance()
+            setMultiplayerService(multiplayerService)
+        }
+
+        // Connect if not already connected
+        if (!multiplayerService.socket || !multiplayerService.socket.connected) {
+            multiplayerService.connect()
+        }
+
+        // Generate a unique room ID
+        const roomId = `room-${Date.now()}`
+        const roomName = `Sala de ${username || "Anónimo"}`
+        const currentUsername = username || "Anónimo"
+
+        // Mostrar la sala de espera inmediatamente con un mensaje de "Creando sala..."
+        setRoomInfo({
+            roomId,
+            roomName: "Creando sala...",
+        })
+        setShowWaitingRoom(true)
+
+        // Usar el méthodo createRoom del servicio
+        multiplayerService
+            .createRoom(roomId, roomName)
+            .then((data) => {
+                if (data.success) {
+                    return multiplayerService.joinRoom(roomId, currentUsername)
+                }
+                // Si hay un error, ocultar la sala de espera y mostrar un mensaje
+                setShowWaitingRoom(false)
+                throw new Error(data.message || "Error al crear sala")
+            })
+            .then((response) => {
+                if (response && response.success) {
+                    console.log(`Sala creada y unido: ${roomId}`, response)
+                    // Actualizar la información de la sala
+                    setRoomInfo({
+                        roomId,
+                        roomName,
+                    })
+                } else {
+                    // Si hay un error, ocultar la sala de espera y mostrar un mensaje
+                    setShowWaitingRoom(false)
+                    alert(`Error al unirse: ${response?.message || "Error desconocido"}`)
+                }
+            })
+            .catch((err) => {
+                console.error("Error al crear sala:", err)
+                setShowWaitingRoom(false)
+                alert(`Error: ${err.message || "No se pudo crear la sala"}`)
+            })
+    }
+
+    // Modificar la función unirSala para asegurar que se pasa correctamente el nombre de usuario
+    function unirSala() {
+        const roomId = prompt("Introduce el ID de la sala:")
+        if (!roomId) return
+
+        if (!multiplayerService) {
+            multiplayerService = MultiplayerService.getInstance()
+            setMultiplayerService(multiplayerService)
+        }
+
+        // Connect if not already connected
+        if (!multiplayerService.socket || !multiplayerService.socket.connected) {
+            multiplayerService.connect()
+        }
+
+        const currentUsername = username || "Anónimo"
+
+        // Mostrar la sala de espera inmediatamente con un mensaje de "Conectando..."
+        setRoomInfo({
+            roomId,
+            roomName: "Conectando...",
+        })
+        setShowWaitingRoom(true)
+
+        // Usar el méthodo joinRoom del servicio
+        multiplayerService
+            .joinRoom(roomId, currentUsername)
+            .then((response) => {
+                if (response.success) {
+                    // Actualizar la información de la sala
+                    setRoomInfo({
+                        roomId,
+                        roomName: response.roomName || `Sala ${roomId}`,
+                    })
+                } else {
+                    // Si hay un error, ocultar la sala de espera y mostrar un mensaje
+                    setShowWaitingRoom(false)
+                    alert(`Error al unirse: ${response.message || "Sala no encontrada"}`)
+                }
+            })
+            .catch((err) => {
+                console.error("Error al unirse a sala:", err)
+                setShowWaitingRoom(false)
+                alert(`Error al unirse: ${err.message || "No se pudo conectar al servidor"}`)
+            })
+    }
+
+    return (
+        <ConfigContext.Provider value={configValue}>
+            <Box
+                sx={{
+                    minHeight: "100vh",
+                    background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)",
+                    pt: 4,
+                    pb: 16, // Aumentar padding inferior
+                }}
             >
-              <Typography variant="h6" sx={{ color: "white", fontWeight: "bold" }}>
-                WiChat - Home
-              </Typography>
+                <Container maxWidth="lg">
+                    {/* Menú Superior */}
+                    <AppBar
+                        position="sticky"
+                        sx={{
+                            background: "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)",
+                            marginBottom: "20px",
+                            borderRadius: 4,
+                            boxShadow: "none",
+                        }}
+                    >
+                        <Toolbar
+                            sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Typography variant="h6" sx={{ color: "white", fontWeight: "bold" }}>
+                                WiChat - Home
+                            </Typography>
 
               <Box sx={{ display: "flex", alignItems: "center", position: "relative" }}>
                 <MenuItem
@@ -398,30 +598,30 @@ const HomePage = () => {
                   <ExitToAppIcon sx={{ mr: 1 }} />
                 </MenuItem>
 
-                {showMessage && (
-                  <Box
-                      sx={{
-                          position: "absolute",
-                          top: "100%",
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                          bgcolor: "rgba(25,118,210,0.7)",
-                          color: "white",
-                          padding: "5px 10px",
-                          borderRadius: "5px",
-                          fontSize: "0.9rem",
-                          whiteSpace: "nowrap",
-                          opacity: 1,
-                          pointerEvents: "none",
-                          zIndex: 10,
-                      }}
-                  >
-                      {showMessage}
-                  </Box>
-                )}
-              </Box>
-            </Toolbar>
-          </AppBar>
+                                {showMessage && (
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            top: "90%",
+                                            left: "0%",
+                                            transform: "translateX(10px)",
+                                            bgcolor: "rgba(25,118,210,0.7)",
+                                            color: "white",
+                                            padding: "5px 10px",
+                                            borderRadius: "5px",
+                                            fontSize: "0.9rem",
+                                            whiteSpace: "nowrap",
+                                            opacity: 1,
+                                            pointerEvents: "none",
+                                            zIndex: 10,
+                                        }}
+                                    >
+                                        {showMessage}
+                                    </Box>
+                                )}
+                            </Box>
+                        </Toolbar>
+                    </AppBar>
 
           {/* Welcome Message - con diseño mejorado */}
           <Fade in={true} timeout={800}>
@@ -541,476 +741,560 @@ const HomePage = () => {
                 </Typography>
               </Box>
 
-              <Box sx={{ p: 4 }}>
-                <Grid container spacing={4}>
-                  {/* Leaderboard - replacing chart */}
-                  <Grid item xs={12} md={8}>
-                    {loading ? (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 3,
-                          height: 300,
-                          p: 3,
-                        }}
-                      >
-                        <Box sx={{ display: "flex", justifyContent: "center", gap: 3 }}>
-                          <Skeleton variant="rounded" width={120} height={80} />
-                          <Skeleton variant="rounded" width={120} height={80} />
-                        </Box>
-                        <Skeleton variant="rounded" width="100%" height={300} />
-                      </Box>
-                    ) : (
-                      <Box>
-                        <Typography
-                          variant="h5"
-                          fontWeight="bold"
-                          color="primary"
-                          sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <EmojiEventsIcon /> Top 3 Jugadores
-                        </Typography>
-                        <Paper
-                          elevation={0}
-                          sx={{
-                            p: 3,
-                            borderRadius: 3,
-                            bgcolor: "white",
-                            border: "1px solid rgba(0, 0, 0, 0.05)",
-                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
-                          }}
-                        >
-                          {leaderboardData.length > 0 ? (
-                            <Box>
-                              {leaderboardData.map((user, index) => (
-                                <Box
-                                  key={index}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    p: 2,
-                                    mb: 2,
-                                    borderRadius: 3,
-                                    bgcolor:
-                                      index === 0
-                                        ? alpha("#FFD700", 0.1)
-                                        : index === 1
-                                          ? alpha("#C0C0C0", 0.1)
-                                          : alpha("#CD7F32", 0.1),
-                                    border: `1px solid ${
-                                      index === 0
-                                        ? alpha("#FFD700", 0.3)
-                                        : index === 1
-                                          ? alpha("#C0C0C0", 0.3)
-                                          : alpha("#CD7F32", 0.3)
-                                    }`,
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      width: 40,
-                                      height: 40,
-                                      borderRadius: "50%",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      fontWeight: "bold",
-                                      fontSize: "1.2rem",
-                                      mr: 2,
-                                      bgcolor: index === 0 ? "#FFD700" : index === 1 ? "#C0C0C0" : "#CD7F32",
-                                      color: index === 0 ? "#000" : "#fff",
-                                    }}
-                                  >
-                                    {index + 1}
-                                  </Box>
-                                  <Box sx={{ flexGrow: 1 }}>
-                                    <Typography variant="h6" fontWeight="bold">
-                                      {user.username}
-                                    </Typography>
-                                    <Box sx={{ display: "flex", gap: 2 }}>
-                                      <Typography variant="body2" color="text.secondary">
-                                          <strong>Precisión:</strong> {Math.round(user.AccuracyRate)}%
-                                      </Typography>
-                                      <Typography variant="body2" color="text.secondary">
-                                        <strong>Correctas:</strong> {user.TotalWellAnswers}
-                                      </Typography>
-                                      <Typography variant="body2" color="text.secondary">
-                                        <strong>Incorrectas:</strong> {user.TotalWrongAnswers}
-                                      </Typography>
-                                    </Box>
-                                  </Box>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      width: 60,
-                                      height: 60,
-                                      borderRadius: "50%",
-                                      bgcolor: "white",
-                                      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-                                    }}
-                                  >
-                                    <Typography
-                                      variant="h5"
-                                      fontWeight="bold"
-                                      sx={{
-                                        color:
-                                          user.AccuracyRate >= 70
-                                            ? "success.main"
-                                            : user.AccuracyRate >= 40
-                                              ? "warning.main"
-                                              : "error.main",
-                                      }}
-                                    >
-                                      {Math.round(user.AccuracyRate)}%
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              ))}
+                            <Box sx={{ p: 4 }}>
+                                <Grid container spacing={4}>
+                                    {/* Leaderboard - replacing chart */}
+                                    <Grid item xs={12}>
+                                        {loading ? (
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    gap: 3,
+                                                    height: 300,
+                                                    p: 3,
+                                                }}
+                                            >
+                                                <Box sx={{ display: "flex", justifyContent: "center", gap: 3 }}>
+                                                    <Skeleton variant="rounded" width={120} height={80} />
+                                                    <Skeleton variant="rounded" width={120} height={80} />
+                                                </Box>
+                                                <Skeleton variant="rounded" width="100%" height={300} />
+                                            </Box>
+                                        ) : (
+                                            <Box>
+                                                <Typography
+                                                    variant="h5"
+                                                    fontWeight="bold"
+                                                    color="primary"
+                                                    sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}
+                                                >
+                                                    <EmojiEventsIcon /> Top 3 Jugadores
+                                                </Typography>
+                                                <Paper
+                                                    elevation={0}
+                                                    sx={{
+                                                        p: 3,
+                                                        borderRadius: 3,
+                                                        bgcolor: "white",
+                                                        border: "1px solid rgba(0, 0, 0, 0.05)",
+                                                        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+                                                    }}
+                                                >
+                                                    {leaderboardData.length > 0 ? (
+                                                        <Box>
+                                                            {leaderboardData.map((user, index) => (
+                                                                <Box
+                                                                    key={index}
+                                                                    sx={{
+                                                                        display: "flex",
+                                                                        alignItems: "center",
+                                                                        justifyContent: "space-between", // Alinear elementos a los extremos
+                                                                        p: 3,
+                                                                        mb: 2,
+                                                                        borderRadius: 3,
+                                                                        bgcolor:
+                                                                            index === 0
+                                                                                ? alpha("#FFD700", 0.1)
+                                                                                : index === 1
+                                                                                    ? alpha("#C0C0C0", 0.1)
+                                                                                    : alpha("#CD7F32", 0.1),
+                                                                        border: `1px solid ${
+                                                                            index === 0
+                                                                                ? alpha("#FFD700", 0.3)
+                                                                                : index === 1
+                                                                                    ? alpha("#C0C0C0", 0.3)
+                                                                                    : alpha("#CD7F32", 0.3)
+                                                                        }`,
+                                                                    }}
+                                                                >
+                                                                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                                        {/* Círculo con posición */}
+                                                                        <Box
+                                                                            sx={{
+                                                                                width: 40,
+                                                                                height: 40,
+                                                                                borderRadius: "50%",
+                                                                                display: "flex",
+                                                                                alignItems: "center",
+                                                                                justifyContent: "center",
+                                                                                fontWeight: "bold",
+                                                                                fontSize: "1.2rem",
+                                                                                mr: 2,
+                                                                                bgcolor: index === 0 ? "#FFD700" : index === 1 ? "#C0C0C0" : "#CD7F32",
+                                                                                color: index === 0 ? "#000" : "#fff",
+                                                                            }}
+                                                                        >
+                                                                            {index + 1}
+                                                                        </Box>
+
+                                                                        {/* Nombre del jugador */}
+                                                                        <Box sx={{ flexGrow: 1 }}>
+                                                                            <Typography variant="h6" fontWeight="bold">
+                                                                                {user.username}
+                                                                            </Typography>
+                                                                            <Typography variant="body2" color="text.secondary">
+                                                                                 <strong>Precisión:</strong> {Math.round(user.AccuracyRate)}%
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    </Box>
+
+                                                                    {/* Círculo con porcentaje de precisión */}
+                                                                    <Box
+                                                                        sx={{
+                                                                            display: "flex",
+                                                                            alignItems: "center",
+                                                                            justifyContent: "center",
+                                                                            width: 60,
+                                                                            height: 60,
+                                                                            borderRadius: "50%",
+                                                                            bgcolor: "white",
+                                                                            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                                                                        }}
+                                                                    >
+                                                                        <Typography
+                                                                            variant="h5"
+                                                                            fontWeight="bold"
+                                                                            sx={{
+                                                                                color:
+                                                                                    user.AccuracyRate >= 70
+                                                                                        ? "success.main"
+                                                                                        : user.AccuracyRate >= 40
+                                                                                            ? "warning.main"
+                                                                                            : "error.main",
+                                                                            }}
+                                                                        >
+                                                                            {Math.round(user.AccuracyRate)}%
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                            ))}
+                                                        </Box>
+                                                    ) : (
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                flexDirection: "column",
+                                                                justifyContent: "center",
+                                                                alignItems: "center",
+                                                                height: 300,
+                                                                p: 4,
+                                                                borderRadius: 3,
+                                                                bgcolor: alpha(theme.palette.info.main, 0.05),
+                                                                border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                                                            }}
+                                                        >
+                                                            <EmojiEventsIcon
+                                                                sx={{
+                                                                    fontSize: 60,
+                                                                    color: alpha(theme.palette.info.main, 0.3),
+                                                                    mb: 2,
+                                                                }}
+                                                            />
+                                                            <Typography>No hay datos de usuarios disponibles</Typography>
+                                                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                                                Comienza a jugar para aparecer en el ranking
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+                                                </Paper>
+                                            </Box>
+                                        )}
+                                    </Grid>
+
+                                    {/* Contenedor para los modos de juego (un jugador y multijugador) */}
+                                    <Grid item xs={12} sx={{ mt: 2 }}>
+                                        <Grid container spacing={4}>
+                                            {/* Un jugador */}
+                                            <Grid item xs={12} md={6}>
+                                                {/* NUEVA IMPLEMENTACIÓN DEL BLOQUE UN JUGADOR */}
+                                                <Box
+                                                    sx={{
+                                                        height: "auto",
+                                                        minHeight: 490,
+                                                        bgcolor: "#ff9800",
+                                                        color: "white",
+                                                        borderRadius: 4,
+                                                        position: "relative",
+                                                        boxShadow: "0 10px 30px rgba(255, 152, 0, 0.3)",
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        py: 6,
+                                                        px: 4,
+                                                    }}
+                                                >
+                                                    {/* Círculos decorativos */}
+                                                    <Box
+                                                        sx={{
+                                                            position: "absolute",
+                                                            top: -25,
+                                                            left: -25,
+                                                            width: 100,
+                                                            height: 100,
+                                                            borderRadius: "50%",
+                                                            background: "rgba(255,255,255,0.1)",
+                                                        }}
+                                                    />
+                                                    <Box
+                                                        sx={{
+                                                            position: "absolute",
+                                                            bottom: -20,
+                                                            right: -20,
+                                                            width: 120,
+                                                            height: 120,
+                                                            borderRadius: "50%",
+                                                            background: "rgba(255,255,255,0.1)",
+                                                        }}
+                                                    />
+
+                                                    {/* Título */}
+                                                    <Typography
+                                                        variant="h4"
+                                                        fontWeight="bold"
+                                                        sx={{
+                                                            mb: 5,
+                                                            textAlign: "center",
+                                                            position: "relative",
+                                                            zIndex: 2,
+                                                        }}
+                                                    >
+                                                        Un jugador
+                                                    </Typography>
+
+                                                    {/* Selección dificultad */}
+                                                    <Typography
+                                                        variant="h6"
+                                                        sx={{
+                                                            mb: 1,
+                                                            textAlign: "center",
+                                                            position: "relative",
+                                                            zIndex: 2,
+                                                        }}
+                                                    >
+                                                        Seleccionar dificultad
+                                                    </Typography>
+
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={handleOpenDifficultyMenu}
+                                                        endIcon={<KeyboardArrowDownIcon />}
+                                                        sx={{
+                                                            bgcolor: "white",
+                                                            color: "#e65100",
+                                                            fontWeight: "bold",
+                                                            fontSize: "1rem",
+                                                            py: 1.5,
+                                                            px: 4,
+                                                            borderRadius: 50,
+                                                            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                                                            "&:hover": {
+                                                                bgcolor: "white",
+                                                                transform: "translateY(-2px)",
+                                                                boxShadow: "0 6px 15px rgba(0,0,0,0.2)",
+                                                            },
+                                                            zIndex: 2,
+                                                            mb: 3,
+                                                        }}
+                                                    >
+                                                        {difficulty}
+                                                    </Button>
+
+                                                    {/* Menú de dificultad */}
+                                                    <Menu
+                                                        id="difficulty-menu"
+                                                        anchorEl={anchorElDifficulty}
+                                                        open={openDifficultyMenu}
+                                                        onClose={handleCloseDifficultyMenu}
+                                                        PaperProps={{
+                                                            elevation: 3,
+                                                            sx: {
+                                                                borderRadius: 2,
+                                                                minWidth: 180,
+                                                            },
+                                                        }}
+                                                    >
+                                                        <MenuItem onClick={() => handleSelectDifficulty("Principiante")}>
+                                                            <ListItemIcon>
+                                                                <SportsEsportsIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Principiante</ListItemText>
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleSelectDifficulty("Normal")}>
+                                                            <ListItemIcon>
+                                                                <SportsEsportsIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Normal</ListItemText>
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleSelectDifficulty("Difícil")}>
+                                                            <ListItemIcon>
+                                                                <SportsEsportsIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Difícil</ListItemText>
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleSelectDifficulty("Experto")}>
+                                                            <ListItemIcon>
+                                                                <SportsEsportsIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Experto</ListItemText>
+                                                        </MenuItem>
+                                                    </Menu>
+
+                                                    {/* Botón Comenzar partida */}
+                                                    <Button
+                                                        variant="contained"
+                                                        startIcon={<PlayArrowIcon />}
+                                                        endIcon={<KeyboardArrowDownIcon />}
+                                                        onClick={handleOpenMenu}
+                                                        sx={{
+                                                            bgcolor: "white",
+                                                            color: "#e65100",
+                                                            fontWeight: "bold",
+                                                            fontSize: "1rem",
+                                                            py: 1.5,
+                                                            px: 4,
+                                                            borderRadius: 50,
+                                                            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                                                            "&:hover": {
+                                                                bgcolor: "white",
+                                                                transform: "translateY(-2px)",
+                                                                boxShadow: "0 6px 15px rgba(0,0,0,0.2)",
+                                                            },
+                                                            zIndex: 2,
+                                                            mb: 4,
+                                                        }}
+                                                    >
+                                                        Comenzar partida
+                                                    </Button>
+
+                                                    {/* Menú de categorías de juego */}
+                                                    <Menu
+                                                        id="game-menu"
+                                                        anchorEl={anchorEl}
+                                                        open={openMenu}
+                                                        onClose={handleCloseMenu}
+                                                        PaperProps={{
+                                                            elevation: 3,
+                                                            sx: {
+                                                                borderRadius: 2,
+                                                                minWidth: 180,
+                                                            },
+                                                        }}
+                                                    >
+                                                        <MenuItem onClick={() => handleShowGame("Geografia", difficulty)}>
+                                                            <ListItemIcon>
+                                                                <PublicIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Geografía</ListItemText>
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleShowGame("Cultura", difficulty)}>
+                                                            <ListItemIcon>
+                                                                <TheaterComedyIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Cultura</ListItemText>
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleShowGame("Personajes", difficulty)}>
+                                                            <ListItemIcon>
+                                                                <PersonIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Personajes</ListItemText>
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleShowGame("Videojuegos", difficulty)}>
+                                                            <ListItemIcon>
+                                                                <SportsEsportsIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Videojuegos</ListItemText>
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => handleShowGame("Aviones", difficulty)}>
+                                                            <ListItemIcon>
+                                                                <FlightIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Aviones</ListItemText>
+                                                        </MenuItem>
+                                                        <Divider />
+                                                        <MenuItem onClick={() => handleShowGame("All", difficulty)}>
+                                                            <ListItemIcon>
+                                                                <ShuffleIcon fontSize="small" color="primary" />
+                                                            </ListItemIcon>
+                                                            <ListItemText>Aleatorio</ListItemText>
+                                                        </MenuItem>
+                                                    </Menu>
+
+                                                    {/* Información de configuración */}
+                                                    <Box sx={{ mt: 1, width: "100%", maxWidth: 280, zIndex: 2 }}>
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                p: 1.5,
+                                                                bgcolor: "rgba(255,255,255,0.2)",
+                                                                borderRadius: 2,
+                                                                mb: 2,
+                                                            }}
+                                                        >
+                                                            <AccessTimeIcon fontSize="small" sx={{ mr: 1 }} />
+                                                            <Typography variant="body2">
+                                                                <strong>{timePerQuestion}</strong> segundos por pregunta
+                                                            </Typography>
+                                                        </Box>
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                p: 1.5,
+                                                                bgcolor: "rgba(255,255,255,0.2)",
+                                                                borderRadius: 2,
+                                                            }}
+                                                        >
+                                                            <QuizIcon fontSize="small" sx={{ mr: 1 }} />
+                                                            <Typography variant="body2">
+                                                                <strong>{numQuestions}</strong> preguntas por partida
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </Box>
+                                            </Grid>
+
+                                            {/* Multijugador */}
+                                            <Grid item xs={12} md={6}>
+                                                {/* NUEVA IMPLEMENTACIÓN DEL BLOQUE MULTIJUGADOR */}
+                                                <Box
+                                                    sx={{
+                                                        height: "auto",
+                                                        minHeight: 490,
+                                                        bgcolor: "#4caf50",
+                                                        color: "white",
+                                                        borderRadius: 4,
+                                                        position: "relative",
+                                                        boxShadow: "0 10px 30px rgba(76, 175, 80, 0.3)",
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        py: 6,
+                                                        px: 4,
+                                                    }}
+                                                >
+                                                    {/* Círculos decorativos */}
+                                                    <Box
+                                                        sx={{
+                                                            position: "absolute",
+                                                            top: -25,
+                                                            left: -25,
+                                                            width: 100,
+                                                            height: 100,
+                                                            borderRadius: "50%",
+                                                            background: "rgba(255,255,255,0.1)",
+                                                        }}
+                                                    />
+                                                    <Box
+                                                        sx={{
+                                                            position: "absolute",
+                                                            bottom: -20,
+                                                            right: -20,
+                                                            width: 120,
+                                                            height: 120,
+                                                            borderRadius: "50%",
+                                                            background: "rgba(255,255,255,0.1)",
+                                                        }}
+                                                    />
+
+                                                    {/* Título */}
+                                                    <Typography
+                                                        variant="h4"
+                                                        fontWeight="bold"
+                                                        sx={{
+                                                            mb: 6,
+                                                            textAlign: "center",
+                                                            position: "relative",
+                                                            zIndex: 2,
+                                                        }}
+                                                    >
+                                                        Multijugador
+                                                    </Typography>
+
+                                                    {/* Botones */}
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            gap: 3,
+                                                            width: "100%",
+                                                            maxWidth: 280,
+                                                            zIndex: 2,
+                                                            mb: 5,
+                                                        }}
+                                                    >
+                                                        <Button
+                                                            variant="contained"
+                                                            onClick={crearSala}
+                                                            sx={{
+                                                                bgcolor: "white",
+                                                                color: "#2e7d32",
+                                                                fontWeight: "bold",
+                                                                fontSize: "1rem",
+                                                                py: 2,
+                                                                borderRadius: 50,
+                                                                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                                                                "&:hover": {
+                                                                    bgcolor: "white",
+                                                                    transform: "translateY(-2px)",
+                                                                    boxShadow: "0 6px 15px rgba(0,0,0,0.2)",
+                                                                },
+                                                            }}
+                                                        >
+                                                            Crear sala
+                                                        </Button>
+
+                                                        <Button
+                                                            variant="contained"
+                                                            onClick={unirSala}
+                                                            sx={{
+                                                                bgcolor: "white",
+                                                                color: "#2e7d32",
+                                                                fontWeight: "bold",
+                                                                fontSize: "1rem",
+                                                                py: 2,
+                                                                borderRadius: 50,
+                                                                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                                                                "&:hover": {
+                                                                    bgcolor: "white",
+                                                                    transform: "translateY(-2px)",
+                                                                    boxShadow: "0 6px 15px rgba(0,0,0,0.2)",
+                                                                },
+                                                            }}
+                                                        >
+                                                            Unirse a sala
+                                                        </Button>
+                                                    </Box>
+
+                                                    {/* Texto informativo */}
+                                                    <Box
+                                                        sx={{
+                                                            p: 2,
+                                                            bgcolor: "rgba(255,255,255,0.2)",
+                                                            borderRadius: 2,
+                                                            width: "100%",
+                                                            maxWidth: 280,
+                                                            textAlign: "center",
+                                                            zIndex: 2,
+                                                        }}
+                                                    >
+                                                        <Typography variant="body2">
+                                                            Juega con amigos en tiempo real y compite por el mejor puntaje
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
                             </Box>
-                          ) : (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                height: 300,
-                                p: 4,
-                                borderRadius: 3,
-                                bgcolor: alpha(theme.palette.info.main, 0.05),
-                                border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
-                              }}
-                            >
-                              <EmojiEventsIcon
-                                sx={{ fontSize: 60, color: alpha(theme.palette.info.main, 0.3), mb: 2 }}
-                              />
-                              <Typography>No hay datos de usuarios disponibles</Typography>
-                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                                Comienza a jugar para aparecer en el ranking
-                              </Typography>
-                            </Box>
-                          )}
                         </Paper>
-                      </Box>
-                    )}
-                  </Grid>
+                    </Fade>
 
-                  {/* Keep the New Game Button section unchanged */}
-                  <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center" }}>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        width: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        p: 4,
-                        borderRadius: 3,
-                        background: secondaryGradient,
-                        color: "white",
-                        boxShadow: "0 10px 30px rgba(245, 124, 0, 0.2)",
-                        position: "relative",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {/* Elementos decorativos */}
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: -15,
-                          right: -15,
-                          width: 80,
-                          height: 80,
-                          borderRadius: "50%",
-                          background: "rgba(255,255,255,0.1)",
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          bottom: -20,
-                          left: -20,
-                          width: 100,
-                          height: 100,
-                          borderRadius: "50%",
-                          background: "rgba(255,255,255,0.1)",
-                        }}
-                      />
-
-                      <Typography
-                        variant="h5"
-                        gutterBottom
-                        align="center"
-                        fontWeight="bold"
-                        sx={{
-                          mb: 3,
-                          position: "relative",
-                          zIndex: 1,
-                        }}
-                      >
-                        Jugar ahora
-                      </Typography>
-
-                      <Box sx={{ mt: 0.5 }}></Box>
-
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        align="center"
-                        sx={{
-                          mb: 1,
-                          position: "relative",
-                          zIndex: 1,
-                        }}
-                      >
-                        Seleccionar dificultad
-                      </Typography>
-
-                      <Button
-                        variant="contained"
-                        size="large"
-                        onClick={handleOpenDifficultyMenu}
-                        endIcon={<KeyboardArrowDownIcon />}
-                        sx={{
-                          py: 1.5,
-                          px: 4,
-                          borderRadius: 8,
-                          fontWeight: "bold",
-                          textTransform: "none",
-                          fontSize: "1.1rem",
-                          bgcolor: "white",
-                          color: theme.palette.warning.dark,
-                          boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-                          position: "relative",
-                          zIndex: 1,
-                          "&:hover": {
-                            bgcolor: "white",
-                            boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
-                            transform: "translateY(-3px)",
-                            transition: "all 0.3s",
-                          },
-                        }}
-                      >
-                        {difficulty}
-                      </Button>
-
-                      <Menu
-                        id="difficulty-menu"
-                        anchorEl={anchorElDifficulty}
-                        open={openDifficultyMenu}
-                        onClose={handleCloseDifficultyMenu}
-                        MenuListProps={{
-                          "aria-labelledby": "difficulty-button",
-                        }}
-                        PaperProps={{
-                          elevation: 3,
-                          sx: {
-                            mt: 1,
-                            borderRadius: 2,
-                            minWidth: 200,
-                            overflow: "visible",
-                            "&:before": {
-                              content: '""',
-                              display: "block",
-                              position: "absolute",
-                              top: 0,
-                              right: 14,
-                              width: 10,
-                              height: 10,
-                              bgcolor: "background.paper",
-                              transform: "translateY(-50%) rotate(45deg)",
-                              zIndex: 0,
-                            },
-                          },
-                        }}
-                        transformOrigin={{ horizontal: "right", vertical: "top" }}
-                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                      >
-                        <MenuItem onClick={() => handleSelectDifficulty("Principiante")}>
-                          <ListItemIcon>
-                            <SportsEsportsIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Principiante</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleSelectDifficulty("Normal")}>
-                          <ListItemIcon>
-                            <SportsEsportsIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Normal</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleSelectDifficulty("Difícil")}>
-                          <ListItemIcon>
-                            <SportsEsportsIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Difícil</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleSelectDifficulty("Experto")}>
-                          <ListItemIcon>
-                            <SportsEsportsIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Experto</ListItemText>
-                        </MenuItem>
-                      </Menu>
-
-                      <Box sx={{ mt: 2.5 }}></Box>
-
-                      <Button
-                        variant="contained"
-                        size="large"
-                        onClick={handleOpenMenu}
-                        endIcon={<KeyboardArrowDownIcon />}
-                        startIcon={<PlayArrowIcon />}
-                        className="pulse-button"
-                        aria-controls={openMenu ? "game-menu" : undefined}
-                        aria-haspopup="true"
-                        aria-expanded={openMenu ? "true" : undefined}
-                        sx={{
-                          py: 1.5,
-                          px: 4,
-                          borderRadius: 8,
-                          fontWeight: "bold",
-                          textTransform: "none",
-                          fontSize: "1.1rem",
-                          bgcolor: "white",
-                          color: theme.palette.warning.dark,
-                          boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-                          position: "relative",
-                          zIndex: 1,
-                          "&:hover": {
-                            bgcolor: "white",
-                            boxShadow: "0 15px 25px rgba(0, 0, 0, 0.15)",
-                            transform: "translateY(-3px)",
-                            transition: "all 0.3s",
-                          },
-                        }}
-                      >
-                        Comenzar partida
-                      </Button>
-
-                      {/* Menú desplegable con opciones de juego */}
-                      <Menu
-                        sx={{ mt: 2 }}
-                        id="game-menu"
-                        anchorEl={anchorEl}
-                        open={openMenu}
-                        onClose={handleCloseMenu}
-                        MenuListProps={{
-                          "aria-labelledby": "game-button",
-                        }}
-                        PaperProps={{
-                          elevation: 3,
-                          sx: {
-                            mt: 1,
-                            borderRadius: 2,
-                            minWidth: 200,
-                            overflow: "visible",
-                            "&:before": {
-                              content: '""',
-                              display: "block",
-                              position: "absolute",
-                              top: 0,
-                              right: 14,
-                              width: 10,
-                              height: 10,
-                              bgcolor: "background.paper",
-                              transform: "translateY(-50%) rotate(45deg)",
-                              zIndex: 0,
-                            },
-                          },
-                        }}
-                        transformOrigin={{ horizontal: "right", vertical: "top" }}
-                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                      >
-                        <MenuItem onClick={() => handleShowGame("Geografia", difficulty)} sx={{ py: 1.5 }}>
-                          <ListItemIcon>
-                            <PublicIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Geografía</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleShowGame("Cultura", difficulty)} sx={{ py: 1.5 }}>
-                          <ListItemIcon>
-                            <TheaterComedyIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Cultura</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleShowGame("Personajes", difficulty)} sx={{ py: 1.5 }}>
-                          <ListItemIcon>
-                            <PersonIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Personajes</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleShowGame("Videojuegos", difficulty)} sx={{ py: 1.5 }}>
-                          <ListItemIcon>
-                            <SportsEsportsIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Videojuegos</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleShowGame("Aviones", difficulty)} sx={{ py: 1.5 }}>
-                          <ListItemIcon>
-                            <FlightIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Aviones</ListItemText>
-                        </MenuItem>
-                        <Divider />
-                        <MenuItem onClick={() => handleShowGame("All", difficulty)} sx={{ py: 1.5 }}>
-                          <ListItemIcon>
-                            <ShuffleIcon fontSize="small" color="primary" />
-                          </ListItemIcon>
-                          <ListItemText>Aleatorio</ListItemText>
-                        </MenuItem>
-                      </Menu>
-
-                      <Box
-                        sx={{
-                          mt: 4,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 1.5,
-                          position: "relative",
-                          zIndex: 1,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: "rgba(255, 255, 255, 0.2)",
-                          }}
-                        >
-                          <AccessTimeIcon fontSize="small" sx={{ mr: 1, color: "white" }} />
-                          <Typography variant="body2" sx={{ color: "white" }}>
-                            <strong>{timePerQuestion}</strong> segundos por pregunta
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            p: 1.5,
-                            borderRadius: 2,
-                            bgcolor: "rgba(255, 255, 255, 0.2)",
-                          }}
-                        >
-                          <QuizIcon fontSize="small" sx={{ mr: 1, color: "white" }} />
-                          <Typography variant="body2" sx={{ color: "white" }}>
-                            <strong>{numQuestions}</strong> preguntas por partida
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Paper>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Paper>
-          </Fade>
-
-          {/* Last 5 Sessions - con diseño mejorado */}
+          {/* Last 3 Sessions */}
           <Fade in={true} timeout={1200}>
             <Paper
               elevation={0}
@@ -1293,124 +1577,165 @@ const HomePage = () => {
                 Preguntas de esta sesión
               </Typography>
 
-              {selectedSession.questions && selectedSession.questions.length > 0 ? (
-                <List sx={{ width: "100%", bgcolor: "background.paper", p: 0 }}>
-                  {selectedSession.questions.map((q, index) => (
-                    <React.Fragment key={index}>
-                      <ListItem
-                        component="div"
-                        alignItems="flex-start"
-                        button
-                        onClick={() => toggleQuestion(index)}
-                        sx={{
-                          px: 3,
-                          py: 2,
-                          bgcolor: expandedQuestion === index ? alpha(theme.palette.primary.main, 0.05) : "transparent",
-                        }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <Typography variant="subtitle1" fontWeight="medium">
-                                Pregunta {index + 1}
-                              </Typography>
-                              {q.userAnswer === q.correctAnswer ? (
-                                <Chip
-                                  icon={<CheckCircleOutlineIcon />}
-                                  label="Correcta"
-                                  size="small"
-                                  color="success"
-                                  variant="outlined"
-                                />
-                              ) : (
-                                <Chip
-                                  icon={<CancelOutlinedIcon />}
-                                  label="Incorrecta"
-                                  size="small"
-                                  color="error"
-                                  variant="outlined"
-                                />
-                              )}
-                            </Box>
-                          }
-                          secondary={
-                            <Typography
-                              component="span"
-                              variant="body2"
-                              color="text.primary"
-                              sx={{ display: "flex", alignItems: "center", mt: 1 }}
-                            >
-                              {q.question}
-                              {expandedQuestion === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                      <Collapse in={expandedQuestion === index} timeout="auto" unmountOnExit>
-                        <Box sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.03) }}>
-                          <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                              <Box
-                                sx={{
-                                  p: 2,
-                                  borderRadius: 2,
-                                  bgcolor: alpha("#4CAF50", 0.1),
-                                  border: `1px solid ${alpha("#4CAF50", 0.2)}`,
-                                }}
-                              >
-                                <Typography variant="subtitle2" color="success.main" gutterBottom>
-                                  Respuesta correcta:
-                                </Typography>
-                                <Typography variant="body2">{q.correctAnswer}</Typography>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <Box
-                                sx={{
-                                  p: 2,
-                                  borderRadius: 2,
-                                  bgcolor:
-                                    q.userAnswer === q.correctAnswer ? alpha("#4CAF50", 0.1) : alpha("#FF5252", 0.1),
-                                  border: `1px solid ${
-                                    q.userAnswer === q.correctAnswer ? alpha("#4CAF50", 0.2) : alpha("#FF5252", 0.2)
-                                  }`,
-                                }}
-                              >
-                                <Typography
-                                  variant="subtitle2"
-                                  color={q.userAnswer === q.correctAnswer ? "success.main" : "error.main"}
-                                  gutterBottom
-                                >
-                                  Tu respuesta:
-                                </Typography>
-                                <Typography variant="body2">{q.userAnswer}</Typography>
-                              </Box>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                      </Collapse>
-                      <Divider component="li" />
-                    </React.Fragment>
-                  ))}
-                </List>
-              ) : (
-                <Box sx={{ p: 3, textAlign: "center" }}>
-                  <Typography color="text.secondary">
-                    No hay información detallada de preguntas para esta sesión.
-                  </Typography>
-                </Box>
-              )}
-            </DialogContent>
-            <DialogActions sx={{ p: 3 }}>
-              <Button onClick={handleCloseDialog} variant="outlined">
-                Cerrar
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
-    </ConfigContext.Provider>
-  )
+                            {selectedSession.questions && selectedSession.questions.length > 0 ? (
+                                <List sx={{ width: "100%", bgcolor: "background.paper", p: 0 }}>
+                                    {selectedSession.questions.map((q, index) => (
+                                        <React.Fragment key={index}>
+                                            <ListItem
+                                                component="div"
+                                                alignItems="flex-start"
+                                                button
+                                                onClick={() => toggleQuestion(index)}
+                                                sx={{
+                                                    px: 3,
+                                                    py: 2,
+                                                    bgcolor: expandedQuestion === index ? alpha(theme.palette.primary.main, 0.05) : "transparent",
+                                                }}
+                                            >
+                                                <ListItemText
+                                                    primary={
+                                                        <Box
+                                                            sx={{
+                                                                display: "flex",
+                                                                justifyContent: "space-between",
+                                                                alignItems: "center",
+                                                            }}
+                                                        >
+                                                            <Typography variant="subtitle1" fontWeight="medium">
+                                                                Pregunta {index + 1}
+                                                            </Typography>
+                                                            {q.userAnswer === q.correctAnswer ? (
+                                                                <Chip
+                                                                    icon={<CheckCircleOutlineIcon />}
+                                                                    label="Correcta"
+                                                                    size="small"
+                                                                    color="success"
+                                                                    variant="outlined"
+                                                                />
+                                                            ) : (
+                                                                <Chip
+                                                                    icon={<CancelOutlinedIcon />}
+                                                                    label="Incorrecta"
+                                                                    size="small"
+                                                                    color="error"
+                                                                    variant="outlined"
+                                                                />
+                                                            )}
+                                                        </Box>
+                                                    }
+                                                    secondary={
+                                                        <Typography
+                                                            component="span"
+                                                            variant="body2"
+                                                            color="text.primary"
+                                                            sx={{ display: "flex", alignItems: "center", mt: 1 }}
+                                                        >
+                                                            {q.question}
+                                                            {expandedQuestion === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                                        </Typography>
+                                                    }
+                                                />
+                                            </ListItem>
+                                            <Collapse in={expandedQuestion === index} timeout="auto" unmountOnExit>
+                                                <Box sx={{ p: 3, bgcolor: alpha(theme.palette.primary.main, 0.03) }}>
+                                                    <Grid container spacing={2}>
+                                                        <Grid item xs={12} sm={6}>
+                                                            <Box
+                                                                sx={{
+                                                                    p: 2,
+                                                                    borderRadius: 2,
+                                                                    bgcolor: alpha("#4CAF50", 0.1),
+                                                                    border: `1px solid ${alpha("#4CAF50", 0.2)}`,
+                                                                }}
+                                                            >
+                                                                <Typography variant="subtitle2" color="success.main" gutterBottom>
+                                                                    Respuesta correcta:
+                                                                </Typography>
+                                                                <Typography variant="body2">{q.correctAnswer}</Typography>
+                                                            </Box>
+                                                        </Grid>
+                                                        <Grid item xs={12} sm={6}>
+                                                            <Box
+                                                                sx={{
+                                                                    p: 2,
+                                                                    borderRadius: 2,
+                                                                    bgcolor:
+                                                                        q.userAnswer === q.correctAnswer ? alpha("#4CAF50", 0.1) : alpha("#FF5252", 0.1),
+                                                                    border: `1px solid ${
+                                                                        q.userAnswer === q.correctAnswer ? alpha("#4CAF50", 0.2) : alpha("#FF5252", 0.2)
+                                                                    }`,
+                                                                }}
+                                                            >
+                                                                <Typography
+                                                                    variant="subtitle2"
+                                                                    color={q.userAnswer === q.correctAnswer ? "success.main" : "error.main"}
+                                                                    gutterBottom
+                                                                >
+                                                                    Tu respuesta:
+                                                                </Typography>
+                                                                <Typography variant="body2">{q.userAnswer}</Typography>
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Box>
+                                            </Collapse>
+                                            <Divider component="li" />
+                                        </React.Fragment>
+                                    ))}
+                                </List>
+                            ) : (
+                                <Box sx={{ p: 3, textAlign: "center" }}>
+                                    <Typography color="text.secondary">
+                                        No hay información detallada de preguntas para esta sesión.
+                                    </Typography>
+                                </Box>
+                            )}
+                        </DialogContent>
+                        <DialogActions sx={{ p: 3 }}>
+                            <Button onClick={handleCloseDialog} variant="outlined">
+                                Cerrar
+                            </Button>
+                        </DialogActions>
+                    </>
+                )}
+            </Dialog>
+            {/* Sala de espera */}
+            {showWaitingRoom && roomInfo && (
+                <WaitingRoom
+                    roomId={roomInfo.roomId}
+                    roomName={roomInfo.roomName}
+                    username={username || "Anónimo"}
+                    multiplayerService={multiplayerService}
+                    onClose={() => {
+                        if (!navigatingToGame && multiplayerService && roomInfo) {
+                            multiplayerService.leaveRoom(roomInfo.roomId)
+                        }
+                        setShowWaitingRoom(false)
+                    }}
+                    onGameStart={() => {
+                        setNavigatingToGame(true) // 👈 evita leaveRoom
+                        setShowWaitingRoom(false)
+                        multiplayerService.requestQuestions(
+                            roomInfo.roomId,
+                            60, //Numero de preguntas multijugador
+                            "All"
+                        ).then((data) => {
+                            navigate("/GameMultiplayer", {
+                                state: {
+                                    gameConfig: {
+                                        roomId: roomInfo.roomId,
+                                        players: roomInfo.players,
+                                        questions: data
+                                    }
+                                }
+                            })
+                            //setShowWaitingRoom(false) // ahora sí, sin activar leaveRoom
+                        })
+                    }}
+                />
+            )}
+        </ConfigContext.Provider>
+    )
 }
 
 export default HomePage
