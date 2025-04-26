@@ -439,7 +439,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1><span class="image"><img src="./images/logo.png" alt="logo"></span> <span class="image"><img src="./images/arc42-logo.png" alt="arc42"></span> WiChat en español - Equipo 1-B</h1>
 <div class="details">
 <span id="revnumber">version 8.3 ES,</span>
-<span id="revdate">30 de marzo de 2025</span>
+<span id="revdate">27 de abril de 2025</span>
 </div>
 <div id="toc" class="toc">
 <div id="toctitle">Tabla de contenidos</div>
@@ -484,7 +484,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_gestión_de_proyecto">8.1. <em>Gestión de Proyecto</em></a></li>
 <li><a href="#_arquitectura_y_patrones_de_diseño">8.2. <em>Arquitectura y patrones de diseño</em></a></li>
 <li><a href="#_libreria_chatbotify">8.3. <em>Libreria ChatBotify</em></a></li>
-<li><a href="#_modelo_de_dominio">8.4. <em>Modelo de dominio</em></a></li>
 </ul>
 </li>
 <li><a href="#section-design-decisions">9. Decisiones arquitectónicas</a></li>
@@ -502,7 +501,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#section-tests">12. Tests</a>
 <ul class="sectlevel2">
-<li><a href="#_pruebas_de_carga_load_tests">12.1. Pruebas de carga (load tests)</a></li>
+<li><a href="#_pruebas_unitarias">12.1. Pruebas unitarias</a></li>
+<li><a href="#_pruebas_de_aceptación">12.2. Pruebas de aceptación</a></li>
+<li><a href="#_pruebas_de_cobertura_de_código">12.3. Pruebas de cobertura de código</a></li>
+<li><a href="#_pruebas_de_carga_load_tests">12.4. Pruebas de carga (load tests)</a></li>
 </ul>
 </li>
 <li><a href="#section-glossary">13. Glosario</a></li>
@@ -525,7 +527,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><strong>About arc42</strong></p>
 </div>
 <div class="paragraph">
-<p>Template Version 8.3 ES. {revremark}, 30 de marzo de 2025</p>
+<p>Template Version 8.3 ES. {revremark}, 27 de abril de 2025</p>
 </div>
 <hr>
 <div class="sidebarblock arc42help">
@@ -570,9 +572,6 @@ For documentation of your own system you use better the <em>plain</em> version.<
 </li>
 <li>
 <p>Jorge Blanco Sánchez</p>
-</li>
-<li>
-<p>Marcelo Díez Domínguez</p>
 </li>
 <li>
 <p>Pablo Urones Clavera</p>
@@ -656,7 +655,7 @@ Dicho juego consistirá en que la aplicación mostrará una imagen y los jugador
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Equipo de desarrollo (Estudiantes)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Bruno Isla Sierra, Guillermo Villacorta Moro, Jorge Blanco Sánchez, Marcelo Díez Domínguez, Pablo Urones Clavera</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bruno Isla Sierra, Guillermo Villacorta Moro, Jorge Blanco Sánchez, Pablo Urones Clavera</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Desarrollar un sistema de preguntas y respuestas, mejorando sus habilidades de programación, desarrollo y trabajo en equipo.</p></td>
 </tr>
 <tr>
@@ -666,7 +665,7 @@ Dicho juego consistirá en que la aplicación mostrará una imagen y los jugador
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Profesores</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Jose Emilio Labra Gayo, Pablo González, Irene Cid Rico</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jose Emilio Labra Gayo, Pablo González, Irene Cid Rico, Diego Martín Fernández</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Evaluar el resultado final de la aplicación, además de ayudar a los estudiantes con el desarrollo de la aplicación.</p></td>
 </tr>
 <tr>
@@ -714,7 +713,7 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">API</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Se utilizará una API de WikiData para obtener información a la hora de generar preguntas (distintas fotografías) y respuestas.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Se utilizará una API de WikiData para obtener información a la hora de generar preguntas (distintas fotografías) y respuestas. También la API de Empathy.co para la interacción con sus LLM.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Pruebas de carga</p></td>
@@ -776,7 +775,7 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <p><strong>Fomentar la participación:</strong> Incentivar a los jugadores mediante recompensas por respuestas correctas y rankings competitivos.</p>
 </li>
 <li>
-<p><strong>Expandir la accesibilidad y el alcance del juego:</strong> Implementando internacionalización y soporte para múltiples idiomas.</p>
+<p><strong>Expandir la jugabilidad y fomentar la socialización:</strong> Implementando una opción de partidas multijugador para competir con otros jugadores.</p>
 </li>
 <li>
 <p><strong>Aprovechar tecnologías de inteligencia artificial:</strong> Generando automáticamente preguntas, respuestas y pistas basadas en datos estructurados.</p>
@@ -1120,6 +1119,10 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona la creación de las preguntas.</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MultiplayerService</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gestiona la infraestructura para permitir el juego multijugador desde diferentes clientes.</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Base de Datos</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Base de datos que almacena la información sobre los usuarios y las preguntas.</p></td>
 </tr>
@@ -1211,6 +1214,9 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <p><strong><em>History Service</em></strong>: Guarda el historial de preguntas del usuario.</p>
 </li>
 <li>
+<p><strong><em>Multiplayer Service</em></strong>: Soporta la infraestructura para permitir jugar a varios usuarios.</p>
+</li>
+<li>
 <p><strong><em>Database</em></strong>: Base de datos que almacena la información de los usuarios y las preguntas.</p>
 </li>
 </ul>
@@ -1270,12 +1276,6 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <h3 id="_libreria_chatbotify">8.3. <em>Libreria ChatBotify</em></h3>
 <div class="paragraph">
 <p>Librería encargada de la gestión del chatbot, se encargará de la gestión de las peticiones del usuario y respuestas del chatbot.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_modelo_de_dominio">8.4. <em>Modelo de dominio</em></h3>
-<div class="paragraph">
-<p><em>Se desarrollara segun la aplicación avance</em></p>
 </div>
 <div style="page-break-after: always;"></div>
 </div>
@@ -1517,7 +1517,7 @@ There you will find links and examples about ADR.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Algunas dependencias del proyecto están desactualizadas y necesitan ser actualizadas para asegurar la compatibilidad y seguridad del sistema.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Máquina virtual delegada a Azure</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Máquina virtual delegada a Microsoft Azure</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Delegamos la gestión de la máquina virtual a Azure, lo que puede generar problemas de rendimiento y escalabilidad, además de futuros problemas si se quiere cambiar el despliegue a un servidor propio.</p></td>
 </tr>
 <tr>
@@ -1534,7 +1534,25 @@ There you will find links and examples about ADR.</p>
 <h2 id="section-tests">12. Tests</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_pruebas_de_carga_load_tests">12.1. Pruebas de carga (load tests)</h3>
+<h3 id="_pruebas_unitarias">12.1. Pruebas unitarias</h3>
+<div class="paragraph">
+<p>Se hacen&#8230;&#8203;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pruebas_de_aceptación">12.2. Pruebas de aceptación</h3>
+<div class="paragraph">
+<p>Se hacen&#8230;&#8203;</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pruebas_de_cobertura_de_código">12.3. Pruebas de cobertura de código</h3>
+<div class="paragraph">
+<p>A completar cuando se termine.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pruebas_de_carga_load_tests">12.4. Pruebas de carga (load tests)</h3>
 <div class="paragraph">
 <p>Se han realizado pruebas de carga a la aplicación. Estas pruebas se encargan de medir el rendimiento de la aplicación bajo condiciones específicas. En este caso, se han realizado pruebas de carga para medir el rendimiento de la aplicación en cuanto a la cantidad de usuarios concurrentes que pueden interactuar con ella al mismo tiempo.</p>
 </div>
@@ -1674,7 +1692,7 @@ There you will find links and examples about ADR.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_pruebas_de_estrés">12.1.1. Pruebas de estrés</h4>
+<h4 id="_pruebas_de_estrés">12.4.1. Pruebas de estrés</h4>
 <div class="paragraph">
 <p>También se han realizado pruebas de estrés a la aplicación. Estas pruebas se encargan de medir el rendimiento de la aplicación bajo condiciones extremas más allá de patrones normales. En este caso, se han realizado pruebas de estrés para medir el rendimiento de la aplicación en cuanto a la cantidad de usuarios concurrentes que pueden interactuar con ella al mismo tiempo. Para ello, se compararán los resultados obtenidos en cada uno de los escenarios con la simulación más compleja y que más cuesta al sistema realizar, qué es el <strong>flujo de jugar una partida usando el chatbot para obtener pistas</strong>. Así obtendremos una evolución de la carga del sistema en función de la cantidad de usuarios concurrentes que interactúan con él al mismo tiempo. Usaremos el gráfico general de rangos de timepo de respuesta.</p>
 </div>
@@ -1798,7 +1816,7 @@ Las pruebas de carga y estrés realizadas a la aplicación han demostrado que la
 <div id="footer">
 <div id="footer-text">
 Version 8.3 ES<br>
-Last updated 2025-04-16 18:49:42 +0200
+Last updated 2025-04-25 22:53:10 +0200
 </div>
 </div>
 </body>
