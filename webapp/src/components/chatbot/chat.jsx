@@ -22,8 +22,7 @@ export default function Chat(props) {
         configure("You are a chatbot that must give short hints to the user about the question '" + question + "', and its correct answer is '" + correctAnswer + "'. You must always respond in perfect Spanish of Spain and give SHORT hints to the user. " +
             "It is extremely important that under no circumstances you give the user the correct answer in your messages. You must never write the correct answer in the hint. You can never say '" + correctAnswer + "'. " +
             "Do not include context like 'here is the hint' or 'I will give you a hint', you must give the hint directly. Your messages should be short and concise, and always in Spanish without gramatical errors. " +
-            "Your name is Doraemon, and the user's name is '" + username + "'.");
-        console.log("Username in configreLLM: " + username);
+            "Your name is Doraemon, and your messages should be short and in Spanish.");
 
     }, [question, correctAnswer]);
 
@@ -64,7 +63,6 @@ async function getMessage(message) {
 
 async function configure(message) {
     try {
-        console.log("Calling configure!!!");
         await axios.post(apiEndpoint+'/configureAssistant', {
             moderation: message,
         });
