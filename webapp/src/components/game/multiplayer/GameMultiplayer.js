@@ -166,8 +166,8 @@ const GameMultiplayer = () => {
         <>
             {waitingForResults ? (
                 <Box sx={{textAlign: "center", mt: 4}}>
-                    <img src="/loading.gif" alt="Calculando resultados..." style={{width: 120}}/>
-                    <Typography variant="h5" sx={{mt: 2}}>¡Calculando resultados!</Typography>
+                    <img src="/loading.gif" alt="Calculando resultados..." style={{width: "33vw"}}/>
+                    <Typography variant="h5" sx={{mt: 2, textAlign: "center"}}>¡Calculando resultados!</Typography>
                 </Box>
             ) : (
 
