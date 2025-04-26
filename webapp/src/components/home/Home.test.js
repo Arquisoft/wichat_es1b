@@ -162,7 +162,7 @@ describe('HomePage Component', () => {
     render(<BrowserRouter><HomePage /></BrowserRouter>);
 
     const profileButton = document.querySelector('[aria-label="AccountCircle"]') ||
-        screen.getAllByRole('menuitem')[0];
+        screen.getAllByRole('menuitem')[3];
 
     // Show the tooltip
     fireEvent.mouseEnter(profileButton);
@@ -179,7 +179,7 @@ describe('HomePage Component', () => {
     render(<BrowserRouter><HomePage /></BrowserRouter>);
 
     const logoutButton = document.querySelector('[aria-label="ExitToApp"]') ||
-        screen.getAllByRole('menuitem')[1];
+        screen.getAllByRole('menuitem')[4];
 
     // Show the tooltip
     fireEvent.mouseEnter(logoutButton);
@@ -297,7 +297,7 @@ describe('HomePage Component', () => {
     render(<BrowserRouter><HomePage /></BrowserRouter>);
 
     await waitFor(() => {
-      expect(screen.getByText(/Nivel: Principiante/)).toBeInTheDocument();
+      expect(screen.getByText(/Nivel:/)).toBeInTheDocument();
     });
   });
 

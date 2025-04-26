@@ -554,7 +554,7 @@ const HomePage = () => {
 
               <Box sx={{ display: "flex", alignItems: "center", position: "relative" }}>
                 <MenuItem
-                    onClick={() => document.getElementById("topPlayers").scrollIntoView({ behavior: "smooth" })} //Not a typo, the anchor is the same for 'play'
+                    onClick={() => document.getElementById("play").scrollIntoView({ behavior: "smooth" })}
                     onMouseEnter={() => setShowMessage("Jugar")}
                     onMouseLeave={() => setShowMessage("")}
                     sx={{ display: "flex", alignItems: "center" }}
@@ -903,7 +903,7 @@ const HomePage = () => {
                                     </Grid>
 
                                     {/* Contenedor para los modos de juego (un jugador y multijugador) */}
-                                    <Grid item xs={12} sx={{ mt: 2 }}>
+                                    <Grid item xs={12} sx={{ mt: 2 }} id="play">
                                         <Grid container spacing={4}>
                                             {/* Un jugador */}
                                             <Grid item xs={12} md={6}>

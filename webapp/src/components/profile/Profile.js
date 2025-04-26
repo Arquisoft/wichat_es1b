@@ -308,7 +308,7 @@ const Profile = () => {
 
                 <Box sx={{ display: "flex", alignItems: "center", position: "relative" }}>
                     <MenuItem
-                        onClick={() => navigate("/Home", { state: { scrollTo: "topPlayers" } })} //Not a typo, the anchor is the same for 'play'
+                        onClick={() => navigate("/Home", { state: { scrollTo: "play" } })}
                         onMouseEnter={() => setShowMessage("Jugar")}
                         onMouseLeave={() => setShowMessage("")}
                         sx={{ display: "flex", alignItems: "center" }}
