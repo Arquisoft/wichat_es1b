@@ -12,6 +12,8 @@
 <p float="left">
 <img src="https://blog.wildix.com/wp-content/uploads/2020/06/react-logo.jpg" height="100">
 <img src="https://miro.medium.com/max/365/1*Jr3NFSKTfQWRUyjblBSKeg.png" height="100">
+<img src="https://2024.allthingsopen.org/wp-content/uploads/2024/05/Gold_MongoDB_FG.jpg" height="100">
+![Empathy](https://empathy.co/assets/media/logo/logo-animated-padding.gif)
 </p>
 
 ## :brain: Sobre Wichat
@@ -35,7 +37,7 @@ Cada categoría tiene un conjunto de consultas específicas para garantizar la r
 - Validación y manejo de respuestas.
 
 #### Multiplayer
-- Los usuarios podrán poner a prueba sus habilidades contra sus amigos en una batalla de 1 minuto.
+- Los usuarios podrán poner a prueba sus habilidades contra sus amigos en una batalla de tiempo limitado.
 - El objetivo es acertar el mayor número de preguntas para llevarse la victoria.
 
 
