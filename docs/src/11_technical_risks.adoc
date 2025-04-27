@@ -24,6 +24,6 @@ ifndef::imagesdir[:imagesdir: ../images]
 | Deuda Técnica | Descripción
 | Refactorización del código | Algunas partes del código no siguen las mejores prácticas y necesitan ser refactorizadas para mejorar la mantenibilidad y legibilidad.
 | Actualización de dependencias | Algunas dependencias del proyecto están desactualizadas y necesitan ser actualizadas para asegurar la compatibilidad y seguridad del sistema.
-| Máquina virtual delegada a Azure | Delegamos la gestión de la máquina virtual a Azure, lo que puede generar problemas de rendimiento y escalabilidad, además de futuros problemas si se quiere cambiar el despliegue a un servidor propio.
+| Máquina virtual delegada a Microsoft Azure | Delegamos la gestión de la máquina virtual a Azure, lo que puede generar problemas de rendimiento y escalabilidad, además de futuros problemas si se quiere cambiar el despliegue a un servidor propio.
 | Falta de documentación | La documentación del proyecto no está completa o actualizada, lo que puede dificultar la comprensión y mantenimiento del código por parte de nuevos desarrolladores.
 |===

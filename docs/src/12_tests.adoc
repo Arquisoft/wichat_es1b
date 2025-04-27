@@ -4,6 +4,21 @@ ifndef::imagesdir[:imagesdir: ../images]
 
 == Tests
 
+=== Pruebas unitarias
+
+Se hacen...
+
+
+=== Pruebas de aceptación
+
+Se hacen...
+
+
+=== Pruebas de cobertura de código
+
+A completar cuando se termine.
+
+
 === Pruebas de carga (load tests)
 
 Se han realizado pruebas de carga a la aplicación. Estas pruebas se encargan de medir el rendimiento de la aplicación bajo condiciones específicas. En este caso, se han realizado pruebas de carga para medir el rendimiento de la aplicación en cuanto a la cantidad de usuarios concurrentes que pueden interactuar con ella al mismo tiempo.

@@ -11,7 +11,6 @@ El equipo comprometido con este desarrollo está formado por:
 * Bruno Isla Sierra
 * Guillermo Villacorta Moro
 * Jorge Blanco Sánchez
-* Marcelo Díez Domínguez
 * Pablo Urones Clavera
 
 En la aplicación, los usuarios podrán registrarse y participar en un juego de preguntas.
@@ -44,9 +43,9 @@ Dicho juego consistirá en que la aplicación mostrará una imagen y los jugador
 [options="header",cols="1,2,2"]
 |===
 |Rol/Nombre|Contacto|Expectativas
-| Equipo de desarrollo (Estudiantes) | Bruno Isla Sierra, Guillermo Villacorta Moro, Jorge Blanco Sánchez, Marcelo Díez Domínguez, Pablo Urones Clavera | Desarrollar un sistema de preguntas y respuestas, mejorando sus habilidades de programación, desarrollo y trabajo en equipo.
+| Equipo de desarrollo (Estudiantes) | Bruno Isla Sierra, Guillermo Villacorta Moro, Jorge Blanco Sánchez, Pablo Urones Clavera | Desarrollar un sistema de preguntas y respuestas, mejorando sus habilidades de programación, desarrollo y trabajo en equipo.
 | Usuarios | Cualquier usuario de la aplicación | Participar en una aplicación intuitiva y fácil de usar/entender.
-| Profesores | Jose Emilio Labra Gayo, Pablo González, Irene Cid Rico | Evaluar el resultado final de la aplicación, además de ayudar a los estudiantes con el desarrollo de la aplicación.
+| Profesores | Jose Emilio Labra Gayo, Pablo González, Irene Cid Rico, Diego Martín Fernández | Evaluar el resultado final de la aplicación, además de ayudar a los estudiantes con el desarrollo de la aplicación.
 | RTVE | Radiotelevisión Española | Cumplimiento de los requisitos establecidos para presentar la aplicación a sus espectadores.
 |===
 

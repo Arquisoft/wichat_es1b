@@ -62,6 +62,7 @@ Muestra el funcionamiento interno de la aplicación y el flujo de datos entre la
 | UserService | Gestiona la creación de nuevos usuarios.
 | HistoryService | Gestiona el historial de los usuarios.
 | QuestionService | Gestiona la creación de las preguntas.
+| MultiplayerService | Gestiona la infraestructura para permitir el juego multijugador desde diferentes clientes.
 | Base de Datos | Base de datos que almacena la información sobre los usuarios y las preguntas.
 | Wikidata | API que genera la información de las preguntas y la proporciona al sistema.
 |===
