@@ -70,13 +70,14 @@ jobs:
           API_URI: http://${{ secrets.DEPLOY_HOST }}:8000
           LLM_URI: http://${{ secrets.DEPLOY_HOST }}:8003
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          MUL: http://${{ secrets.DEPLOY_HOST }}:8085
         with:
           name: arquisoft/wichat_es1b/webapp
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
           workdir: webapp
-          buildargs: API_URI,LLM_API_KEY
+          buildargs: API_URI,LLM_API_KEY, MUL
   docker-push-authservice:
     name: Push auth service Docker Image to GitHub Packages
     runs-on: ubuntu-latest
@@ -181,8 +182,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
-        env:
-          MULTIPLAYER: ${{ secrets.DEPLOY_HOST }}
         with:
           name: arquisoft/wichat_es1b/multiplayerservice
           username: ${{ github.actor }}
