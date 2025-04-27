@@ -45,6 +45,7 @@ jobs:
       - run: npm --prefix gatewayservice test -- --coverage
       - run: npm --prefix webapp test -- --coverage
       - run: npm --prefix apiservice test -- --coverage
+      - run: npm --prefix multiplayerservice test -- --coverage
 
       - name: Cache SonarQube scanner
         uses: actions/cache@v4
