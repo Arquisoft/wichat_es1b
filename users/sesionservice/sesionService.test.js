@@ -242,4 +242,56 @@ describe('Session Service', () => {
             expect(mongoose.connection.close).toHaveBeenCalled();
         });
     });
+
+    describe('Validaciones en POST /save-session', () => {
+        it('retorna error para distintos errores de userid', async () => {
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+      
+          // userid no es string (error línea 51)
+          await routeHandlers.post['/save-session']({ body: { userid: 123 } }, res);
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith({ error: 'Invalid user ID format' });
+      
+          res.status.mockClear();
+          res.json.mockClear();
+      
+          // userid demasiado corto o largo (error línea 57)
+          await routeHandlers.post['/save-session']({ body: { userid: ' '.repeat(51) } }, res);
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith({ error: 'User ID must be between 1 and 50 characters' });
+      
+          res.status.mockClear();
+          res.json.mockClear();
+      
+          // userid con caracteres no válidos (error línea 63)
+          await routeHandlers.post['/save-session']({ body: { userid: 'user invalid' } }, res);
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith({ error: 'User ID contains invalid characters' });
+        });
+      });
+
+      describe('GET /get-users-totaldatas', () => {
+        it('retorna error si la base de datos falla', async () => {
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+      
+          // Simula error al buscar usuarios
+          const originalFind = mongoose.model('User').find;
+          mongoose.model('User').find = jest.fn().mockRejectedValue(new Error('Database error'));
+      
+          await routeHandlers.get['/get-users-totaldatas']({}, res);
+      
+          expect(res.status).toHaveBeenCalledWith(500);
+          expect(res.json).toHaveBeenCalledWith({ error: 'Error getting users' });
+      
+          mongoose.model('User').find = originalFind; // Restaurar
+        });
+      });
+      
+      
 });
