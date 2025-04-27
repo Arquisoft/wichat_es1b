@@ -921,13 +921,13 @@ o mayor medida la arquitectura o forma final que tendrá el proyecto.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Rendimiento</strong>: Se buscará minimizar los tiempos de procesamiento de datos y tareas, para así mejorar la experiencia del usuario.</p>
+<p><strong>Rendimiento</strong>: Se buscará minimizar los tiempos de procesamiento de datos y tareas, para así mejorar la experiencia del usuario. Con ayuda de las pruebas de carga, se medirá el rendimiento de la aplicación.</p>
 </li>
 <li>
-<p><strong>Testeabilidad</strong>: El equipo testeará la aplicación manual y automáticamente mediante pruebas de cobertura (unitarias e integración), pruebas de aceptación (e2e) y pruebas de carga.</p>
+<p><strong>Testeabilidad</strong>: El equipo testeará la aplicación manual y automáticamente mediante pruebas de cobertura (unitarias e integración), pruebas de aceptación (e2e) y pruebas de carga, que incluirán las pruebas de estrés.</p>
 </li>
 <li>
-<p><strong>Usabilidad</strong>: La aplicación será clara, intuitiva y familiar para el usuario.</p>
+<p><strong>Usabilidad</strong>: La aplicación será clara, intuitiva y familiar para el usuario. Tratando de que la navegación sea sencilla y rápida.</p>
 </li>
 <li>
 <p><strong>Mantenibilidad</strong>: La aplicación será mantenible gracias al diseño por componentes, lo que nos permitirá tener un código con baja acoplamiento y alta mucha cohesión, ayudándonos a que realizar cambios sea más sencillo y rápido. La documentación se revisará para tenerla actualizada. Además, se implementará y configurará un sistema de CI (Integración Continua) para que cada vez que se realice un cambio en el código, se lleven a cabo pruebas automáticas y se despliegue la aplicación en la nube, dadas ciertas precondiciones.</p>
@@ -1413,8 +1413,8 @@ There you will find links and examples about ADR.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Rendimiento</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Los tiempos de espera o respuesta de la aplicación sean reducidos, para que el usuario pueda disfrutar de una experiencia fluida y con las mínimas interrupciones posibles. Los tiempos de respuesta no serán superiores a 0.8 segundos.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Medio-Alto</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Los tiempos de espera o respuesta de la aplicación sean reducidos, para que el usuario pueda disfrutar de una experiencia fluida y con las mínimas interrupciones posibles. Los tiempos de respuesta no serán superiores a 0.8 segundos. Esto se comprobará mediante las pruebas de carga, que nos indicarán cuata carga soporta nuestra aplicación, estimando el número de usuarios concurrentes óptimo en torno a unos 100 usuarios.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Alto</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Testeabilidad</p></td>
@@ -1776,8 +1776,10 @@ There you will find links and examples about ADR.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>Conclusiones de las pruebas de carga y estrés</strong>
-Las pruebas de carga y estrés realizadas a la aplicación han demostrado que la aplicación es capaz de soportar una gran cantidad de usuarios concurrentes sin problemas de rendimiento. La aplicación ha demostrado ser capaz de manejar hasta 150 usuarios concurrentes con un 86% de las peticiones en un tiempo inferior a 800 ms, aunque a partir de 750 usuarios se empiezan a notar algunos problemas de rendimiento ya que baja al 62%. A partir de 1500 usuarios, la aplicación empieza a tener problemas de rendimiento y no es capaz de manejar todos los usuarios concurrentes.</p>
+<p><strong>Conclusiones de las pruebas de carga y estrés</strong></p>
+</div>
+<div class="paragraph">
+<p>Las pruebas de carga y estrés realizadas a la aplicación han demostrado que la aplicación es capaz de soportar una gran cantidad de usuarios concurrentes sin problemas de rendimiento. La aplicación ha demostrado ser capaz de manejar hasta 150 usuarios concurrentes con un 86% de las peticiones en un tiempo inferior a 800 ms, aunque a partir de 750 usuarios se empiezan a notar algunos problemas de rendimiento ya que baja al 62%. A partir de 1500 usuarios, la aplicación empieza a tener problemas de rendimiento y no es capaz de manejar todos los usuarios concurrentes.</p>
 </div>
 <div style="page-break-after: always;"></div>
 </div>
@@ -1816,7 +1818,7 @@ Las pruebas de carga y estrés realizadas a la aplicación han demostrado que la
 <div id="footer">
 <div id="footer-text">
 Version 8.3 ES<br>
-Last updated 2025-04-25 22:53:10 +0200
+Last updated 2025-04-27 12:55:50 +0200
 </div>
 </div>
 </body>
