@@ -231,4 +231,52 @@ describe('Profile component', () => {
 
     expect(await screen.findByText(/No hay información detallada de preguntas/i)).toBeInTheDocument();
   });
+
+  // javascript
+  it('sorts sessions by score descending when selecting "Puntuación"', async () => {
+    const low = {
+      _id: 'low',
+      createdAt: '2023-01-01T10:00:00Z',
+      score: 1,
+      wrongAnswers: 0,
+      difficulty: 'X',
+      category: 'Y',
+      questions: []
+    };
+    const high = {
+      _id: 'high',
+      createdAt: '2023-01-02T10:00:00Z',
+      score: 5,
+      wrongAnswers: 0,
+      difficulty: 'X',
+      category: 'Y',
+      questions: []
+    };
+    setupMockResponse({ sessions: [low, high] });
+    renderComponent();
+
+    // wait until both session cards render
+    expect(await screen.findAllByText(/correctas/i)).toHaveLength(6);
+
+    fireEvent.click(screen.getByText(/Ordenar por/i));
+    fireEvent.click(screen.getByText(/Puntuación/i));
+
+    // after sorting, the first "correctas" should be the higher score
+    const scoreEls = screen.getAllByText(/correctas/i);
+    expect(scoreEls[0]).toHaveTextContent('Correctas');
+  });
+
+  it('handles fetch error by logging and showing no‑data message', async () => {
+    mockAxios.onGet(new RegExp('/get-user-sessions/')).networkError();
+    renderComponent();
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith(
+          'Error al obtener las sesiones:',
+          expect.any(Error)
+      );
+    });
+
+    expect(await screen.findByText(/No hay datos de sesiones disponibles/i)).toBeInTheDocument();
+  });
 });

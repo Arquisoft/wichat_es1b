@@ -5,6 +5,14 @@ const server = require('./multiplayer-service');
 
 const API_URL = 'http://localhost:8085';
 
+const originalConsoleError = console.error;
+beforeAll(() => {
+    console.error = jest.fn();
+});
+afterAll(() => {
+    console.error = originalConsoleError;
+});
+
 jest.mock('axios', () => ({
     get: jest.fn(() => Promise.resolve({
         data: {
@@ -24,10 +32,6 @@ describe('MultiplayerServer (integration)', () => {
         if (clientSocket1) clientSocket1.disconnect();
         if (clientSocket2) clientSocket2.disconnect();
         if (clientSocket3) clientSocket3.disconnect();
-    });
-    afterAll((done) => {
-        server.stop();
-        setTimeout(done, 500);
     });
 
     test('health endpoint returns ok', async () => {
@@ -294,4 +298,109 @@ describe('MultiplayerServer (integration)', () => {
                 });
             });
     });
+});
+
+describe('MultiplayerServer error branches', () => {
+    let client;
+
+    beforeAll(() => new Promise(res => setTimeout(res, 500)));
+    afterEach(() => {
+        if (client) client.disconnect();
+    });
+
+    // Only stop the server after all tests are complete
+    afterAll(done => {
+        server.stop();
+        setTimeout(done, 500);
+    });
+
+    test('POST /createRoom without roomId returns 400', async () => {
+        const res = await request(API_URL).post('/createRoom').send({ roomName: 'NoID' });
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toMatch(/Se requiere un ID de sala/);
+    });
+
+    test('POST /createRoom idempotent when exists returns 200 with message', async () => {
+        const roomId = 'room-idempotent';
+        await request(API_URL).post('/createRoom').send({ roomId });
+        const res2 = await request(API_URL).post('/createRoom').send({ roomId });
+        expect(res2.statusCode).toBe(200);
+        expect(res2.body.message).toBe('La sala ya existe');
+        expect(res2.body.roomId).toBe(roomId);
+    });
+
+    test('GET /rooms/:roomId returns 404 if missing', async () => {
+        const res = await request(API_URL).get('/rooms/nonexistent');
+        expect(res.statusCode).toBe(404);
+        expect(res.body.message).toBe('Sala no encontrada');
+    });
+
+    test('socket joinRoom with missing data emits error', (done) => {
+        client = ioClient(API_URL, { transports: ['websocket'] });
+
+        client.on('error', data => {
+            expect(data.message).toMatch(/Se requiere un ID de sala/);
+            done();
+        });
+
+        client.on('connect', () => {
+            client.emit('joinRoom', { roomId: '', username: '' });
+        });
+    });
+
+    test('socket sendCorrect with no room emits error', (done) => {
+        client = ioClient(API_URL, { transports: ['websocket'] });
+
+        client.on('error', data => {
+            expect(data.message).toBe('La sala no existe');
+            done();
+        });
+
+        client.on('connect', () => {
+            client.emit('sendCorrect', 10);
+        });
+    });
+
+    test('socket getQuestions for invalid room emits error', (done) => {
+        client = ioClient(API_URL, { transports: ['websocket'] });
+
+        client.on('error', data => {
+            expect(data.message).toBe('La sala no existe');
+            done();
+        });
+
+        client.on('connect', () => {
+            client.emit('getQuestions', { roomId: 'bad-room' });
+        });
+    });
+
+    test('socket getQuestions when player not in room emits error', (done) => {
+
+        const roomJoin = 'room-join-test';
+        const roomQuery = 'room-query-test';
+
+        Promise.all([
+            request(API_URL).post('/createRoom').send({ roomId: roomJoin }),
+            request(API_URL).post('/createRoom').send({ roomId: roomQuery })
+        ]).then(() => {
+            client = ioClient(API_URL, { transports: ['websocket'] });
+
+            client.on('error', data => {
+                if (data.message === 'No estás en esta sala') {
+                    done();
+                    return;
+                }
+            });
+
+            client.on('connect', () => {
+                client.emit('joinRoom', { roomId: roomJoin, username: 'UserTest' });
+            });
+
+            client.on('roomJoined', () => {
+                setTimeout(() => {
+                    client.emit('getQuestions', { roomId: roomQuery });
+                }, 100);
+            });
+        });
+    }, 10000);
 });
