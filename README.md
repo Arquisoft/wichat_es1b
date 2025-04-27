@@ -13,7 +13,7 @@
 <img src="https://blog.wildix.com/wp-content/uploads/2020/06/react-logo.jpg" height="100">
 <img src="https://miro.medium.com/max/365/1*Jr3NFSKTfQWRUyjblBSKeg.png" height="100">
 <img src="https://2024.allthingsopen.org/wp-content/uploads/2024/05/Gold_MongoDB_FG.jpg" height="100">
-![Empathy](https://empathy.co/assets/media/logo/logo-animated-padding.gif)
+<img src="https://github.com/Arquisoft/wichat_es1b/blob/master/docs/images/Empathy.gif" height="100">
 </p>
 
 ## :brain: Sobre Wichat
