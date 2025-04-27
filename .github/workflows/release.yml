@@ -29,6 +29,7 @@ jobs:
     - run: npm --prefix gatewayservice test -- --coverage
     - run: npm --prefix webapp test -- --coverage
     - run: npm --prefix apiservice test -- --coverage
+    - run: npm --prefix multiplayerservice test -- --coverage
     - name: Analyze with SonarCloud
       uses: SonarSource/sonarqube-scan-action@master
       env:

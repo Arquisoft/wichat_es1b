@@ -19,6 +19,7 @@ describe('AddUser component', () => {
         </Router>
     );
 
+
     const usernameInput = screen.getByLabelText(/Username/i);
     const passwordInput = screen.getByLabelText(/Password/i);
     const confirmPasswordInput = screen.getByLabelText(/Confirmar Contraseña/i);
@@ -87,4 +88,44 @@ describe('AddUser component', () => {
       expect(screen.getByText(/Error al crear el nuevo usuario/i)).toBeInTheDocument();
     });
   });
+
+  it('muestra error si la contraseña es muy corta', async () => {
+    render(<Router><AddUser /></Router>);
+  
+    fireEvent.change(screen.getByLabelText(/Username/i), { target: { value: 'testUser' } });
+    fireEvent.change(screen.getByLabelText(/Password/i), { target: { value: '123' } });
+    fireEvent.change(screen.getByLabelText(/Confirmar Contraseña/i), { target: { value: '123' } });
+    fireEvent.click(screen.getByRole('button', { name: /crear usuario/i }));
+  
+    await waitFor(() => {
+      expect(screen.getByText(/La contraseña debe tener al menos 6 caracteres/i)).toBeInTheDocument();
+    });
+  });
+
+  it('muestra error si el nombre de usuario es muy corto', async () => {
+    render(<Router><AddUser /></Router>);
+  
+    fireEvent.change(screen.getByLabelText(/Username/i), { target: { value: 'ab' } });
+    fireEvent.change(screen.getByLabelText(/Password/i), { target: { value: '123456' } });
+    fireEvent.change(screen.getByLabelText(/Confirmar Contraseña/i), { target: { value: '123456' } });
+    fireEvent.click(screen.getByRole('button', { name: /crear usuario/i }));
+  
+    await waitFor(() => {
+      expect(screen.getByText(/El nombre de usuario debe tener al menos 3 y menos de 20 caracteres/i)).toBeInTheDocument();
+    });
+  });
+  
+  it('muestra error si el nombre de usuario contiene espacios', async () => {
+    render(<Router><AddUser /></Router>);
+  
+    fireEvent.change(screen.getByLabelText(/Username/i), { target: { value: 'test user' } });
+    fireEvent.change(screen.getByLabelText(/Password/i), { target: { value: '123456' } });
+    fireEvent.change(screen.getByLabelText(/Confirmar Contraseña/i), { target: { value: '123456' } });
+    fireEvent.click(screen.getByRole('button', { name: /crear usuario/i }));
+  
+    await waitFor(() => {
+      expect(screen.getByText(/no puede contener espacios en blanco/i)).toBeInTheDocument();
+    });
+  });  
+  
 });
