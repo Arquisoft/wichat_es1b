@@ -1085,7 +1085,6 @@ const Profile = () => {
                     {selectedSession.questions.map((q, index) => (
                       <React.Fragment key={index}>
                         <ListItem
-                          component="div"
                           alignItems="flex-start"
                           button
                           onClick={() => handleToggleQuestionDetails(index)}
