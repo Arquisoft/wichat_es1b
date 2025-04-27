@@ -14,15 +14,27 @@
 <img src="https://miro.medium.com/max/365/1*Jr3NFSKTfQWRUyjblBSKeg.png" height="100">
 </p>
 
-This is a base project for the Software Architecture course in 2024/2025. It is a basic application composed of several components.
+## :brain: Sobre Wichat
+Bienvenido a Wichat, una aplicación moderna y escalable para el uso como un Juego Quizz. Este proyecto ha sido desarrollado como parte del curso de Ingeniería de Software en la Universidad de Oviedo.
 
-- **User service**. Express service that handles the insertion of new users in the system.
-- **Auth service**. Express service that handles the authentication of users.
-- **LLM service**. Express service that handles the communication with the LLM.
-- **Gateway service**. Express service that is exposed to the public and serves as a proxy to the two previous ones.
-- **Webapp**. React web application that uses the gateway service to allow basic login and new user features.
 
-Both the user and auth service share a Mongo database that is accessed with mongoose.
+## :cold_face: ¿Cómo funciona el Quizz?
+- Generación de preguntas dinámicas:
+
+Las preguntas se generan dinámicamente a partir de consultas a WikiData, utilizando información relevante como imágenes y etiquetas asociadas.
+Cada pregunta incluye una imagen y un conjunto de opciones de respuesta, de las cuales solo una es correcta.
+- Categorías temáticas:
+
+Las preguntas se agrupan en categorías como Geografía, Cultura, Personajes, Videojuegos, Aviones y un modo Aleatorio.
+Cada categoría tiene un conjunto de consultas específicas para garantizar la relevancia de las preguntas.
+- Modos de juego:
+- SinglePlayer
+Los usuarios pueden iniciar un juego seleccionando una categoría específica o eligiendo todas las categorías.
+Durante el juego, se presentan preguntas únicas y aleatorias para evitar repeticiones.
+Validación y manejo de respuestas:
+- Multiplayer
+Los usuarios se podran poner aprueba contra sus amigos en una batalla de 1 minuto en la cual tendran que acertar el mayor número de preguntas para llevarse la victoria.
+
 
 ## Quick start guide
 
