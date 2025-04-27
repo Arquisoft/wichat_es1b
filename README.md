@@ -15,25 +15,28 @@
 </p>
 
 ## :brain: Sobre Wichat
-Bienvenido a Wichat, una aplicación moderna y escalable para el uso como un Juego Quizz. Este proyecto ha sido desarrollado como parte del curso de Ingeniería de Software en la Universidad de Oviedo.
+Bienvenido a Wichat, una aplicación moderna y escalable para el uso como un Juego Quizz. Este proyecto ha sido desarrollado como parte del grado de Ingeniería Informatica del Software en la Universidad de Oviedo.
 
 
 ## :cold_face: ¿Cómo funciona el Quizz?
-- Generación de preguntas dinámicas:
+### :ok_hand: Generación de preguntas dinámicas:
 
 Las preguntas se generan dinámicamente a partir de consultas a WikiData, utilizando información relevante como imágenes y etiquetas asociadas.
 Cada pregunta incluye una imagen y un conjunto de opciones de respuesta, de las cuales solo una es correcta.
-- Categorías temáticas:
+### :right_anger_bubble: Categorías temáticas:
 
 Las preguntas se agrupan en categorías como Geografía, Cultura, Personajes, Videojuegos, Aviones y un modo Aleatorio.
 Cada categoría tiene un conjunto de consultas específicas para garantizar la relevancia de las preguntas.
-- Modos de juego:
-- SinglePlayer
-Los usuarios pueden iniciar un juego seleccionando una categoría específica o eligiendo todas las categorías.
-Durante el juego, se presentan preguntas únicas y aleatorias para evitar repeticiones.
-Validación y manejo de respuestas:
-- Multiplayer
-Los usuarios se podran poner aprueba contra sus amigos en una batalla de 1 minuto en la cual tendran que acertar el mayor número de preguntas para llevarse la victoria.
+### :space_invader: Modos de juego
+
+#### SinglePlayer
+- Los usuarios pueden iniciar un juego seleccionando una categoría específica o eligiendo todas las categorías.
+- Durante el juego, se presentan preguntas únicas y aleatorias para evitar repeticiones.
+- Validación y manejo de respuestas.
+
+#### Multiplayer
+- Los usuarios podrán poner a prueba sus habilidades contra sus amigos en una batalla de 1 minuto.
+- El objetivo es acertar el mayor número de preguntas para llevarse la victoria.
 
 
 ## Quick start guide
