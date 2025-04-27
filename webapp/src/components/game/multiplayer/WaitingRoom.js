@@ -186,11 +186,32 @@ export default function WaitingRoom({ roomId, roomName, username, multiplayerSer
         }
     }
 
-    const handleCopyRoomId = () => {
-        navigator.clipboard.writeText(roomId)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+    function copyTextToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text);
+        }
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        return Promise.resolve();
     }
+
+    const handleCopyRoomId = () => {
+        copyTextToClipboard(roomId)
+            .then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            })
+            .catch((err) => {
+                console.error('Copy failed:', err);
+            });
+    };
 
     const handleLeaveRoom = () => {
         if (multiplayerService) {

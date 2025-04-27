@@ -499,3 +499,96 @@ describe('HomePage Component', () => {
     });
   });
 });
+
+describe('HomePage multiplayerService wiring', () => {
+  let mockService
+  const callbacks = {}
+
+  beforeEach(() => {
+    callbacks.onConnect = jest.fn()
+    callbacks.onRoomJoined = jest.fn()
+    callbacks.onPlayerJoined = jest.fn()
+    callbacks.onPlayerReady = jest.fn()
+    callbacks.onGameStart = jest.fn()
+    callbacks.onError = jest.fn()
+
+    mockService = {
+      socket: { connected: false, emit: jest.fn() },
+      connect: jest.fn(),
+      on: jest.fn((evt, cb) => {
+        callbacks[evt] = cb;
+        return mockService;
+      }),
+      off: jest.fn(() => mockService),           // ← add this
+      createRoom: jest.fn(() => Promise.resolve({ success: true })),
+      joinRoom:  jest.fn(() => Promise.resolve({ success: true })),
+    };
+
+    MultiplayerMock.getInstance.mockReturnValue(mockService)
+    // mock navigate from useNavigate
+    jest.spyOn(require('react-router-dom'), 'useNavigate').mockReturnValue(jest.fn())
+  })
+
+  test('registers all event handlers on mount', () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>)
+    expect(mockService.on).toHaveBeenCalledWith('onConnect', expect.any(Function))
+    expect(mockService.on).toHaveBeenCalledWith('onRoomJoined', expect.any(Function))
+    expect(mockService.on).toHaveBeenCalledWith('onPlayerJoined', expect.any(Function))
+    expect(mockService.on).toHaveBeenCalledWith('onPlayerReady', expect.any(Function))
+    expect(mockService.on).toHaveBeenCalledWith('onGameStart', expect.any(Function))
+    expect(mockService.on).toHaveBeenCalledWith('onError', expect.any(Function))
+  })
+
+  test('onRoomJoined shows waiting room and stores roomInfo', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>)
+
+    await act(async () => {
+      callbacks.onRoomJoined({ roomId: 'r1', roomName: 'Custom' })
+    })
+    expect(screen.getByText(/Sala de Espera/i)).toBeInTheDocument()
+  })
+
+  test('onGameStart navigates to /Game with proper state', async () => {
+    const navigate = jest.fn()
+    jest.spyOn(require('react-router-dom'), 'useNavigate').mockReturnValue(navigate)
+
+    render(<BrowserRouter><HomePage /></BrowserRouter>)
+    await act(async () => {
+      callbacks.onGameStart({ roomId: 'r2', players: ['a','b'] })
+    })
+
+    expect(navigate).toHaveBeenCalledWith('/Game', expect.objectContaining({
+      state: expect.objectContaining({
+        gameConfig: expect.objectContaining({
+          multiplayer: true, roomId: 'r2', players: ['a','b']
+        })
+      })
+    }))
+  })
+
+  test('onError alerts and logs', async () => {
+    global.alert = jest.fn()
+    console.error = jest.fn()
+
+    render(<BrowserRouter><HomePage /></BrowserRouter>)
+    await act(async () => {
+      callbacks.onError({ message: 'err' })
+    })
+
+    expect(console.error).toHaveBeenCalledWith('Error:', 'err')
+    expect(global.alert).toHaveBeenCalledWith('Error: err')
+  })
+
+  test('crearSala without existing service calls getInstance and createRoom/joinRoom', async () => {
+    // Clear prior instance
+    MultiplayerMock.getInstance.mockClear()
+    render(<BrowserRouter><HomePage /></BrowserRouter>)
+
+    fireEvent.click(screen.getByText('Crear sala'))
+    await waitFor(() => {
+      expect(MultiplayerMock.getInstance).toHaveBeenCalled()
+      expect(mockService.createRoom).toHaveBeenCalled()
+      expect(mockService.joinRoom).toHaveBeenCalled()
+    })
+  })
+})
