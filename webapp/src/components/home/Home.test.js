@@ -389,4 +389,113 @@ describe('HomePage Component', () => {
       });
     }
   });
+
+  test('handles error when creating a room fails', async () => {
+    MultiplayerMock.getInstance().createRoom.mockResolvedValueOnce({ success: false, message: 'Room error' });
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+    fireEvent.click(screen.getByText('Crear sala'));
+    await waitFor(() => {
+      expect(screen.queryByText(/Sala de Espera/)).not.toBeInTheDocument();
+    });
+  });
+
+  test('handles error when joining a room fails', async () => {
+    window.prompt.mockReturnValue('room-err');
+    MultiplayerMock.getInstance().joinRoom.mockResolvedValueOnce({ success: false, message: 'Join error' });
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+    fireEvent.click(screen.getByText('Unirse a sala'));
+    await waitFor(() => {
+      expect(screen.queryByText(/Sala de Espera/)).not.toBeInTheDocument();
+    });
+  });
+
+  test('handles multiplayerService not connected on create/join', async () => {
+    MultiplayerMock.getInstance().socket.connected = false;
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+    fireEvent.click(screen.getByText('Crear sala'));
+    await waitFor(() => {
+      expect(MultiplayerMock.getInstance().connect).toHaveBeenCalled();
+    });
+    window.prompt.mockReturnValue('room-abc');
+    fireEvent.click(screen.getByText('Unirse a sala'));
+    await waitFor(() => {
+      expect(MultiplayerMock.getInstance().connect).toHaveBeenCalled();
+    });
+  });
+
+  test('handles onError event from multiplayerService', async () => {
+    let errorCallback;
+    MultiplayerMock.getInstance().on.mockImplementation(function(event, cb) {
+      if (event === 'onError') errorCallback = cb;
+      return this;
+    });
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+    fireEvent.click(screen.getByText('Crear sala'));
+    await waitFor(() => {
+      expect(MultiplayerMock.getInstance().createRoom).toHaveBeenCalled();
+    });
+    if (errorCallback) {
+      errorCallback({ message: 'Test error' });
+    }
+  });
+
+  test('handles WaitingRoom onClose and onGameStart', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+    fireEvent.click(screen.getByText('Crear sala'));
+    await waitFor(() => {
+      expect(screen.getByText(/Sala de Espera/)).toBeInTheDocument();
+    });
+    // Simulate onClose
+    const closeBtn = screen.getByRole('button', { name: /Abandonar sala/i });
+    fireEvent.click(closeBtn);
+    // Simulate onGameStart
+    fireEvent.click(screen.getByText('Crear sala'));
+    await waitFor(() => {
+      expect(screen.getByText(/Sala de Espera/)).toBeInTheDocument();
+    });
+    // Simulate the onGameStart prop
+    const waitingRoom = screen.getByText(/Sala de Espera/).closest('div');
+    if (waitingRoom) {
+      // Simulate the onGameStart callback
+      await act(async () => {
+        await MultiplayerMock.getInstance().requestQuestions();
+      });
+    }
+  });
+
+  test('renders session details dialog with no questions', async () => {
+    axios.get.mockImplementationOnce(() => Promise.resolve({
+      data: {
+        ...mockUserData,
+        sessions: [{
+          ...mockUserData.sessions[0],
+          questions: []
+        }]
+      }
+    }));
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+    await waitFor(() => {
+      expect(screen.getByText(/Tus últimas partidas/)).toBeInTheDocument();
+    });
+    const sessionCard = screen.getByText('correctas').closest('.session-card');
+    fireEvent.click(sessionCard);
+    await waitFor(() => {
+      expect(screen.getByText(/No hay información detallada de preguntas/)).toBeInTheDocument();
+    });
+  });
+
+  test('handles getPlayerLevel edge case with 0 questions', async () => {
+    axios.get.mockImplementationOnce(() => Promise.resolve({
+      data: {
+        ...mockUserData,
+        TotalWellAnswers: 0,
+        TotalWrongAnswers: 0,
+        sessions: []
+      }
+    }));
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+    await waitFor(() => {
+      expect(screen.getByText(/No hay sesiones de juego registradas/)).toBeInTheDocument();
+    });
+  });
 });
