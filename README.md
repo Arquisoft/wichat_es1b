@@ -16,29 +16,53 @@
 <img src="https://github.com/Arquisoft/wichat_es1b/blob/master/docs/images/Empathy.gif" height="100">
 </p>
 
-## :brain: Sobre Wichat
-Bienvenido a Wichat, una aplicación moderna y escalable para el uso como un Juego Quizz. Este proyecto ha sido desarrollado como parte del grado de Ingeniería Informatica del Software en la Universidad de Oviedo.
+![logo - Copy](https://github.com/user-attachments/assets/e06cbf79-130b-40af-8ceb-f23ae51a470b)
 
 
-## :cold_face: ¿Cómo funciona el Quizz?
-### :ok_hand: Generación de preguntas dinámicas:
+## 🐉 Sobre Wichat
+Bienvenido a Wichat, una aplicación moderna y escalable para el uso como un Juego Quizz. Este proyecto ha sido desarrollado como parte del grado de Ingeniería Informatica del Software en la Universidad de Oviedo, más en concreto como parte de la asignatura Arquitectura del Software.
+
+![Screenshot 2025-04-27 194955](https://github.com/user-attachments/assets/a52da404-afbc-4d68-afbc-0ddd453068a9)
+
+
+
+## :brain: ¿Cómo funciona el Quizz?
+### ✈️ Generación de preguntas dinámicas:
+
+![Screenshot 2025-04-27 195252](https://github.com/user-attachments/assets/b16ff06c-3f4e-4678-8ea3-28d9170df468)
 
 Las preguntas se generan dinámicamente a partir de consultas a WikiData, utilizando información relevante como imágenes y etiquetas asociadas.
 Cada pregunta incluye una imagen y un conjunto de opciones de respuesta, de las cuales solo una es correcta.
 ### :right_anger_bubble: Categorías temáticas:
 
 Las preguntas se agrupan en categorías como Geografía, Cultura, Personajes, Videojuegos, Aviones y un modo Aleatorio.
-Cada categoría tiene un conjunto de consultas específicas para garantizar la relevancia de las preguntas.
+Cada categoría tiene un conjunto de consultas específicas para garantizar la relevancia y variedad de las preguntas.
 ### :space_invader: Modos de juego
 
+![Screenshot 2025-04-27 194642](https://github.com/user-attachments/assets/075f285f-29ab-411e-92bf-4232b7d271ce)
+
 #### SinglePlayer
-- Los usuarios pueden iniciar un juego seleccionando una categoría específica o eligiendo todas las categorías.
+- Los usuarios pueden iniciar una partida seleccionando una categoría específica o eligiendo todas las categorías.
 - Durante el juego, se presentan preguntas únicas y aleatorias para evitar repeticiones.
 - Validación y manejo de respuestas.
+- Al finalizar, se muestran las estadísticas de la partida:
+
+    ![Screenshot 2025-04-27 201249](https://github.com/user-attachments/assets/da2066cc-13b4-414d-bd5e-47e7942f863a)
+  
 
 #### Multiplayer
 - Los usuarios podrán poner a prueba sus habilidades contra sus amigos en una batalla de tiempo limitado.
 - El objetivo es acertar el mayor número de preguntas para llevarse la victoria.
+- En cada partida se generará un 'pool' compartido de preguntas, de tal forma que todos los usuarios tienen las mismas, solo que cada uno las verá en distinto orden para evitar tramposos.
+- Dos o más jugadores podrán ser invitados a formar parte de la misma sala y así competir entre ellos:
+  
+    ![Screenshot 2025-04-27 195833](https://github.com/user-attachments/assets/6fade4af-9cb4-4d38-b473-bd53de5a23a8)
+
+- Al terminar la partida, todos los jugadores verán el ránking final, así como quién ha sido el ganador:
+
+    ![Screenshot 2025-04-27 200157](https://github.com/user-attachments/assets/17c3cfe7-c4f8-40af-a0a0-8bc8f49d31b0)
+
+
 
 
 ## Quick start guide
