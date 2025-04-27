@@ -7,6 +7,7 @@ let llmservice;
 let gatewayservice;
 let sessionservice;
 let questionservice;
+let multiplayer;
 
 async function startServer() {
     console.log('Starting MongoDB memory server...');
@@ -23,6 +24,7 @@ async function startServer() {
     questionservice = await require("../../questionservice/question-service");
     llmservice = await require("../../llmservice/llm-service");
     gatewayservice = await require("../../gatewayservice/gateway-service");
+    multiplayer = await require("../../multiplayerservice/multiplayer-service");
 }
 
 startServer();

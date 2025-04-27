@@ -6,5 +6,6 @@ module.exports = {
         //"/steps/login.steps.js",
         //"/steps/register.steps.js",
         //"/steps/home-stats.steps.js",
+        //"/steps/game.steps.js",
     ]
 }

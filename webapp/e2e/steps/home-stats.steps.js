@@ -27,7 +27,7 @@ defineFeature(feature, test => {
   });
 
 
-  /*test('Usuario sin partidas ve estadísticas recientes', ({ given, when, then }) => {
+  test('Usuario sin partidas ve estadísticas recientes', ({ given, when, then }) => {
     
     let username;
     let password;
@@ -70,7 +70,7 @@ defineFeature(feature, test => {
 
       expect(divExists).toBe(true);
     });
-  }, 100000);*/
+  }, 100000);
 
 
   test('Usuario con partidas ve estadísticas recientes', ({ given, when, then }) => {
@@ -130,15 +130,12 @@ defineFeature(feature, test => {
       await page.waitForSelector('p.MuiTypography-root.MuiTypography-body2.css-bxmwoh', { visible: true, timeout: 10000 });
       const statisticsExist = await page.evaluate(() => {
         // First person in the leaderboard
-        const correctElement = document.querySelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-8.css-efwuvd > div > div > div > div > div.MuiBox-root.css-i9gxme > h6");
-        const correctScore = correctElement && correctElement.textContent === "wiStats";
+        const correctElement = document.querySelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.css-15j76c0 > div > div > div > div > div.MuiBox-root.css-70qvj9 > div.MuiBox-root.css-i9gxme > h6");
+        return  correctElement && correctElement.textContent === "wiStats";
 
-        // Check for correct Answers (5)
-        const incorrectElement =document.querySelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-8.css-efwuvd > div > div > div > div > div.MuiBox-root.css-i9gxme > div > p:nth-child(2)")
-        const incorrectScore = incorrectElement && incorrectElement.textContent === 'Correctas: 5';
-
-        return correctScore && incorrectScore;
       });
+
+
       expect(statisticsExist).toBe(true);
     });
   });

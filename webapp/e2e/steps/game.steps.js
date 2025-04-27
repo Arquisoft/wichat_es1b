@@ -61,20 +61,20 @@ defineFeature(feature, test => {
         when('Inicia una partida', async () => {
             //Cargaremos la partida en principiante
 
-            await page.waitForSelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-4.css-iln954 > div > button:nth-child(6)");
-            await page.waitForSelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-4.css-iln954 > div > button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-colorPrimary.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-colorPrimary.pulse-button.css-hja32l")
+            await page.waitForSelector("#play > div > div:nth-child(1) > div > button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.css-1dm9p0h");
+            await page.waitForSelector("#play > div > div:nth-child(1) > div > button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.css-kl0dyj")
 
             await page.evaluate(async () => {
                 //Dificil
-                let button = document.querySelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-4.css-iln954 > div > button:nth-child(6)")
+                let button = document.querySelector("#play > div > div:nth-child(1) > div > button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.css-1dm9p0h")
                 await button.click();
-                let dificil = document.querySelector("#difficulty-menu > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation3.MuiPopover-paper.MuiMenu-paper.css-17roxjl > ul > li:nth-child(3) > div.MuiListItemText-root.css-14rdsw0 > span")
+                let dificil = document.querySelector("#difficulty-menu > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation3.MuiPopover-paper.MuiMenu-paper.css-s2kez3 > ul > li:nth-child(3)")
                 await dificil.click();
 
                 //Geografia
-                button = document.querySelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-4.css-iln954 > div > button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-colorPrimary.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeLarge.MuiButton-containedSizeLarge.MuiButton-colorPrimary.pulse-button.css-hja32l")
+                button = document.querySelector("#play > div > div:nth-child(1) > div > button.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorPrimary.css-kl0dyj")
                 await button.click();
-                let geografia = document.querySelector("#game-menu > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation3.MuiPopover-paper.MuiMenu-paper.css-17roxjl > ul > li:nth-child(1)")
+                let geografia = document.querySelector("#game-menu > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation3.MuiPopover-paper.MuiMenu-paper.css-s2kez3 > ul > li:nth-child(1) > div.MuiListItemText-root.css-14rdsw0 > span")
                 await geografia.click();
             })
         });

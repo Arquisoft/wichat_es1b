@@ -48,6 +48,7 @@ jobs:
       - run: npm --prefix llmservice install
       - run: npm --prefix gatewayservice install
       - run: npm --prefix apiservice install
+      - run: npm --prefix multiplayerservice install
       - run: CI=false npm --prefix webapp install
       - run: CI=false npm --prefix webapp run build
       - run: CI=false npm --prefix webapp run test:e2e
