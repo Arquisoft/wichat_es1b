@@ -45,7 +45,7 @@ class MultiplayerService {
             onAllPlayersFinished: [] // Para cuando todos terminan
         }
 
-        this.serverUrl = process.env.MULTIPLAYER ||"http://localhost:8085" // Cambia esto a la URL de tu servidor
+        this.serverUrl = process.env.REACT_APP_MULTIPLAYER ||"http://localhost:8085" // Cambia esto a la URL de tu servidor
     }
 
     /**
