@@ -89,6 +89,7 @@ services:
       - llmservice
       - questionservice
       - sessionservice
+      - multiplayerservice
     ports:
       - "8000:8000"
     networks:
@@ -112,6 +113,19 @@ services:
     networks:
       - mynetwork
 
+  multiplayerservice:
+    container_name: multiplayerservice-wichat_es1b
+    image: ghcr.io/arquisoft/wichat_es1b/multiplayerservice:latest
+    profiles: [ "dev", "prod" ]
+    build: ./multiplayerservice
+    environment:
+      - REACT_APP_API_ENDPOINT=http://gatewayservice:8000
+    depends_on:
+      - mongodb
+    ports:
+      - "8085:8085"
+    networks:
+      - mynetwork
 
   prometheus:
     image: ghcr.io/arquisoft/wichat_es1b/prometheus:latest
@@ -159,16 +173,17 @@ services:
     container_name: webapp-wichat_es1b
     image: ghcr.io/arquisoft/wichat_es1b/webapp:latest
     profiles: ["dev", "prod"]
-    build: 
+    build:
       context: ./webapp
       args:
         LLM_API_KEY: ${LLM_API_KEY}
     depends_on:
       - gatewayservice
+      - multiplayerservice
     ports:
       - "3000:3000"
 
-      
+
 
 
 
