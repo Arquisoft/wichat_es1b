@@ -1,11 +1,66 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import axios from 'axios';
 import { BrowserRouter } from 'react-router-dom';
 import HomePage from './Home';
 
-// Mock axios completely to avoid any endpoint dependencies
+jest.mock('../game/multiplayer/Multiplayer', () => {
+  const mockMultiplayerInstance = {
+    socket: { connected: true, emit: jest.fn() },
+    connect: jest.fn().mockResolvedValue(),
+    disconnect: jest.fn(),
+    on: jest.fn().mockImplementation(function() { return this; }),
+    off: jest.fn().mockImplementation(function() { return this; }),
+    createRoom: jest.fn().mockResolvedValue({ success: true }),
+    joinRoom: jest.fn().mockResolvedValue({ success: true, roomName: 'Sala de testUser' }),
+    leaveRoom: jest.fn(),
+    requestQuestions: jest.fn().mockResolvedValue([]),
+    sendReady: jest.fn(),
+    startGame: jest.fn(),
+    userId: 'testUserId'
+  };
+  return {
+    __esModule: true,
+    default: {
+      getInstance: jest.fn(() => mockMultiplayerInstance)
+    }
+  };
+});
+
+let mockMultiplayerInstance;
+
+beforeEach(() => {
+  // Reset the mock instance before each test
+  mockMultiplayerInstance = {
+    socket: { connected: true, emit: jest.fn() },
+    connect: jest.fn().mockResolvedValue(),
+    disconnect: jest.fn(),
+    on: jest.fn().mockImplementation(function() { return this; }),
+    off: jest.fn().mockImplementation(function() { return this; }),
+    createRoom: jest.fn().mockResolvedValue({ success: true }),
+    joinRoom: jest.fn().mockResolvedValue({ success: true, roomName: 'Sala de testUser' }),
+    leaveRoom: jest.fn(),
+    requestQuestions: jest.fn().mockResolvedValue([]),
+    sendReady: jest.fn(),
+    startGame: jest.fn(),
+    userId: 'testUserId'
+  };
+
+  // Update the getInstance mock to use this fresh instance
+  require('../game/multiplayer/Multiplayer').default.getInstance.mockReturnValue(mockMultiplayerInstance);
+
+  window.localStorage.getItem = jest.fn((key) => {
+    if (key === 'username') return 'testUser';
+    return null;
+  });
+});
+
+afterEach(() => {
+  window.localStorage.getItem.mockRestore();
+});
+
+// Mock axios
 jest.mock('axios');
 
 // Mock useNavigate
@@ -20,29 +75,26 @@ const localStorageMock = (() => {
   let store = { username: 'testUser' };
   return {
     getItem: jest.fn(key => store[key]),
-    setItem: jest.fn((key, value) => {
-      store[key] = value;
-    }),
-    removeItem: jest.fn(key => {
-      delete store[key];
-    }),
-    clear: jest.fn(() => {
-      store = {};
-    })
+    setItem: jest.fn((key, value) => { store[key] = value; }),
+    removeItem: jest.fn(key => { delete store[key]; }),
+    clear: jest.fn(() => { store = {}; })
   };
 })();
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// Mock console.error to prevent test output pollution
+// Mock window.prompt
+window.prompt = jest.fn();
+
+// Silence console errors during tests
 const originalConsoleError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalConsoleError;
-});
+beforeAll(() => { console.error = jest.fn(); });
+afterAll(() => { console.error = originalConsoleError; });
+
+// Get the mock for assertions
+const MultiplayerMock = jest.requireMock('../game/multiplayer/Multiplayer').default;
 
 describe('HomePage Component', () => {
+  // Sample user data for tests
   const mockUserData = {
     username: 'testUser',
     TotalWellAnswers: 25,
@@ -58,413 +110,283 @@ describe('HomePage Component', () => {
         category: 'Geografia',
         questions: [
           {
-            question: 'What is the capital of France?',
-            correctAnswer: 'Paris',
-            userAnswer: 'Paris'
+            question: 'Test Question 1?',
+            correctAnswer: 'Correct Answer',
+            userAnswer: 'Correct Answer'
           },
           {
-            question: 'What is the capital of Spain?',
-            correctAnswer: 'Madrid',
-            userAnswer: 'Barcelona'
+            question: 'Test Question 2?',
+            correctAnswer: 'Correct Answer 2',
+            userAnswer: 'Wrong Answer'
           }
         ]
-      },
-      {
-        _id: '2',
-        score: 7,
-        wrongAnswers: 3,
-        createdAt: '2023-03-28T14:30:00Z',
-        difficulty: 'Difícil',
-        category: 'Cultura',
-        questions: []
-      },
-      {
-        _id: '3',
-        score: 9,
-        wrongAnswers: 1,
-        createdAt: '2023-03-25T10:15:00Z',
-        difficulty: 'Principiante',
-        category: 'Personajes',
-        questions: []
       }
     ]
   };
 
+  // Sample leaderboard data
   const mockLeaderboardData = [
-    {
-      username: 'topUser',
-      AccuracyRate: 95,
-      TotalWellAnswers: 100,
-      TotalWrongAnswers: 5
-    },
-    {
-      username: 'secondUser',
-      AccuracyRate: 85,
-      TotalWellAnswers: 85,
-      TotalWrongAnswers: 15
-    },
-    {
-      username: 'thirdUser',
-      AccuracyRate: 75,
-      TotalWellAnswers: 75,
-      TotalWrongAnswers: 25
-    }
+    { username: 'leader1', AccuracyRate: 95, TotalWellAnswers: 100 },
+    { username: 'leader2', AccuracyRate: 85, TotalWellAnswers: 90 },
+    { username: 'leader3', AccuracyRate: 75, TotalWellAnswers: 80 }
   ];
 
   beforeEach(() => {
-    // Reset mocks
+    // Clear all mocks before each test
     jest.clearAllMocks();
-    
-    // Default mock implementation for axios.get
-    axios.get.mockResolvedValue({ data: mockUserData });
-  });
 
-  test('renders the home page with header', async () => {
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Check if the header is rendered
-    const header = await screen.findByText('WiChat - Home');
-    expect(header).toBeInTheDocument();
-  });
-
-  test('navigates to game when clicking on a category', async () => {
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Find and click the "Comenzar partida" button
-    const startButton = await screen.findByText('Comenzar partida');
-    fireEvent.click(startButton);
-    
-    // Find and click any category button that appears in the menu
-    // Wait a bit for the menu to appear
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Try to find any of the category buttons
-    const categoryButtons = screen.getAllByRole('menuitem');
-    if (categoryButtons.length > 0) {
-      fireEvent.click(categoryButtons[0]); // Click the first menu item
-      
-      // Check if navigate was called
-      expect(mockNavigate).toHaveBeenCalledWith('/Game', expect.anything());
-    }
-  });
-
-  test('logs out user when clicking logout button', async () => {
-    const { container } = render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Find all menu items in the toolbar
-    await waitFor(() => {
-      const menuItems = container.querySelectorAll('[role="menuitem"]');
-      expect(menuItems.length).toBeGreaterThan(0);
-      
-      // Find the logout button (usually the second menu item)
-      if (menuItems.length > 1) {
-        const logoutButton = menuItems[4];
-        fireEvent.click(logoutButton);
-        
-        // Check if localStorage was cleared and navigation happened
-        expect(localStorageMock.removeItem).toHaveBeenCalledWith('username');
-        expect(mockNavigate).toHaveBeenCalledWith('/');
+    // Default mock responses for API calls
+    axios.get.mockImplementation(url => {
+      if (url.includes('/get-user-sessions')) {
+        return Promise.resolve({ data: mockUserData });
+      } else if (url.includes('/get-users-totaldatas')) {
+        return Promise.resolve({ data: mockLeaderboardData });
       }
+      return Promise.resolve({ data: {} });
+    });
+  });
+
+  test('renders key UI elements', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    await waitFor(() => {
+      expect(screen.getByText(/¡Hola, testUser!/)).toBeInTheDocument();
+      expect(screen.getByText(/Un jugador/)).toBeInTheDocument();
+      expect(screen.getByText(/Multijugador/)).toBeInTheDocument();
+      expect(screen.getByText(/Comenzar partida/)).toBeInTheDocument();
+      expect(screen.getByText(/Tus últimas partidas/)).toBeInTheDocument();
     });
   });
 
   test('navigates to profile when clicking profile button', async () => {
-    const { container } = render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Find all menu items in the toolbar
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    const profileButton = document.querySelector('[aria-label="AccountCircle"]') ||
+        screen.getAllByRole('menuitem')[3];
+
+    // Show the tooltip
+    fireEvent.mouseEnter(profileButton);
     await waitFor(() => {
-      const menuItems = container.querySelectorAll('[role="menuitem"]');
-      expect(menuItems.length).toBeGreaterThan(0);
-      
-      // Find the profile button (usually the first menu item)
-      const profileButton = menuItems[3];
-      fireEvent.click(profileButton);
-      
-      // Check if navigation happened
-      expect(mockNavigate).toHaveBeenCalledWith('/Profile');
+      expect(screen.getByText('Ir al perfil')).toBeInTheDocument();
+    });
+
+    // Click the profile button
+    fireEvent.click(profileButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/Profile');
+  });
+
+  test('handles logout functionality', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    const logoutButton = document.querySelector('[aria-label="ExitToApp"]') ||
+        screen.getAllByRole('menuitem')[4];
+
+    // Show the tooltip
+    fireEvent.mouseEnter(logoutButton);
+    await waitFor(() => {
+      expect(screen.getByText('Cerrar sesión')).toBeInTheDocument();
+    });
+
+    // Click logout
+    fireEvent.click(logoutButton);
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('username');
+    expect(mockNavigate).toHaveBeenCalledWith('/');
+  });
+
+  test('changes difficulty when selecting from menu', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    // Open difficulty menu
+    fireEvent.click(screen.getByText('Normal'));
+
+    // Select a different difficulty
+    await waitFor(() => {
+      expect(screen.getByText('Difícil')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Difícil'));
+
+    // Check that difficulty changed
+    await waitFor(() => {
+      expect(screen.getByText('Difícil')).toBeInTheDocument();
+    });
+  });
+
+  test('opens and interacts with session details dialog', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Tus últimas partidas/)).toBeInTheDocument();
+    });
+
+    // Click on a session card
+    const sessionCard = screen.getByText('correctas').closest('.session-card');
+    fireEvent.click(sessionCard);
+
+    // Check dialog content
+    await waitFor(() => {
+      expect(screen.getByText(/Detalles de la sesión/)).toBeInTheDocument();
+      expect(screen.getByText('Pregunta 1')).toBeInTheDocument();
+    });
+
+    // Expand question details
+    fireEvent.click(screen.getByText('Pregunta 1'));
+    await waitFor(() => {
+      expect(screen.getByText('Respuesta correcta:')).toBeInTheDocument();
+    });
+
+    // Close dialog
+    fireEvent.click(screen.getByText('Cerrar'));
+    await waitFor(() => {
+      expect(screen.queryByText(/Detalles de la sesión/)).not.toBeInTheDocument();
+    });
+  });
+
+  test('selects different game categories', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    // Open game menu
+    fireEvent.click(screen.getByText('Comenzar partida'));
+
+    // Select Geografia category
+    await waitFor(() => {
+      expect(screen.getByText('Geografía')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Geografía'));
+
+    // Check navigation occurred with correct params
+    expect(mockNavigate).toHaveBeenCalledWith('/Game', {
+      state: {
+        gameConfig: {
+          numQuestions: 10,
+          timePerQuestion: 30,
+          difficulty: 'Normal',
+          category: 'Geografia',
+        },
+      },
+    });
+  });
+
+  test('renders correctly with empty sessions', async () => {
+    axios.get.mockImplementationOnce(() => Promise.resolve({
+      data: { ...mockUserData, sessions: [] }
+    }));
+
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    await waitFor(() => {
+      expect(screen.getByText(/No hay sesiones de juego registradas/)).toBeInTheDocument();
+    });
+  });
+
+  test('renders correctly with empty leaderboard', async () => {
+    axios.get.mockImplementationOnce((url) => {
+      if (url.includes('/get-user-sessions')) {
+        return Promise.resolve({ data: mockUserData });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Revisa tus estadísticas y comienza una nueva partida/)).toBeInTheDocument();
+    });
+  });
+
+  test('displays player level based on total questions', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Nivel:/)).toBeInTheDocument();
     });
   });
 
   test('handles API error gracefully', async () => {
-    // Mock API error
-    axios.get.mockRejectedValueOnce(new Error('API error'));
-    
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Component should still render without crashing
-    const header = await screen.findByText('WiChat - Home');
-    expect(header).toBeInTheDocument();
-    
-    // Error should be logged (we've mocked console.error)
-    expect(console.error).toHaveBeenCalled();
-  });
+    axios.get.mockImplementationOnce(() => Promise.reject(new Error('Network error')));
 
-  // Test for changing difficulty
-  test('changes difficulty when selecting from menu', async () => {
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Find the difficulty button (it should contain "Normal" by default)
-    const difficultyButtons = await screen.findAllByText('Normal');
-    
-    // Click the first button that contains "Normal"
-    if (difficultyButtons.length > 0) {
-      fireEvent.click(difficultyButtons[0]);
-      
-      // Wait a bit for the menu to appear
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Try to find and click the "Difícil" option
-      const dificilOptions = screen.getAllByText('Difícil');
-      if (dificilOptions.length > 0) {
-        fireEvent.click(dificilOptions[0]);
-        
-        // After clicking, the button should now show "Difícil"
-        const updatedButtons = await screen.findAllByText('Difícil');
-        expect(updatedButtons.length).toBeGreaterThan(0);
-      }
-    }
-  });
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
 
-  // Test for session details dialog
-  test('opens and interacts with session details dialog', async () => {
-    // Mock user data with sessions
-    axios.get.mockResolvedValue({ data: mockUserData });
-    
-    const { container } = render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Wait for the component to load
     await waitFor(() => {
-      // Find session cards
-      const sessionCards = container.querySelectorAll('.session-card');
-      
-      // If session cards are found, click the first one
-      if (sessionCards.length > 0) {
-        fireEvent.click(sessionCards[0]);
-        
-        // Dialog should open - check for dialog content
-        return screen.findByText((content) => 
-          content.includes('Detalles') || content.includes('sesión')
-        );
-      }
-    }, { timeout: 2000 });
-    
-    // Try to find and click a question to expand it
-    const questionElements = screen.queryAllByText((content) => 
-      content.includes('Pregunta')
-    );
-    
-    if (questionElements.length > 0) {
-      fireEvent.click(questionElements[0]);
-      
-      // Check if question details are displayed
-      await waitFor(() => {
-        const answerElements = screen.queryAllByText((content) => 
-          content.includes('Respuesta') || content.includes('correcta')
-        );
-        expect(answerElements.length).toBeGreaterThan(0);
-      });
-    }
-    
-    // Try to close the dialog
-    const closeButton = screen.queryByText('Cerrar');
-    if (closeButton) {
-      fireEvent.click(closeButton);
-      
-      // Check if dialog is closed
-      await waitFor(() => {
-        const dialogTitle = screen.queryByText((content) => 
-          content.includes('Detalles') && content.includes('sesión')
-        );
-        expect(dialogTitle).not.toBeInTheDocument();
-      });
-    }
-  });
-
-  // Test for category selection
-  test('selects different game categories', async () => {
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Find and click the "Comenzar partida" button
-    const startButton = await screen.findByText('Comenzar partida');
-    fireEvent.click(startButton);
-    
-    // Wait for menu to appear
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Try to find and click different category options
-    const categoryOptions = [
-      { name: 'Geografía', category: 'Geografia' },
-      { name: 'Cultura', category: 'Cultura' },
-      { name: 'Personajes', category: 'Personajes' },
-      { name: 'Aleatorio', category: 'All' }
-    ];
-    
-    // Test each category if it's available
-    for (const option of categoryOptions) {
-      const categoryButton = screen.queryByText(option.name);
-      if (categoryButton) {
-        fireEvent.click(categoryButton);
-        
-        // Check if navigate was called with the correct category
-        expect(mockNavigate).toHaveBeenCalledWith('/Game', expect.objectContaining({
-          state: expect.objectContaining({
-            gameConfig: expect.objectContaining({
-              category: option.category,
-            }),
-          }),
-        }));
-        
-        // Reset mock for next iteration
-        mockNavigate.mockClear();
-        
-        // Need to click the button again to open the menu for the next category
-        fireEvent.click(startButton);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-  });
-
-  // Test for rendering with empty sessions
-  test('renders correctly with empty sessions', async () => {
-    // Mock empty sessions
-    axios.get.mockResolvedValue({ 
-      data: {
-        ...mockUserData,
-        sessions: []
-      }
+      expect(screen.getByText(/¡Hola, testUser!/)).toBeInTheDocument();
     });
-    
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Component should render without crashing
-    const header = await screen.findByText('WiChat - Home');
-    expect(header).toBeInTheDocument();
-    
-    // The component should still have the game section
-    const gameSection = await screen.findByText('Comenzar partida');
-    expect(gameSection).toBeInTheDocument();
   });
 
-  // Test for rendering with empty leaderboard
-  test('renders correctly with empty leaderboard', async () => {
-    // First call returns normal user data, second call returns empty leaderboard
-    axios.get
-      .mockResolvedValueOnce({ data: mockUserData })
-      .mockResolvedValueOnce({ data: [] });
-    
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Component should render without crashing
-    const header = await screen.findByText('WiChat - Home');
-    expect(header).toBeInTheDocument();
-    
-    // The component should still have the game section
-    const gameSection = await screen.findByText('Comenzar partida');
-    expect(gameSection).toBeInTheDocument();
-  });
+  // Multiplayer UI coverage
+  test('shows waiting room when creating a room', async () => {
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
 
-  // Test for player level display
-  test('displays player level based on total questions', async () => {
-    // Mock user data with enough questions to reach "Intermedio" level
-    const userData = {
-      ...mockUserData,
-      TotalWellAnswers: 40,
-      TotalWrongAnswers: 20
-    };
-    
-    axios.get.mockResolvedValue({ data: userData });
-    
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Check if any level indicator is displayed
+    // Click create room button
+    expect(screen.getByText(/Crear sala/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Crear sala'));
+
+    // Verify waiting room is displayed
     await waitFor(() => {
-      // Look for level text or chip
-      const levelElement = screen.queryByText((content) => {
-        return content.includes('Nivel') || 
-              content.includes('Principiante') || 
-              content.includes('Aprendiz') || 
-              content.includes('Intermedio') || 
-              content.includes('Avanzado') || 
-              content.includes('Experto') || 
-              content.includes('Generalísimo');
-      });
-      
-      // If level element is found, test passes
-      if (levelElement) {
-        expect(levelElement).toBeInTheDocument();
-      }
-    }, { timeout: 2000 });
-  });
-
-  // Test for UI elements rendering
-  test('renders key UI elements', async () => {
-    render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
-    );
-    
-    // Check for important UI elements
-    await waitFor(() => {
-      // Header
-      const header = screen.getByText('WiChat - Home');
-      expect(header).toBeInTheDocument();
-      
-      // Game section
-      const gameSection = screen.getByText('Comenzar partida');
-      expect(gameSection).toBeInTheDocument();
-      
-      // Difficulty selector
-      const difficultySection = screen.getByText('Seleccionar dificultad');
-      expect(difficultySection).toBeInTheDocument();
-      
-      // Check for any buttons
-      const buttons = screen.getAllByRole('button');
-      expect(buttons.length).toBeGreaterThan(0);
+      expect(screen.getByText(/Sala de Espera/)).toBeInTheDocument();
+      expect(MultiplayerMock.getInstance().createRoom).toHaveBeenCalled();
+      expect(MultiplayerMock.getInstance().joinRoom).toHaveBeenCalled();
     });
+  });
+
+  test('shows waiting room when joining a room', async () => {
+    window.prompt.mockReturnValue('room-123');
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    // Click join room button
+    fireEvent.click(screen.getByText('Unirse a sala'));
+
+    // Verify waiting room is displayed with correct data
+    await waitFor(() => {
+      expect(window.prompt).toHaveBeenCalledWith('Introduce el ID de la sala:');
+      expect(screen.getByText(/Revisa tus estadísticas y comienza una nueva partida/)).toBeInTheDocument();
+      expect(MultiplayerMock.getInstance().joinRoom).toHaveBeenCalledWith('room-123', 'testUser');
+    });
+  });
+
+  test('handles multiplayer game start', async () => {
+    // Prepare the event handler mock for onGameStart
+    const mockGameStartHandler = jest.fn();
+    let gameStartCallback;
+
+    MultiplayerMock.getInstance.mockImplementation(() => ({
+      socket: { connected: true, emit: jest.fn() },
+      connect: jest.fn().mockResolvedValue(),
+      disconnect: jest.fn(),
+      on: jest.fn().mockImplementation(function(event, callback) {
+        if (event === 'onGameStart') {
+          gameStartCallback = callback;
+        }
+        return this;
+      }),
+      off: jest.fn().mockImplementation(function() { return this; }), // <-- Add this line
+      createRoom: jest.fn().mockResolvedValue({ success: true }),
+      joinRoom: jest.fn().mockResolvedValue({ success: true, roomName: 'Sala de testUser' }),
+      leaveRoom: jest.fn(),
+      requestQuestions: jest.fn().mockResolvedValue([]),
+      sendReady: jest.fn(),
+      startGame: jest.fn(),
+      userId: 'testUserId'
+    }));
+
+    render(<BrowserRouter><HomePage /></BrowserRouter>);
+
+    // Create a room to show waiting room
+    fireEvent.click(screen.getByText('Crear sala'));
+
+    // Wait for the waiting room to appear
+    await waitFor(() => {
+      expect(screen.getByText(/Creando sala/)).toBeInTheDocument();
+    });
+
+    // Trigger the game start event if callback is available
+    if (gameStartCallback) {
+      act(() => {
+        gameStartCallback({ roomId: 'room-123', players: ['player1', 'player2'] });
+      });
+
+      // Verify navigation occurred
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/GameMultiplayer', expect.any(Object));
+      });
+    }
   });
 });

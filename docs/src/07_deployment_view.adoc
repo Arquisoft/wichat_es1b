@@ -27,6 +27,7 @@ Servicios de la aplicación en servidor propio:::
 * *_User Service_*: Provee información de los usuarios.
 * *_Questions Generator Service_*: Genera preguntas para el usuario.
 * *_History Service_*: Guarda el historial de preguntas del usuario.
+* *_Multiplayer Service_*: Soporta la infraestructura para permitir jugar a varios usuarios.
 * *_Database_*: Base de datos que almacena la información de los usuarios y las preguntas.
 
 Servicio en el cliente:::

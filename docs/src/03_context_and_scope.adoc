@@ -16,7 +16,7 @@ Los principales objetivos comerciales de WIChat son:
 
 * **Fomentar la participación:** Incentivar a los jugadores mediante recompensas por respuestas correctas y rankings competitivos.
 
-* **Expandir la accesibilidad y el alcance del juego:** Implementando internacionalización y soporte para múltiples idiomas.
+* **Expandir la jugabilidad y fomentar la socialización:** Implementando una opción de partidas multijugador para competir con otros jugadores.
 
 * **Aprovechar tecnologías de inteligencia artificial:** Generando automáticamente preguntas, respuestas y pistas basadas en datos estructurados.
 
