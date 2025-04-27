@@ -76,6 +76,36 @@ describe('Gateway Service', () => {
       expect(res.body).toEqual({ error: 'Unauthorized' });
     });
 
+    it('should return error when POST /adduser fails', async () => {
+      axios.post.mockRejectedValueOnce({
+        response: { status: 401, data: { error: 'Unauthorized' } }
+      });
+
+      const res = await request(app).post('/adduser').send({});
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toEqual({ error: 'Unauthorized' });
+    });
+
+    it('should return error when POST /askllm fails', async () => {
+      axios.post.mockRejectedValueOnce({
+        response: { status: 401, data: { error: 'Unauthorized' } }
+      });
+
+      const res = await request(app).post('/askllm').send({});
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toEqual({ error: 'Unauthorized' });
+    });
+
+    it('should return error when POST /configureAssistant fails', async () => {
+      axios.post.mockRejectedValueOnce({
+        response: { status: 401, data: { error: 'Unauthorized' } }
+      });
+
+      const res = await request(app).post('/configureAssistant').send({});
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toEqual({ error: 'Unauthorized' });
+    });
+
     it('should return error when GET /generateQuestion fails', async () => {
       axios.get.mockRejectedValueOnce({
         response: { status: 500, data: { error: 'Question error' } }
