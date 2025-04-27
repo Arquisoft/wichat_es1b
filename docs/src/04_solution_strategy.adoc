@@ -20,9 +20,9 @@ ifndef::imagesdir[:imagesdir: ../images]
 
 
 === Decisiones sobre cómo alcanzar los objetivos clave de calidad
-* **Rendimiento**: Se buscará minimizar los tiempos de procesamiento de datos y tareas, para así mejorar la experiencia del usuario.
-* **Testeabilidad**: El equipo testeará la aplicación manual y automáticamente mediante pruebas de cobertura (unitarias e integración), pruebas de aceptación (e2e) y pruebas de carga.
-* **Usabilidad**: La aplicación será clara, intuitiva y familiar para el usuario.   
+* **Rendimiento**: Se buscará minimizar los tiempos de procesamiento de datos y tareas, para así mejorar la experiencia del usuario. Con ayuda de las pruebas de carga, se medirá el rendimiento de la aplicación.
+* **Testeabilidad**: El equipo testeará la aplicación manual y automáticamente mediante pruebas de cobertura (unitarias e integración), pruebas de aceptación (e2e) y pruebas de carga, que incluirán las pruebas de estrés.
+* **Usabilidad**: La aplicación será clara, intuitiva y familiar para el usuario. Tratando de que la navegación sea sencilla y rápida.   
 * **Mantenibilidad**: La aplicación será mantenible gracias al diseño por componentes, lo que nos permitirá tener un código con baja acoplamiento y alta mucha cohesión, ayudándonos a que realizar cambios sea más sencillo y rápido. La documentación se revisará para tenerla actualizada. Además, se implementará y configurará un sistema de CI (Integración Continua) para que cada vez que se realice un cambio en el código, se lleven a cabo pruebas automáticas y se despliegue la aplicación en la nube, dadas ciertas precondiciones.
 
 
