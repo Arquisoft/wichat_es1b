@@ -6,17 +6,113 @@ ifndef::imagesdir[:imagesdir: ../images]
 
 === Pruebas unitarias
 
-Se hacen...
+Para este proyecto decidimos realizar pruebas unitarias para cada servicio desarrollado y para cada componente de React en el frontend. Estas pruebas se llevan a cabo de manera obligatoria al realizar un commit en la rama principal del repositorio y al efectuar una release, lo que nos permite garantizar el correcto funcionamiento de la aplicación.
 
 
 === Pruebas de aceptación
 
-Se hacen...
+Se han realizado 5 pruebas de aceptación con sus respectivos escenarios. Estas pruebas se encargan de verificar que la aplicación cumple con los requisitos establecidos y que el comportamiento de la aplicación es el esperado. Los flujos de la aplicación testados son los siguientes:
+
+*Flujo Iniciar sesión*
+
+Para este flujo hay 2 posibles escenarios:
+* El usuario introduce credenciales válidas y se inicia sesión correctamente.
+* El usuario introduce credenciales inválidas.
+
+*Flujo Registrarse como nuevo usuario*
+
+Para este flujo hemos establecido estos 2 escenarios:
+* El nuevo usuario se registra correctamente.
+* El nuevo usuario introduce contraseñas que no coinciden.
+
+*Flujo Mostrar estadísticas en  la pantalla Home*
+
+Para este flujo hay 2 posibles escenarios:
+* EL usuario no ha jugado ninguna partida, por lo tanto, se muestra el mensaje "No hay datos de sesiones disponibles".
+* El usuario ha jugado alguna partida, por lo tanto, se muestran las estadísticas de las partidas jugadas, preguntas corerctas correctas/incorrectas y ranking de los jugadores.
+
+*Flujo Jugar una nueva partida*
+
+Para este flujo hay 5 posibles escenarios:
+* El usuario entra e inicia una nueva partida, se le mosntrará la pantalla de juego.
+* El usuario responde correctamente a la pregunta, se le mostrará su respuesta en verde.
+* El usuario responde incorrectamente a la pregunta, se le mostrará su respuesta en rojo.
+* El usuario no responde a la pregunta, cuando se acabe el tiempo, se le mostrará la respuesta correcta en verde.
+* El usuario usa una pista usando el chatbot.
 
 
 === Pruebas de cobertura de código
 
-A completar cuando se termine.
+El objetivo de las pruebas de cobertura establecido ha sido cubrir 80% de las líneas del código total.
+
+A continuación, se muestra la cobertura de código obtenida en cada uno de los servicios desarrollados:
+
+*API Service*
+
+image::../images/12_testsCoverage_api.png[]
+
+*Gateway Service*
+
+image::../images/12_testsCoverage_gateway.png[]
+
+*LLM Service*
+
+image::../images/12_testsCoverage_llm.png[]
+
+*Multiplayer Service*
+
+image::../images/12_testsCoverage_multiplayer.png[]
+
+*Question Service*
+
+image::../images/12_testsCoverage_question.png[]
+
+*Authentication Service*
+
+image::../images/12_testsCoverage_auth.png[]
+
+*Sesion Service*
+
+image::../images/12_testsCoverage_sesion.png[]
+
+*Users Service*
+
+image::../images/12_testsCoverage_users.png[]
+
+
+A continuación, se muestra la cobertura de código obtenida en cada uno de los componentes que forman la aplicación, almacenados en el directorio *webapp*:
+
+*App*
+
+image::../images/12_testsCoverage_webapp_app.png[]
+
+*AnimatedCharacter*
+
+image::../images/12_testsCoverage_webapp_animatedCharacter.png[]
+
+*Chatbot*
+
+image::../images/12_testsCoverage_webapp_chatbot.png[]
+
+*Game*
+
+image::../images/12_testsCoverage_webapp_game.png[]
+
+*Home*
+
+image::../images/12_testsCoverage_webapp_home.png[]
+
+*Login*
+
+image::../images/12_testsCoverage_webapp_login.png[]
+
+*Profile*
+
+image::../images/12_testsCoverage_webapp_profile.png[]
+
+*AddUser*
+
+image::../images/12_testsCoverage_webapp_adduser.png[]
 
 
 === Pruebas de carga (load tests)
