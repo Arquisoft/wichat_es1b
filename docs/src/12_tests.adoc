@@ -16,9 +16,7 @@ Se hacen...
 
 === Pruebas de cobertura de código
 
-El objetivo de las pruebas de cobertura establecido ha sido cubrir 80% de las líneas del código total.
-
-A continuación, se muestra la cobertura de código obtenida en cada uno de los servicios desarrollados:
+El objetivo de las pruebas de cobertura establecido ha sido el del 80% de cobertura de código. A continuación, se muestra la cobertura de código obtenida en cada uno de los servicios y componentes desarrollados:
 
 *API Service*
 
@@ -51,41 +49,6 @@ image::../images/12_testsCoverage_sesion.png[]
 *Users Service*
 
 image::../images/12_testsCoverage_users.png[]
-
-
-A continuación, se muestra la cobertura de código obtenida en cada uno de los componentes que forman la aplicación, almacenados en el directorio *webapp*:
-
-*App*
-
-image::../images/12_testsCoverage_webapp_app.png[]
-
-*AnimatedCharacter*
-
-image::../images/12_testsCoverage_webapp_animatedCharacter.png[]
-
-*Chatbot*
-
-image::../images/12_testsCoverage_webapp_chatbot.png[]
-
-*Game*
-
-image::../images/12_testsCoverage_webapp_game.png[]
-
-*Home*
-
-image::../images/12_testsCoverage_webapp_home.png[]
-
-*Login*
-
-image::../images/12_testsCoverage_webapp_login.png[]
-
-*Profile*
-
-image::../images/12_testsCoverage_webapp_profile.png[]
-
-*AddUser*
-
-image::../images/12_testsCoverage_webapp_adduser.png[]
 
 
 === Pruebas de carga (load tests)
