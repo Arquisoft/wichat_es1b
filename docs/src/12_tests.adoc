@@ -6,7 +6,7 @@ ifndef::imagesdir[:imagesdir: ../images]
 
 === Pruebas unitarias
 
-Para este proyecto decidimos realizar pruebas unitarias para cada servicio desarrollado y para cada componente de React en el frontend. Estas pruebas se llevan a cabo de manera obligatoria al realizar un commit en la rama principal del repositorio y al efectuar una release, lo que nos permite garantizar el correcto funcionamiento de la aplicación.
+Se hacen...
 
 
 === Pruebas de aceptación
@@ -16,39 +16,7 @@ Se hacen...
 
 === Pruebas de cobertura de código
 
-El objetivo de las pruebas de cobertura establecido ha sido el del 80% de cobertura de código. A continuación, se muestra la cobertura de código obtenida en cada uno de los servicios y componentes desarrollados:
-
-*API Service*
-
-image::../images/12_testsCoverage_api.png[]
-
-*Gateway Service*
-
-image::../images/12_testsCoverage_gateway.png[]
-
-*LLM Service*
-
-image::../images/12_testsCoverage_llm.png[]
-
-*Multiplayer Service*
-
-image::../images/12_testsCoverage_multiplayer.png[]
-
-*Question Service*
-
-image::../images/12_testsCoverage_question.png[]
-
-*Authentication Service*
-
-image::../images/12_testsCoverage_auth.png[]
-
-*Sesion Service*
-
-image::../images/12_testsCoverage_sesion.png[]
-
-*Users Service*
-
-image::../images/12_testsCoverage_users.png[]
+A completar cuando se termine.
 
 
 === Pruebas de carga (load tests)
