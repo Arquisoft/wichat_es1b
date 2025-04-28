@@ -1536,19 +1536,188 @@ There you will find links and examples about ADR.</p>
 <div class="sect2">
 <h3 id="_pruebas_unitarias">12.1. Pruebas unitarias</h3>
 <div class="paragraph">
-<p>Se hacen&#8230;&#8203;</p>
+<p>Para este proyecto decidimos realizar pruebas unitarias para cada servicio desarrollado y para cada componente de React en el frontend. Estas pruebas se llevan a cabo de manera obligatoria al realizar un commit en la rama principal del repositorio y al efectuar una release, lo que nos permite garantizar el correcto funcionamiento de la aplicación.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_pruebas_de_aceptación">12.2. Pruebas de aceptación</h3>
 <div class="paragraph">
-<p>Se hacen&#8230;&#8203;</p>
+<p>Se han realizado 5 pruebas de aceptación con sus respectivos escenarios. Estas pruebas se encargan de verificar que la aplicación cumple con los requisitos establecidos y que el comportamiento de la aplicación es el esperado. Los flujos de la aplicación testados son los siguientes:</p>
+</div>
+<div class="paragraph">
+<p><strong>Flujo Iniciar sesión</strong></p>
+</div>
+<div class="paragraph">
+<p>Para este flujo hay 2 posibles escenarios:
+* El usuario introduce credenciales válidas y se inicia sesión correctamente.
+* El usuario introduce credenciales inválidas.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flujo Registrarse como nuevo usuario</strong></p>
+</div>
+<div class="paragraph">
+<p>Para este flujo hemos establecido estos 2 escenarios:
+* El nuevo usuario se registra correctamente.
+* El nuevo usuario introduce contraseñas que no coinciden.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flujo Mostrar estadísticas en  la pantalla Home</strong></p>
+</div>
+<div class="paragraph">
+<p>Para este flujo hay 2 posibles escenarios:
+* EL usuario no ha jugado ninguna partida, por lo tanto, se muestra el mensaje "No hay datos de sesiones disponibles".
+* El usuario ha jugado alguna partida, por lo tanto, se muestran las estadísticas de las partidas jugadas, preguntas corerctas correctas/incorrectas y ranking de los jugadores.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flujo Jugar una nueva partida</strong></p>
+</div>
+<div class="paragraph">
+<p>Para este flujo hay 5 posibles escenarios:
+* El usuario entra e inicia una nueva partida, se le mosntrará la pantalla de juego.
+* El usuario responde correctamente a la pregunta, se le mostrará su respuesta en verde.
+* El usuario responde incorrectamente a la pregunta, se le mostrará su respuesta en rojo.
+* El usuario no responde a la pregunta, cuando se acabe el tiempo, se le mostrará la respuesta correcta en verde.
+* El usuario usa una pista usando el chatbot.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_pruebas_de_cobertura_de_código">12.3. Pruebas de cobertura de código</h3>
 <div class="paragraph">
-<p>A completar cuando se termine.</p>
+<p>El objetivo de las pruebas de cobertura establecido ha sido cubrir 80% de las líneas del código total.</p>
+</div>
+<div class="paragraph">
+<p>A continuación, se muestra la cobertura de código obtenida en cada uno de los servicios desarrollados:</p>
+</div>
+<div class="paragraph">
+<p><strong>API Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_api.png" alt="12 testsCoverage api">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Gateway Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_gateway.png" alt="12 testsCoverage gateway">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>LLM Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_llm.png" alt="12 testsCoverage llm">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Multiplayer Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_multiplayer.png" alt="12 testsCoverage multiplayer">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Question Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_question.png" alt="12 testsCoverage question">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Authentication Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_auth.png" alt="12 testsCoverage auth">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Sesion Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_sesion.png" alt="12 testsCoverage sesion">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Users Service</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_users.png" alt="12 testsCoverage users">
+</div>
+</div>
+<div class="paragraph">
+<p>A continuación, se muestra la cobertura de código obtenida en cada uno de los componentes que forman la aplicación, almacenados en el directorio <strong>webapp</strong>:</p>
+</div>
+<div class="paragraph">
+<p><strong>App</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_app.png" alt="12 testsCoverage webapp app">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>AnimatedCharacter</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_animatedCharacter.png" alt="12 testsCoverage webapp animatedCharacter">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Chatbot</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_chatbot.png" alt="12 testsCoverage webapp chatbot">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Game</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_game.png" alt="12 testsCoverage webapp game">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Home</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_home.png" alt="12 testsCoverage webapp home">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Login</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_login.png" alt="12 testsCoverage webapp login">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Profile</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_profile.png" alt="12 testsCoverage webapp profile">
+</div>
+</div>
+<div class="paragraph">
+<p><strong>AddUser</strong></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./images/12_testsCoverage_webapp_adduser.png" alt="12 testsCoverage webapp adduser">
+</div>
 </div>
 </div>
 <div class="sect2">
