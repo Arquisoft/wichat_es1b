@@ -11,7 +11,7 @@ Para este proyecto decidimos realizar pruebas unitarias para cada servicio desar
 
 === Pruebas de aceptación
 
-Las pruebas de aceptación se han realizado para cada uno de los flujos de la aplicación. Estas pruebas se encargan de verificar que la aplicación cumple con los requisitos establecidos y que el comportamiento de la aplicación es el esperado. Los flujos son los siguientes:
+Se han realizado 5 pruebas de aceptación con sus respectivos escenarios. Estas pruebas se encargan de verificar que la aplicación cumple con los requisitos establecidos y que el comportamiento de la aplicación es el esperado. Los flujos de la aplicación testados son los siguientes:
 
 *Flujo Iniciar sesión*
 
@@ -25,12 +25,20 @@ Para este flujo hemos establecido estos 2 escenarios:
 * El nuevo usuario se registra correctamente.
 * El nuevo usuario introduce contraseñas que no coinciden.
 
-*Flujo Estadísticas en Home*
+*Flujo Mostrar estadísticas en  la pantalla Home*
 
 Para este flujo hay 2 posibles escenarios:
 * EL usuario no ha jugado ninguna partida, por lo tanto, se muestra el mensaje "No hay datos de sesiones disponibles".
 * El usuario ha jugado alguna partida, por lo tanto, se muestran las estadísticas de las partidas jugadas, preguntas corerctas correctas/incorrectas y ranking de los jugadores.
 
+*Flujo Jugar una nueva partida*
+
+Para este flujo hay 5 posibles escenarios:
+* El usuario entra e inicia una nueva partida, se le mosntrará la pantalla de juego.
+* El usuario responde correctamente a la pregunta, se le mostrará su respuesta en verde.
+* El usuario responde incorrectamente a la pregunta, se le mostrará su respuesta en rojo.
+* El usuario no responde a la pregunta, cuando se acabe el tiempo, se le mostrará la respuesta correcta en verde.
+* El usuario usa una pista usando el chatbot.
 
 
 === Pruebas de cobertura de código
