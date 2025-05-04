@@ -305,6 +305,10 @@ function getQuestionData(data) {
 
 
 app.get('/generateQuestion', async (req, res) => {
+    if (!queries || queries.length === 0) {
+        return res.status(400).json({ error: 'No queries available to generate a question' });
+    }
+
     randomQuery = crypto.randomInt(0, queries.length);
     console.log("Selected Query: " + randomQuery);
     const apiUrl = `https://query.wikidata.org/sparql?query=${encodeURIComponent(queries[randomQuery])}&format=json`;
@@ -328,7 +332,11 @@ app.get('/generateQuestion', async (req, res) => {
         //const data = await response.json();
 
         // Send the parsed response to be selected
-        getQuestionData(response.data.results.bindings);
+        const questionData = getQuestionData(response.data.results.bindings);
+        questionObject = questionData.questionObject;
+        questionImage = questionData.questionImage;
+        correctAnswer = questionData.correctAnswer;
+        answerOptions = questionData.answerOptions;
 
         // Declare what will be return
         solution = {
@@ -387,7 +395,7 @@ app.post('/configureGame', async (req, res) => {
 
 app.post('/startGame',  async (req, res) => {
     const quest = await getQuestionsByCategory(req.body.category);
-    usedIndices = new Set();
+    //usedIndices = new Set();
     const category = req.body.category;
     res.status(200).json({
         message: 'Game started',
@@ -400,7 +408,10 @@ app.post('/startGame',  async (req, res) => {
 
 
 app.get('/nextQuestion', async (req, res) => {
-    const question = await getQuestionsByCategory(req.query.category)
+    const question = await getQuestionsByCategory(req.query.category);
+    if (!question) {
+        return res.status(400).json({ error: 'No more questions' });
+    }
     res.status(200).json(question);
 });
 
@@ -562,6 +573,10 @@ async function getQuestionsByCategory(category) {
 
         if (count === 0) {
             console.log(`No questions found for category: ${category}`);
+            return null;
+        }
+
+        if (usedIndices.size >= count) {
             return null;
         }
 

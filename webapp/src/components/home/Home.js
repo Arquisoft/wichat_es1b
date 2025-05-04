@@ -429,8 +429,8 @@ const HomePage = () => {
             multiplayerService.connect()
         }
 
-        // Generate a unique room ID
-        const roomId = `room-${Date.now()}`
+        // Generate a unique 6-digit random room ID
+        const roomId = `room-${Math.floor(100000 + Math.random() * 900000).toString()}`
         const roomName = `Sala de ${username || "Anónimo"}`
         const currentUsername = username || "Anónimo"
 

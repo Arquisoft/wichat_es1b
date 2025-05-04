@@ -79,7 +79,7 @@ image::../images/12_testsCoverage_multiplayer.png[]
 
 *Question Service*
 
-image::../images/12_testsCoverage_question.png[]
+image::../images/12_testsCoverage_questionService.png[]
 
 *Authentication Service*
 

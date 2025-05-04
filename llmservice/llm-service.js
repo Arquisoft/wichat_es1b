@@ -11,7 +11,7 @@ const llmConfigs = {
   empathy: {
     url: () => 'https://empathyai.prod.empathy.co/v1/chat/completions',
     transformRequest: (question, moderation) => ({
-      model: "mistralai/Mistral-7B-Instruct-v0.3",
+      model: "qwen/qwen-2.5-72b-instruct",
       stream: false, // No soporta stream=true con axios directamente
       messages: [
         { role: "system", content: moderation },

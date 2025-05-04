@@ -3,7 +3,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const axios = require('axios');
 
 let mongoServer;
-let app;
+let server;
 
 // Mock axios
 jest.mock('axios');
@@ -12,11 +12,41 @@ beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     process.env.MONGODB_URI = mongoUri;
-    app = require('./question-service');
+    server = require('./question-service');
+
+    // Mock axios for backend Wikidata queries
+    axios.mockImplementation(() => {
+        return Promise.resolve({
+            data: {
+                results: {
+                    bindings: [
+                        {
+                            optionLabel: { value: "Test Option 1" },
+                            imageLabel: { value: "https://example.com/image1.jpg" }
+                        },
+                        {
+                            optionLabel: { value: "Test Option 2" },
+                            imageLabel: { value: "https://example.com/image2.jpg" }
+                        },
+                        {
+                            optionLabel: { value: "Test Option 3" },
+                            imageLabel: { value: "https://example.com/image3.jpg" }
+                        },
+                        {
+                            optionLabel: { value: "Test Option 4" },
+                            imageLabel: { value: "https://example.com/image4.jpg" }
+                        }
+                    ]
+                }
+            }
+        });
+    });
+
+    await request(server).put('/createQuestions');
 });
 
 afterAll(async () => {
-    app.close();
+    server.close();
     await mongoServer.stop();
 });
 
@@ -52,7 +82,9 @@ describe('Question Service', () => {
     });
 
     it('should generate a new question on GET /generateQuestion', async () => {
-        const response = await request(app).get('/generateQuestion');
+        await request(server).post('/configureGame').send({ valueQuestion: 5 });
+        await request(server).post('/startGame').send({});
+        const response = await request(server).get('/generateQuestion');
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty("responseQuestion");
         expect(response.body).toHaveProperty("responseCorrectAnswer");
@@ -61,26 +93,26 @@ describe('Question Service', () => {
     });
 
     it('should return a valid image URL on GET /generateQuestion', async () => {
-        const response = await request(app).get('/generateQuestion');
+        const response = await request(server).get('/generateQuestion');
         expect(response.status).toBe(200);
         expect(response.body.responseQuestionImage).toMatch(/^https?:\/\/.+/);
     });
 
     it('should configure the game on POST /configureGame', async () => {
-        const response = await request(app).post('/configureGame').send({ valueQuestion: 5 });
+        const response = await request(server).post('/configureGame').send({ valueQuestion: 5 });
         expect(response.status).toBe(200);
         expect(response.body).toBe(5);
     });
 
     it('should return an error if valueQuestion is not provided on POST /configureGame', async () => {
-        const response = await request(app).post('/configureGame').send({});
+        const response = await request(server).post('/configureGame').send({});
         expect(response.status).toBe(400);
         expect(response.body).toHaveProperty('error', 'Incorrect number of questions');
     });
 
     // New tests for category functionality
     it('should start a game with no specific category', async () => {
-        const response = await request(app).post('/startGame').send({});
+        const response = await request(server).post('/startGame').send({});
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('message', 'Game started');
         expect(response.body).toHaveProperty('category', 'All');
@@ -88,7 +120,7 @@ describe('Question Service', () => {
     });
 
     it('should start a game with a specific category', async () => {
-        const response = await request(app).post('/startGame').send({ category: 'Art' });
+        const response = await request(server).post('/startGame').send({ category: 'Art' });
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('message', 'Game started');
         expect(response.body).toHaveProperty('category', 'Art');
@@ -97,10 +129,10 @@ describe('Question Service', () => {
 
     it('should get the next question after starting a game', async () => {
         // First start a game
-        await request(app).post('/startGame').send({});
+        await request(server).post('/startGame').send({});
 
         // Then get the next question
-        const response = await request(app).get('/nextQuestion');
+        const response = await request(server).get('/nextQuestion');
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('questionObject');
         expect(response.body).toHaveProperty('questionImage');
@@ -110,14 +142,34 @@ describe('Question Service', () => {
 
     it('should return an error when no more questions are available', async () => {
         // Configure game with only 1 question
-        await request(app).post('/configureGame').send({ valueQuestion: 1 });
+        await request(server).post('/configureGame').send({ valueQuestion: 1 });
 
         // Start a game
-        await request(app).post('/startGame').send({});
+        await request(server).post('/startGame').send({});
 
         // Try to get the next question (should fail as there's only 1)
-        const response = await request(app).get('/nextQuestion');
+        const response = await request(server).get('/nextQuestion');
         expect(response.status).toBe(400);
         expect(response.body).toHaveProperty('error', 'No more questions');
+    });
+
+    it('should handle Wikidata API errors in /generateQuestion', async () => {
+        axios.mockImplementationOnce(() => Promise.reject(new Error('API error')));
+        const response = await request(server).get('/generateQuestion');
+        expect(response.status).toBe(500);
+        expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    });
+
+    it('should return message if no questions found in /generatedQuestion', async () => {
+        const response = await request(server).get('/generatedQuestion?category=nonexistent');
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('message', 'No questions found for the specified criteria');
+    });
+
+    it('should handle unknown category in /startGame', async () => {
+        const response = await request(server).post('/startGame').send({ category: 'UnknownCategory' });
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('category');
+        expect(response.body).toHaveProperty('firstQuestion');
     });
 });
