@@ -328,19 +328,13 @@ app.get('/generateQuestion', async (req, res) => {
         // Parse the response
         //const data = await response.json();
 
-        // Send the parsed response to be selected
-        const questionData = getQuestionData(response.data.results.bindings);
-        questionObject = questionData.questionObject;
-        questionImage = questionData.questionImage;
-        correctAnswer = questionData.correctAnswer;
-        answerOptions = questionData.answerOptions;
+        const question = getQuestionData(response.data.results.bindings);
 
-        // Declare what will be return
-        solution = {
-            responseQuestion : questionObject,
-            responseCorrectAnswer : correctAnswer,
-            responseAnswerOptions : answerOptions,
-            responseQuestionImage : questionImage
+        const solution = {
+            responseQuestion: question.questionObject,
+            responseCorrectAnswer: question.correctAnswer,
+            responseAnswerOptions: question.answerOptions,
+            responseQuestionImage: question.questionImage
         };
 
         //saveQuestion();

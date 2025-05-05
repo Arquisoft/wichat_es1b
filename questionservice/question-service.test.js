@@ -106,7 +106,7 @@ describe('Question Service', () => {
 
     it('should return an error if valueQuestion is not provided on POST /configureGame', async () => {
         const response = await request(server).post('/configureGame').send({});
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(400);
     });
 
     // New tests for category functionality
