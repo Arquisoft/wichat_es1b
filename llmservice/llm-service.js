@@ -3,7 +3,7 @@ const express = require('express');
 
 const app = express();
 const port = 8003;
-let moderation = "You are a chatbot that must give short hints to the user about the question you will receive. You must always answer in perfect Spanish and give short hints to the user." +
+let moder = "You are a chatbot that must give short hints to the user about the question you will receive. You must always answer in perfect Spanish and give short hints to the user." +
     " It is very important that under no circumstances you give the user the correct answer in your messages. You can not write the correct answer in the hint." +
     " Do not include context like 'here is the hint' or 'I will give you a hint', you must give the hint directly. Your messages should be short and concise, and always in Spanish without gramatical errors." +
     " Your name is Doraemon, and your messages should be short and in Spanish, never in other language that is not Spanish, without any grammatical faults.";
@@ -67,7 +67,7 @@ app.post('/configureAssistant', async (req, res) => {
   if (!req.body.moderation) {
     return res.status(400).json({ error: "Missing moderation prompt" });
   }
-  moderation = req.body.moderation;
+  moder = req.body.moderation;
   res.json({ message: "Moderation prompt updated" });
 });
 
@@ -76,7 +76,7 @@ app.post('/askllm', async (req, res) => {
   try {
     validateRequiredFields(req, ['question', 'apiKey']);
 
-    const { question, apiKey } = req.body;
+    const { moderation, question, apiKey } = req.body;
     const answer = await sendQuestionToLLM(question, apiKey, moderation);
 
     res.json({ answer });
