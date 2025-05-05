@@ -38,14 +38,14 @@ describe('API Service', () => {
     describe('GET /questions/:username', () => {
         it('should return formatted sessions data', async () => {
             // Mock the axios response
-            axios.get.mockResolvedValue({ data: [{ _id: '123', score: 5 }] });
+            axios.get.mockResolvedValue({ data: { sessions: [{ _id: '123', score: 5 }] } });
 
             const res = await request(app).get('/questions/testuser');
 
             expect(res.statusCode).toBe(200);
             expect(res.body).toHaveProperty('sessions');
             expect(res.body.sessions[0]).not.toHaveProperty('_id');
-            expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/get-sessions/testuser'));
+            expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('/get-user-sessions/testuser'));
         });
     });
 
@@ -181,40 +181,4 @@ describe('API Service', () => {
             console.log = originalConsoleLog;
         });
     });
-
-/*
-    describe('Server startup logging', () => {
-        it('should log server startup messages', () => {
-            // Mock console.log to capture output
-            const originalConsoleLog = console.log;
-            console.log = jest.fn();
-
-            jest.isolateModules(() => {
-                // Save the listen callback
-                let listenCallback;
-                const originalListen = require('express/lib/application').listen;
-                require('express/lib/application').listen = function(port, callback) {
-                    listenCallback = callback;
-                    return mockServer;
-                };
-
-                require('./api-service');
-
-                if (typeof listenCallback === 'function') {
-                    listenCallback();
-                }
-
-                // Restore original listen
-                require('express/lib/application').listen = originalListen;
-            });
-
-            // Verify the console.log statements were called
-            expect(console.log).toHaveBeenCalledWith('API service listening at http://localhost:7000');
-
-            // Restore console.log
-            console.log = originalConsoleLog;
-        });
-    });
-
- */
 });
