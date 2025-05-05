@@ -547,4 +547,24 @@ describe('Game Component', () => {
       expect(screen.getByTestId('pie-chart')).toBeInTheDocument();
     });
   });
+  
+  test('muestra error si no se recibe la primera pregunta al iniciar partida', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Silenciar el log
+  
+    // Simula respuesta sin 'firstQuestion'
+    axios.post.mockResolvedValueOnce({ data: {} });
+  
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+  
+    // Espera a que se ejecute handleNewGame
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith("No question received");
+    });
+  
+    consoleErrorSpy.mockRestore();
+  });
 });
