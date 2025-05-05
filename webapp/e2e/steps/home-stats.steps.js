@@ -126,11 +126,10 @@ defineFeature(feature, test => {
 
     then('Debera mostrarse unas estadísticas de preguntas correctas e incorrectas, y un raking de jugadores', async () => {
 
-      await page.waitForSelector('h6.MuiTypography-root.MuiTypography-h6.css-1ntayem', { visible: true, timeout: 10000 });
-      await page.waitForSelector('p.MuiTypography-root.MuiTypography-body2.css-bxmwoh', { visible: true, timeout: 10000 });
+      await page.waitForSelector('.MuiTypography-root.MuiTypography-body2.css-d7hf6', { visible: true, timeout: 10000 });
       const statisticsExist = await page.evaluate(() => {
         // First person in the leaderboard
-        const correctElement = document.querySelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.css-15j76c0 > div > div > div > div > div.MuiBox-root.css-70qvj9 > div.MuiBox-root.css-i9gxme > h6");
+        const correctElement = document.querySelector("#root > div > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-58o9ae > div.MuiBox-root.css-1wcaknn > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.css-15j76c0 > div > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation0.css-ze5bre > div.MuiBox-root.css-0 > div.MuiBox-root.css-jjcd51 > div > div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-3.css-vi3cr > p")
         return  correctElement && correctElement.textContent === "wiStats";
 
       });
