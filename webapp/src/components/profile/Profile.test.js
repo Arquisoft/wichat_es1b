@@ -46,9 +46,7 @@ describe('Profile Component', () => {
   });
 
   const mockResponse = (sessions) => {
-    mockAxios
-      .onGet(new RegExp('/get-user-sessions/'))
-      .reply(200, { sessions });
+    mockAxios.onGet(/get-user-sessions/).reply(200, { sessions });
   };
 
   it('shows loading skeletons initially', async () => {
@@ -140,7 +138,7 @@ describe('Profile Component', () => {
     mockResponse([s1, s2]);
     renderComponent();
     const items = await screen.findAllByText(/Sesión del/);
-    const expectedDate = new Date('2025-06-01T00:00:00Z').toLocaleDateString('es-ES');
+    const expectedDate = new Date('2025-06-01T00:00:00Z').toLocaleDateString();
     expect(items[0].textContent).toContain(expectedDate);
 
     fireEvent.click(screen.getByText(/Ordenar por: Fecha/i));
