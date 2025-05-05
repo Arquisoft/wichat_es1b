@@ -22,7 +22,8 @@
 ## 🐉 Sobre Wichat
 Bienvenido a Wichat, una aplicación moderna y escalable para el uso como un Juego Quizz. Este proyecto ha sido desarrollado como parte del grado de Ingeniería Informatica del Software en la Universidad de Oviedo, más en concreto como parte de la asignatura Arquitectura del Software.
 
-![Screenshot 2025-04-27 194955](https://github.com/user-attachments/assets/a52da404-afbc-4d68-afbc-0ddd453068a9)
+
+![image](https://github.com/user-attachments/assets/3b73b88a-5357-41f7-9510-11d79621638e)
 
 
 
