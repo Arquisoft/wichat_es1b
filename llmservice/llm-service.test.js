@@ -62,7 +62,7 @@ describe('LLM Service', () => {
     // Then test the ask endpoint
     const response = await request(app)
         .post('/askllm')
-        .send({ question: 'another question', apiKey: 'apiKey' });
+        .send({ moderation: 'Custom moderation', question: 'another question', apiKey: 'apiKey' });
 
     expect(response.statusCode).toBe(200);
     expect(response.body.answer).toBe('custom moderated answer');
