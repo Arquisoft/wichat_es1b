@@ -19,14 +19,11 @@ export default function Chat(props) {
     ]
 
     useEffect(() => {
-        configure("You are a chatbot that must give short hints to the user about the question '" + question + "', and its correct answer is '" + correctAnswer + "'. You must always respond in perfect Spanish of Spain and give SHORT hints to the user. " +
-            "It is extremely important that under no circumstances you give the user the correct answer in your messages. You must never write the correct answer in the hint. You can never say '" + correctAnswer + "'. " +
-            "Do not include context like 'here is the hint' or 'I will give you a hint', you must give the hint directly. Your messages should be short and concise, and always in Spanish without gramatical errors. " +
-            "Your name is Doraemon, and your messages should be short and in Spanish.");
-
+        configure("The question is '" + question + "', and the correct answer is '" + correctAnswer + "'. Remember you can not say the correct answer, you have to help the user giving hints in Spanish without grammatical faults." +
+            " Be a helpful assistant, giving short hints, not long messages, and only one each time. Remember to never say '" + correctAnswer + "' explicitly.");
     }, [question, correctAnswer]);
 
-    const [message, setMessage] = useState("¡Bienvenido! Soy Doraemon, el gato robot, y estoy aquí para ayudarte a descubrir qué representa la imagen que ves 🥳");
+    const [message, setMessage] = useState("¡Bienvenido! Soy Doraemon, el gato robot, y estoy aquí para ayudarte a descubrir qué representa la imagen que ves 🍀");
 
     const flow = {
         start: {

@@ -3,7 +3,10 @@ const express = require('express');
 
 const app = express();
 const port = 8003;
-let moderation = "You are a helpful assistant.";
+let moderation = "You are a chatbot that must give short hints to the user about the question you will receive. You must always answer in perfect Spanish and give short hints to the user." +
+    " It is very important that under no circumstances you give the user the correct answer in your messages. You can not write the correct answer in the hint." +
+    " Do not include context like 'here is the hint' or 'I will give you a hint', you must give the hint directly. Your messages should be short and concise, and always in Spanish without gramatical errors." +
+    " Your name is Doraemon, and your messages should be short and in Spanish, never in other language that is not Spanish, without any grammatical faults.";
 
 app.use(express.json()); // Middleware para parsear JSON
 
@@ -11,7 +14,8 @@ const llmConfigs = {
   empathy: {
     url: () => 'https://empathyai.prod.empathy.co/v1/chat/completions',
     transformRequest: (question, moderation) => ({
-      model: "qwen/qwen-2.5-72b-instruct",
+      //model: "qwen/Qwen2.5-Coder-7B-Instruct",
+      model: "mistralai/Mistral-7B-Instruct-v0.3",
       stream: false, // No soporta stream=true con axios directamente
       messages: [
         { role: "system", content: moderation },

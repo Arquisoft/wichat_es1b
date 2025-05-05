@@ -305,9 +305,6 @@ function getQuestionData(data) {
 
 
 app.get('/generateQuestion', async (req, res) => {
-    if (!queries || queries.length === 0) {
-        return res.status(400).json({ error: 'No queries available to generate a question' });
-    }
 
     randomQuery = crypto.randomInt(0, queries.length);
     console.log("Selected Query: " + randomQuery);
@@ -409,9 +406,7 @@ app.post('/startGame',  async (req, res) => {
 
 app.get('/nextQuestion', async (req, res) => {
     const question = await getQuestionsByCategory(req.query.category);
-    if (!question) {
-        return res.status(400).json({ error: 'No more questions' });
-    }
+
     res.status(200).json(question);
 });
 
