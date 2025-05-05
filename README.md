@@ -78,7 +78,7 @@ Cada categoría tiene un conjunto de consultas específicas para garantizar la r
 |------|----------------|
 | Jorge Blanco Sánchez | <a href="https://github.com/Jorge-Bs"><img src="https://img.shields.io/badge/UO293697-Jorge--Bs-FF3030"></a> |
 | Guillermo Villacorta Moro | <a href="https://github.com/guitlleVM"><img src="https://img.shields.io/badge/UO294193-guitlleVM-purple"></a> |
-| Bruno Isla Sierra |    <a href="https://github.com/Blayb"><img src="https://img.shields.io/badge/UO293994-Bplayb-orange"></a> |
+| Bruno Isla Sierra |    <a href="https://github.com/Bplayb"><img src="https://img.shields.io/badge/UO293994-Bplayb-orange"></a> |
 | Pablo Fernando Urones Clavera |     <a href="https://github.com/pablouronesclavera"><img src="https://img.shields.io/badge/UO264915-pablouronesclavera-green"></a> |
 
 
