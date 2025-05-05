@@ -567,4 +567,62 @@ describe('Game Component', () => {
   
     consoleErrorSpy.mockRestore();
   });
+
+  test('muestra advertencia si no hay preguntas en la sesión y muestra error si falla el guardado', async () => {
+    // Mock sin preguntas en sesión y fallo al guardar
+    useLocation.mockReturnValue({
+      state: {
+        gameConfig: {
+          numQuestions: 1,
+          timePerQuestion: 20,
+          difficulty: 'Normal',
+          category: 'Science'
+        }
+      }
+    });
+  
+    // 1. Simula que la primera llamada carga bien
+    axios.post.mockResolvedValueOnce({
+      data: {
+        firstQuestion: {
+          questionObject: "¿Capital de Francia?",
+          questionImage: "img.png",
+          correctAnswer: "Paris",
+          answerOptions: ["Paris", "Madrid"]
+        }
+      }
+    });
+  
+    // 2. Pero simula que guardar sesión falla
+    axios.post.mockRejectedValueOnce(new Error("Falló al guardar"));
+  
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+  
+    // Clic en opción correcta para finalizar
+    await waitFor(() => {
+      expect(screen.getByText('Paris')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Paris'));
+  
+    // Esperar a que termine la partida
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+  
+    await waitFor(() => {
+      expect(screen.getByText('¡Partida finalizada!')).toBeInTheDocument();
+    });
+  
+  
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });  
+
 });
