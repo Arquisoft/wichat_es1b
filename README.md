@@ -66,6 +66,15 @@ Cada categoría tiene un conjunto de consultas específicas para garantizar la r
 
 
 
+### 🐦‍🔥 API REST
+
+- La aplicación cuenta con una API REST básica con las principales funcionalidades relativas a las estadísticas de usuarios y a la generación de preguntas.
+- Se puede acceder a ella de forma sencilla desde el puerto y directorio: '8015/api-doc'.
+
+
+
+
+
 ## Quick start guide
 
 First, clone the project:
