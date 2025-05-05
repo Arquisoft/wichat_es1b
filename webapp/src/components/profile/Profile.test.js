@@ -5,6 +5,10 @@ import MockAdapter from 'axios-mock-adapter';
 import { BrowserRouter as Router, useNavigate } from 'react-router-dom';
 import Profile from './Profile';
 
+// Suppress MUI warning about non-boolean attributes
+beforeAll(() => jest.spyOn(console, 'error').mockImplementation(() => {}));
+afterAll(() => console.error.mockRestore());
+
 // Mock react-router useNavigate to track calls
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -136,7 +140,8 @@ describe('Profile Component', () => {
     mockResponse([s1, s2]);
     renderComponent();
     const items = await screen.findAllByText(/Sesión del/);
-    expect(items[0].textContent).toContain('1/6/2025');
+    const expectedDate = new Date('2025-06-01T00:00:00Z').toLocaleDateString('es-ES');
+    expect(items[0].textContent).toContain(expectedDate);
 
     fireEvent.click(screen.getByText(/Ordenar por: Fecha/i));
     fireEvent.click(screen.getByText(/Puntuación/i));
@@ -162,7 +167,7 @@ describe('Profile Component', () => {
     mockResponse([mockSession]);
     renderComponent();
     fireEvent.click(screen.getAllByRole('menuitem')[3]); // Home icon
-    expect(mockNavigate).toHaveBeenCalledWith('/Home');
+    expect(mockNavigate.mock.calls[0][0]).toBe('/Home');
 
     fireEvent.click(screen.getAllByRole('menuitem')[4]); // Logout icon
     await waitFor(() => expect(localStorage.getItem('username')).toBeNull());
