@@ -22,8 +22,8 @@ export default function Chat(props) {
     ]
 
     useEffect(() => {
-        configure("The question is '" + question + "', and the correct answer is '" + correctAnswer + "'. Remember you can not say the correct answer, you have to help the user giving hints in Spanish without grammatical faults." +
-            " Be a helpful assistant, giving short hints, not long messages, and only one each time. Remember to never say '" + correctAnswer + "' explicitly.");
+        configure("The question is '" + question + "', and the correct answer is '" + correctAnswer + "'. Remember you can not say the correct answer, you have to help the user giving a hint in Spanish without grammatical faults." +
+            " Be a helpful assistant, giving short hints, not long messages, and only one hint each time. Remember to never say '" + correctAnswer + "' explicitly.");
     }, [question, correctAnswer]);
 
     const [message, setMessage] = useState("¡Bienvenido! Soy Doraemon, el gato robot, y estoy aquí para ayudarte a descubrir qué representa la imagen que ves 🍀");
@@ -52,8 +52,8 @@ export default function Chat(props) {
 async function getMessage(message) {
     try {
         const response = await axios.post(apiEndpoint+'/askllm', {
-            moderation: "The question is '" + pro.question + "', and the correct answer is '" + pro.correctAnswer + "'. Remember you can not say the correct answer, you have to help the user giving hints in Spanish without grammatical faults." +
-                " Be a helpful assistant, giving short hints, not long messages, and only one each time. Remember to never say '" + pro.correctAnswer + "' explicitly.",
+            moderation: "The question is '" + pro.question + "', and the correct answer is '" + pro.correctAnswer + "'. Remember you can not say the correct answer, you have to help the user giving a hint in Spanish without grammatical faults." +
+                " Be a helpful assistant, giving short hints, not long messages, and only one hint each time. Remember to never say '" + pro.correctAnswer + "' explicitly.",
             question: message,
             apiKey: process.env.REACT_APP_LLM_API_KEY
         });

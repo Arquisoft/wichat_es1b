@@ -565,10 +565,6 @@ async function getQuestionsByCategory(category) {
             return null;
         }
 
-        if (usedIndices.size >= count) {
-            return null;
-        }
-
         // Generate random index
         let random;
         do {
