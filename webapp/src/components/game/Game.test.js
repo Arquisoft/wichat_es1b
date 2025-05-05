@@ -625,4 +625,37 @@ describe('Game Component', () => {
     consoleErrorSpy.mockRestore();
   });  
 
+  test('finaliza la partida si se detecta que ha terminado mediante useEffect', async () => {
+    useLocation.mockReturnValue({
+      state: {
+        gameConfig: {
+          numQuestions: 0, // hace que isGameFinished sea true directamente
+          timePerQuestion: 20,
+          difficulty: 'Normal',
+          category: 'Science'
+        }
+      }
+    });
+  
+    render(
+      <MemoryRouter>
+        <Game />
+      </MemoryRouter>
+    );
+  
+    // Espera a que cargue y ejecute el useEffect de fin de partida
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
+    });
+  
+    act(() => {
+      jest.advanceTimersByTime(1000); // Avanza el tiempo del setTimeout
+    });
+  
+    // Verificamos que el juego terminó y se muestra el mensaje
+    await waitFor(() => {
+      expect(screen.getByText('¡Partida finalizada!')).toBeInTheDocument();
+    });
+  });  
+
 });
