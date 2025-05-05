@@ -22,8 +22,8 @@ app.use(express.json());
 app.get('/questions/:username', async (req, res) => {
     try {
 
-        const response = await axios.get(apiEndpoint + '/get-sessions/' + req.params.username);
-        const sessions = response.data;
+        const response = await axios.get(apiEndpoint + '/get-user-sessions/' + req.params.username);
+        const sessions = response.data.sessions || [];
         console.log(sessions);
         // Transform sessions to remove _id and group questions by session
         const sessionsFormatted = sessions.map(session => {
@@ -59,8 +59,8 @@ app.get('/questions/:username', async (req, res) => {
 
 app.get('/statistics/:username', async (req, res) => {
     try {
-        const response = await axios.get(apiEndpoint + '/get-sessions/' + req.params.username);
-        const sessions = response.data;
+        const response = await axios.get(apiEndpoint + '/get-user-sessions/' + req.params.username);
+        const sessions = response.data.sessions || [];
 
         const totalSessions = sessions.length;
         const totalScore = sessions.reduce((acc, session) => acc + (session.score || 0), 0);
@@ -124,7 +124,7 @@ if (fs.existsSync(openapiPath)) {
     // Serve the Swagger UI documentation at the '/api-doc' endpoint
     // This middleware serves the Swagger UI files and sets up the Swagger UI page
     // It takes the parsed Swagger document as input
-    app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    app.use('/api-doc', swaggerUi.serve, (req, res, next) => swaggerUi.setup(swaggerDocument)(req, res, next));
 } else {
     console.log("Not configuring OpenAPI. Configuration file not present.")
 }

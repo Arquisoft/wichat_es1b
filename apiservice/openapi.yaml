@@ -6,6 +6,8 @@ info:
 servers:
   - url: http://SOMEIP:8015
     description: Production server
+  - url: http://localhost:8015
+    description: Development server
 tags:
   - name: User Sessions
     description: Endpoints related to user question sessions

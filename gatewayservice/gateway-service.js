@@ -183,7 +183,7 @@ if (fs.existsSync(openapiPath)) {
   // Serve the Swagger UI documentation at the '/api-doc' endpoint
   // This middleware serves the Swagger UI files and sets up the Swagger UI page
   // It takes the parsed Swagger document as input
-  app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use('/api-doc', swaggerUi.serve, (req, res, next) => swaggerUi.setup(swaggerDocument)(req, res, next));
 } else {
   console.log("Not configuring OpenAPI. Configuration file not present.")
 }

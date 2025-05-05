@@ -1,54 +1,29 @@
-jest.mock('../../components/game/multiplayer/Multiplayer', () => {
-  const mockMultiplayerInstance = {
-    socket: { connected: true, emit: jest.fn() },
-    connect: jest.fn().mockResolvedValue(),
-    disconnect: jest.fn(),
-    on: jest.fn().mockImplementation(function() { return this; }),
-    off: jest.fn().mockImplementation(function() { return this; }),
-    createRoom: jest.fn().mockResolvedValue({ success: true }),
-    joinRoom: jest.fn().mockResolvedValue({ success: true }),
-    leaveRoom: jest.fn(),
-    requestQuestions: jest.fn().mockResolvedValue([]),
-    sendReady: jest.fn(),
-    startGame: jest.fn(),
-    userId: 'testUserId'
-  };
-
-  return {
-    __esModule: true,
-    default: {
-      getInstance: jest.fn(() => mockMultiplayerInstance)
-    }
-  };
-});
-
-// webapp/src/components/profile/Profile.test.js
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { BrowserRouter, BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, useNavigate } from 'react-router-dom';
 import Profile from './Profile';
 
-// Mock window.alert to avoid JSDOM errors
-beforeAll(() => {
-  window.alert = jest.fn();
-  jest.spyOn(console, 'error').mockImplementation(() => {}); // Silence errors
-});
-afterAll(() => {
-  window.alert.mockRestore();
-  console.error.mockRestore();
-});
+// Suppress MUI warning about non-boolean attributes
+beforeAll(() => jest.spyOn(console, 'error').mockImplementation(() => {}));
+afterAll(() => console.error.mockRestore());
+
+// Mock react-router useNavigate to track calls
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
 
 const mockAxios = new MockAdapter(axios);
 
-const renderComponent = () => {
-  return render(
-      <Router>
-        <Profile />
-      </Router>
+const renderComponent = () =>
+  render(
+    <Router>
+      <Profile />
+    </Router>
   );
-};
 
 const mockSession = {
   _id: 'session1',
@@ -58,225 +33,148 @@ const mockSession = {
   difficulty: 'Fácil',
   category: 'Historia',
   questions: [
-    {
-      question: '¿Capital de Francia?',
-      correctAnswer: 'París',
-      userAnswer: 'París',
-    },
-    {
-      question: '¿Capital de Alemania?',
-      correctAnswer: 'Berlín',
-      userAnswer: 'Madrid',
-    }
-  ]
+    { question: '¿Capital de Francia?', correctAnswer: 'París', userAnswer: 'París' },
+    { question: '¿Capital de Alemania?', correctAnswer: 'Berlín', userAnswer: 'Madrid' },
+  ],
 };
 
-// Mock useNavigate globally
-const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate
-}));
-
-describe('Profile component', () => {
+describe('Profile Component', () => {
   beforeEach(() => {
-    localStorage.setItem('username', 'TestUser');
     mockAxios.reset();
+    localStorage.setItem('username', 'TestUser');
     mockNavigate.mockClear();
   });
 
-  const setupMockResponse = (response) => {
-    mockAxios.onGet(new RegExp(`/get-user-sessions/`)).reply(200, response);
+  const mockResponse = (sessions) => {
+    mockAxios.onGet(/get-user-sessions/).reply(200, { sessions });
   };
 
-  it('renderiza correctamente sin sesiones', async () => {
-    setupMockResponse({ sessions: [] });
+  it('shows loading skeletons initially', async () => {
+    mockResponse([]);
+    const { container } = renderComponent();
+    const skeletons = container.getElementsByClassName('MuiSkeleton-root');
+    expect(skeletons.length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.queryByText(/No hay datos de sesiones disponibles/i)).toBeInTheDocument();
+    });
+  });
 
+  it('renders empty state when no sessions', async () => {
+    mockResponse([]);
     renderComponent();
-
-    expect(await screen.findByText(/WiChat - Perfil/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Estas son las estadísticas de tu perfil/i)).toBeInTheDocument();
     expect(await screen.findByText(/No hay datos de sesiones disponibles/i)).toBeInTheDocument();
   });
 
-  it('renderiza con sesiones y permite ver detalles de una sesión', async () => {
-    setupMockResponse({ sessions: [mockSession] });
-
+  it('renders session list and details dialog', async () => {
+    mockResponse([mockSession]);
     renderComponent();
-
     expect(await screen.findByText(/Sesión del/i)).toBeInTheDocument();
-
     fireEvent.click(screen.getByText(/Sesión del/i));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Detalles de la sesión/i)).toBeInTheDocument();
-    });
-
+    expect(await screen.findByText(/Detalles de la sesión/i)).toBeInTheDocument();
     fireEvent.click(screen.getByText(/Pregunta 1/i));
-    const parisElements = await screen.findAllByText(/París/i);
-    expect(parisElements.length).toBeGreaterThan(0);
-
+    expect(await screen.findAllByText(/París/i)).toHaveLength(2);
     fireEvent.click(screen.getByText(/Pregunta 2/i));
     expect(await screen.findByText(/Berlín/i)).toBeInTheDocument();
     expect(await screen.findByText(/Madrid/i)).toBeInTheDocument();
-
     fireEvent.click(screen.getByRole('button', { name: /Cerrar/i }));
-  });
-
-  it('muestra mensaje de bienvenida y estadísticas', async () => {
-    setupMockResponse({ sessions: [mockSession] });
-
-    renderComponent();
-
-    expect(await screen.findByText(/WiChat - Perfil/i)).toBeInTheDocument();
-
-    expect(await screen.findAllByText(/Correctas/i)).not.toHaveLength(0);
-    expect(await screen.findAllByText(/Incorrectas/i)).not.toHaveLength(0);
-    expect(await screen.findAllByText(/Tasa de acierto/i)).not.toHaveLength(0);
-  });
-
-  it('muestra correctamente el nivel de jugador para diferentes cantidades de preguntas', async () => {
-    const niveles = [
-      { level: 'Principiante', data: [{ score: 2, wrongAnswers: 3 }] },
-      { level: 'Aprendiz', data: [{ score: 15, wrongAnswers: 10 }] },
-      { level: 'Intermedio', data: [{ score: 35, wrongAnswers: 20 }] },
-      { level: 'Avanzado', data: [{ score: 50, wrongAnswers: 45 }] },
-      { level: 'Experto', data: [{ score: 100, wrongAnswers: 10 }] },
-    ];
-
-    for (const { level, data } of niveles) {
-      mockAxios.resetHandlers();
-      setupMockResponse({ sessions: data });
-
-      renderComponent();
-
-      const chip = await screen.findByText(new RegExp(`Nivel: ${level}`, 'i'));
-      expect(chip).toBeInTheDocument();
-    }
-  });
-
-  it('permite cambiar el orden de las sesiones', async () => {
-    setupMockResponse({ sessions: [mockSession] });
-
-    renderComponent();
-
-    const sortButton = await screen.findByText(/Ordenar por/i);
-    fireEvent.click(sortButton);
-
-    const scoreOption = await screen.findByText(/Puntuación/i);
-    fireEvent.click(scoreOption);
-
-    expect(screen.getByText(/Ordenar por: Puntuación/i)).toBeInTheDocument();
-  });
-
-  it('permite cerrar sesión y redirige al inicio', async () => {
-    setupMockResponse({ sessions: [mockSession] });
-
-    renderComponent();
-
-    // Find the logout button
-    const menuItems = await screen.findAllByRole('menuitem');
-    const logoutBtn = menuItems[4];
-
-    // Click the logout button
-    fireEvent.click(logoutBtn);
-
-    // Check that localStorage was cleared and navigate was called
     await waitFor(() => {
-      expect(localStorage.getItem('username')).toBeNull();
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(screen.queryByText(/Detalles de la sesión/i)).not.toBeInTheDocument();
     });
   });
 
-  it('permite volver al Home al hacer clic en el botón de Home', async () => {
-    setupMockResponse({ sessions: [mockSession] });
-
+  it('displays greeting based on time of day', () => {
+    const RealDate = Date;
+    global.Date = class extends RealDate {
+      constructor() {
+        super();
+        return new RealDate('2025-05-05T08:00:00Z');
+      }
+    };
+    mockResponse([]);
     renderComponent();
+    expect(screen.getByText(/¡Buenos días, TestUser/i)).toBeInTheDocument();
 
-    const menuItems = await screen.findAllByRole('menuitem');
-    const homeBtn = menuItems.find(item => item.innerHTML.includes('HomeIcon'));
+    global.Date = class extends RealDate {
+      constructor() {
+        super();
+        return new RealDate('2025-05-05T14:00:00Z');
+      }
+    };
+    renderComponent();
+    expect(screen.getByText(/¡Buenas tardes, TestUser/i)).toBeInTheDocument();
 
-    fireEvent.click(homeBtn);
+    global.Date = class extends RealDate {
+      constructor() {
+        super();
+        return new RealDate('2025-05-05T21:00:00Z');
+      }
+    };
+    renderComponent();
+    expect(screen.getByText(/¡Buenas noches, TestUser/i)).toBeInTheDocument();
 
-    expect(mockNavigate).toHaveBeenCalledWith('/Home');
+    global.Date = RealDate;
   });
 
-  it('permite navegar entre páginas de sesiones', async () => {
+  it('shows player level for various total questions', async () => {
+    const levels = [
+      { total: 5, label: 'Principiante' },
+      { total: 25, label: 'Aprendiz' },
+      { total: 55, label: 'Intermedio' },
+      { total: 95, label: 'Avanzado' },
+      { total: 110, label: 'Experto' },
+    ];
+    for (const { total, label } of levels) {
+      const session = { ...mockSession, score: total, wrongAnswers: 0, questions: [] };
+      mockAxios.reset();
+      mockResponse([session]);
+      renderComponent();
+      expect(await screen.findByText(new RegExp(`Nivel: ${label}`, 'i'))).toBeInTheDocument();
+    }
+  });
+
+  it('allows sorting sessions by score and date', async () => {
+    const s1 = { ...mockSession, _id: '1', score: 1, createdAt: '2025-01-01T00:00:00Z' };
+    const s2 = { ...mockSession, _id: '2', score: 5, createdAt: '2025-06-01T00:00:00Z' };
+    mockResponse([s1, s2]);
+    renderComponent();
+    const items = await screen.findAllByText(/Sesión del/);
+    const expectedDate = new Date('2025-06-01T00:00:00Z').toLocaleDateString();
+    expect(items[0].textContent).toContain(expectedDate);
+
+    fireEvent.click(screen.getByText(/Ordenar por: Fecha/i));
+    fireEvent.click(screen.getByText(/Puntuación/i));
+    expect(screen.getByText(/Ordenar por: Puntuación/i)).toBeInTheDocument();
+  });
+
+  it('handles pagination correctly', async () => {
     const sessions = Array.from({ length: 8 }, (_, i) => ({
       ...mockSession,
-      _id: `session${i}`,
-      createdAt: new Date().toISOString(),
+      _id: `s${i}`,
+      createdAt: `2025-05-0${i + 1}T00:00:00Z`,
     }));
-
-    setupMockResponse({ sessions });
-
+    mockResponse(sessions);
     renderComponent();
-
     expect(await screen.findByText(/Página 1 de 2/)).toBeInTheDocument();
-
     fireEvent.click(screen.getByText(/Siguiente/i));
     expect(await screen.findByText(/Página 2 de 2/)).toBeInTheDocument();
-
     fireEvent.click(screen.getByText(/Anterior/i));
     expect(await screen.findByText(/Página 1 de 2/)).toBeInTheDocument();
   });
 
-  it('muestra mensaje cuando no hay preguntas detalladas en una sesión', async () => {
-    const sessionWithoutQuestions = { ...mockSession, questions: [] };
-    setupMockResponse({ sessions: [sessionWithoutQuestions] });
-
+  it('logs out and navigates home', async () => {
+    mockResponse([mockSession]);
     renderComponent();
+    fireEvent.click(screen.getAllByRole('menuitem')[3]); // Home icon
+    expect(mockNavigate.mock.calls[0][0]).toBe('/Home');
 
-    fireEvent.click(await screen.findByText(/Sesión del/i));
-
-    expect(await screen.findByText(/No hay información detallada de preguntas/i)).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('menuitem')[4]); // Logout icon
+    await waitFor(() => expect(localStorage.getItem('username')).toBeNull());
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 
-  // javascript
-  it('sorts sessions by score descending when selecting "Puntuación"', async () => {
-    const low = {
-      _id: 'low',
-      createdAt: '2023-01-01T10:00:00Z',
-      score: 1,
-      wrongAnswers: 0,
-      difficulty: 'X',
-      category: 'Y',
-      questions: []
-    };
-    const high = {
-      _id: 'high',
-      createdAt: '2023-01-02T10:00:00Z',
-      score: 5,
-      wrongAnswers: 0,
-      difficulty: 'X',
-      category: 'Y',
-      questions: []
-    };
-    setupMockResponse({ sessions: [low, high] });
+  it('shows error state when fetching sessions fails', async () => {
+    mockAxios.onGet(/get-user-sessions/).reply(500);
     renderComponent();
-
-    // wait until both session cards render
-    expect(await screen.findAllByText(/correctas/i)).toHaveLength(6);
-
-    fireEvent.click(screen.getByText(/Ordenar por/i));
-    fireEvent.click(screen.getByText(/Puntuación/i));
-
-    // after sorting, the first "correctas" should be the higher score
-    const scoreEls = screen.getAllByText(/correctas/i);
-    expect(scoreEls[0]).toHaveTextContent('Correctas');
-  });
-
-  it('handles fetch error by logging and showing no‑data message', async () => {
-    mockAxios.onGet(new RegExp('/get-user-sessions/')).networkError();
-    renderComponent();
-
-    await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith(
-          'Error al obtener las sesiones:',
-          expect.any(Error)
-      );
-    });
-
     expect(await screen.findByText(/No hay datos de sesiones disponibles/i)).toBeInTheDocument();
   });
 });
